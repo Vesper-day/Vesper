@@ -41,6 +41,10 @@ pnpm-debug.log*
 # Sentry
 .sentryclirc
 
+# Playwright
+apps/web/playwright-report/
+apps/web/test-results/
+
 # Misc
 .vercel
 

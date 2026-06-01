@@ -1,0 +1,60 @@
+# This workflow fires only on mobile-v* tags. EAS credentials are configured separately.
+# Do not block this session on Expo/EAS account setup.
+#
+# To trigger a production iOS build, push a tag:
+#   git tag mobile-v1.0.0 && git push origin mobile-v1.0.0
+#
+# Required GitHub secret (Settings → Secrets → Actions):
+#   EXPO_TOKEN — from expo.dev → Account Settings → Access Tokens → Create Token
+#
+# EAS project must be initialized before this workflow can succeed:
+#   cd apps/mobile && eas init (requires Expo account; deferred to ~Block 8)
+#
+# This workflow runs `eas build` only — NOT `eas submit`.
+# Promoting to TestFlight is a manual founder step after the build completes.
+
+name: Mobile Build (EAS)
+
+on:
+  push:
+    tags:
+      - 'mobile-v*'
+
+jobs:
+  build-ios:
+    name: EAS iOS production build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: node-modules-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install EAS CLI
+        run: pnpm add -g eas-cli
+
+      - name: Build iOS (production)
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas build --platform ios --profile production --non-interactive
