@@ -57,4 +57,4 @@ supabase/snippets/
 remotion/
 
 # Stray nested Claude config (real config lives at repo root)
-docs/.claude/
+docs/.claude/.claude/settings.local.json 
