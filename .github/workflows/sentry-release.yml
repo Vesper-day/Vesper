@@ -1,0 +1,98 @@
+# Sentry release workflow: runs on every push to main.
+# Uploads source maps for apps/web, apps/mobile, and workers/ and tags the release.
+#
+# Required GitHub secrets (Settings → Secrets → Actions):
+#   SENTRY_AUTH_TOKEN — from Sentry → Settings → Auth Tokens → Create Internal Integration
+#   SENTRY_ORG       — your Sentry organization slug (e.g. "getvesperday")
+#   SENTRY_PROJECT   — your Sentry project slug (e.g. "vesper-web")
+#
+# For mobile source maps, a separate SENTRY_PROJECT_MOBILE may be needed if web and
+# mobile are different Sentry projects.
+
+name: Sentry Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # required for Sentry release commits
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+            workers/*/node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: node-modules-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      # Web source maps — Next.js emits them to apps/web/.next/static/chunks/
+      - name: Upload web source maps to Sentry
+        uses: getsentry/action-release@v3
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        with:
+          environment: production
+          version: ${{ github.sha }}
+          sourcemaps: apps/web/.next/static/chunks
+          url_prefix: '~/_next/static/chunks'
+
+      # Workers source maps — emitted to workers/dist/ after wrangler build
+      # The workers/ directory may not be built at Chat 002; this step is graceful.
+      - name: Upload workers source maps to Sentry
+        if: ${{ hashFiles('workers/dist/**/*.map') != '' }}
+        shell: bash
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        run: |
+          npx @sentry/cli@latest releases new "$GITHUB_SHA"
+          npx @sentry/cli@latest releases files "$GITHUB_SHA" \
+            upload-sourcemaps workers/dist --rewrite
+          npx @sentry/cli@latest releases finalize "$GITHUB_SHA"
+
+      # Mobile source maps — Expo bundles are uploaded separately via sentry-expo.
+      # This step runs expo export --platform ios and uploads the resulting bundle map.
+      # Skipped until Chat 008 (mobile shell) exists.
+      - name: Upload mobile source maps to Sentry
+        if: ${{ hashFiles('apps/mobile/app/**') != '' }}
+        working-directory: apps/mobile
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        run: |
+          pnpm exec expo export --platform ios --output-dir dist/ || true
+          npx @sentry/cli@latest releases new "$GITHUB_SHA"
+          npx @sentry/cli@latest releases files "$GITHUB_SHA" \
+            upload-sourcemaps dist/ --rewrite || true
+          npx @sentry/cli@latest releases finalize "$GITHUB_SHA" || true
