@@ -2,9 +2,9 @@
 
 ## What This Project Is
 
-A web and mobile app that ingests a user's full context (work, fitness, nutrition, location, calendar) and generates a complete personalized daily plan. The target audience is young professionals (ages 22 to 32), with secondary appeal to ambitious students. The product positions itself as a "Life OS with local intelligence" — a calm, butler-like AI assistant that schedules the entire day rather than acting as a cold scheduling tool.
+A web and mobile app that ingests a user's full context (work, fitness, nutrition, location, calendar) and generates a complete personalized daily plan. The target audience is young professionals (ages 22 to 32), with secondary appeal to ambitious students. The product positions itself as a "Life OS with adaptive planning" — a calm, butler-like AI assistant that schedules the entire day rather than acting as a cold scheduling tool.
 
-The core differentiation: existing apps in this space (Motion, Reclaim, Morgen, Simplified, Tiimo) each cover only one slice of life, such as work scheduling, calendar management, or fitness and nutrition. No current competitor unifies all domains with local context and a warm, anti-overwhelm user experience.
+The core differentiation: existing apps in this space (Motion, Reclaim, Morgen, Simplified, Tiimo) each cover only one slice of life, such as work scheduling, calendar management, or fitness and nutrition. No current competitor unifies all domains with a warm, anti-overwhelm user experience.
 
 ## Founder Context
 
@@ -24,7 +24,7 @@ Consolidate the six layer documents into a single Product Requirements Document 
 
 ### Phase 3: Environment Setup (Week 5)
 
-Domain registration, hosting account setup (Vercel for web, Supabase for database and authentication), repository initialization, design system tokens, third-party API accounts (Stripe, Google OAuth, mapping providers, Yelp, recipe APIs), and Claude Code configuration with project-specific context files. This phase is short but critical: time invested here saves significant friction later. Two paid items are intentionally deferred from Phase 3 to approximately Project Week 22 (start of Phase 5 internal alpha): the Apple Developer Program enrollment ($99/year) and the domain TLD purchase ($15-30 one-time). Both are gated on parental funding contingent on a working prototype. iOS development proceeds in the iOS Simulator, and external surfaces use Vercel preview URLs (*.vercel.app) and Resend's sandbox sender until Week 22.
+Domain registration, hosting account setup (Vercel for web, Supabase for database and authentication), repository initialization, design system tokens, third-party API accounts (Stripe, Google OAuth, recipe APIs), and Claude Code configuration with project-specific context files. This phase is short but critical: time invested here saves significant friction later. Two paid items are intentionally deferred from Phase 3 to approximately Project Week 22 (start of Phase 5 internal alpha): the Apple Developer Program enrollment ($99/year) and the domain TLD purchase ($15-30 one-time). Both are gated on parental funding contingent on a working prototype. iOS development proceeds in the iOS Simulator, and external surfaces use Vercel preview URLs (*.vercel.app) and Resend's sandbox sender until Week 22.
 
 ### Phase 4: V1 Build (Months 2 through 5)
 
@@ -33,10 +33,12 @@ Approximate sequencing across the build period. Mobile and web are built in para
 - Build month 1: User authentication, onboarding flow, profile data model, core database schema, mobile and web shells initialized in parallel
 - Build month 2: Core AI planning engine (template library plus AI selection model), daily plan display on both surfaces, Google Calendar sync
 - Build month 3: Fitness module, nutrition module, meal plan and grocery list generation, built-in calendar (forked from open-source base such as react-native-calendars)
-- Build month 4: Local intelligence layer (grocery routing, restaurant and cafe suggestions, errands batching, traffic buffers), sleep and medication and finance and errands modules, task auto-scheduling engine, Dynamic Island integration via iOS Live Activity Push Starts
+- Build month 4: Sleep module, medication module, finance module, errands module, task auto-scheduling engine, Dynamic Island integration via iOS Live Activity Push Starts
 - Build month 5: Polish pass, Stripe payments integration, internal testing, bug triage, App Store submission preparation
 
-Sequencing assumes approximately 56 hours per week of focused founder time. Lighter weekly commitments extend this timeline proportionally.
+Sequencing assumes approximately 56 hours per week of focused founder time. Lighter weekly commitments extend this timeline proportionally. The Phase 4 build is decomposed into approximately 110 to 111 Claude Code sessions across the four build months — 105 primary build chats, plus six sessions added during the post-Layer review pass to cover items surfaced during architecture sign-off, plus one conditional session held in reserve for an Apple StoreKit integration fallback path.
+
+Apple Sign In is live at V1 launch as an equal-weight option alongside Google OAuth and email magic link. The implementation activates at Cutover step C-09 of the Phase 3 environment cutover and is required before the chat 010 production deploy; App Store Review guideline 4.8 mandates Apple Sign In whenever any other social login is offered on the iOS surface.
 
 ### Phase 5: Internal Alpha (Month 6)
 
@@ -57,22 +59,20 @@ Activation, retention, and conversion metrics are monitored against the success 
 ## Tools and Infrastructure
 
 - AI development: Claude Pro subscription ($20 per month, includes Claude Code with 5-hour rate-limit windows)
-- Web hosting: Vercel, free tier initially
+- Web hosting: Vercel Pro ($20/month, required from launch — Hobby tier prohibits commercial use)
 - Database and authentication: Supabase, free tier initially
-- Mobile framework: React Native, with iOS as the only target at V1 launch and Android joining at V1.5
-- Mobile distribution: Apple Developer Program ($99 per year), Google Play Console ($25 one-time fee, deferred until V1.5)
+- Mobile framework: React Native, with iOS as the only target at V1 launch and Android as a friend-assisted fast-follow post-V1 with no committed shipping date
+- Mobile distribution: Apple Developer Program ($99 per year), Google Play Console ($25 one-time fee, deferred post-V1)
 - Payments: Stripe, pay-per-transaction with no upfront cost
 - Domain: approximately $12 per year
 - Transactional email: Resend or a similar service
 - Product analytics: PostHog free tier or Vercel Analytics
-- Mapping: Mapbox (cheaper than Google Maps for routing) with OpenStreetMap and Nominatim as free fallback for geocoding and POI data
-- Restaurant and place data: Yelp Fusion free tier (5,000 calls per day, sufficient at low user counts)
 - Recipe data: TheMealDB free API as baseline, Edamam or Spoonacular for nutritional metadata
 - Workout template seed: ExerciseDB free API
 
 ## Total Cost to Launch
 
-Approximately $250 in the first year for domain, Apple Developer Program, minimal API spend at low user counts, and supporting tools. The Claude Pro subscription ($20 per month) is paid separately and is the primary build tool. No external investment is required to reach a publicly launched, payment-enabled product. Hosting and database costs only begin to climb meaningfully after several hundred active users, at which point paid plans pay for themselves through subscription revenue.
+Approximately $351 in the first year: domain (~$12), Apple Developer Program ($99), and Vercel Pro ($240, at $20/month required from launch). Supabase and Resend are free at low user counts. The Claude Pro subscription ($20/month) is the primary build tool and is tracked separately. No external investment is required to reach a publicly launched, payment-enabled product. Hosting and database costs only begin to climb meaningfully after several hundred active users, at which point subscription revenue covers infrastructure.
 
 ## Time Investment
 

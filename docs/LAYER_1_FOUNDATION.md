@@ -20,9 +20,9 @@ Layer 1 locks the foundational decisions that every subsequent decision depends 
 
 ## Positioning
 
-**Primary lens, dominant in marketing and design:** Life OS with local intelligence. Two combined ideas: one unified app for every domain of daily life (work, food, fitness, errands), and deep awareness of the user's physical environment such as nearby grocery stores, gyms, restaurants, and traffic patterns.
+**Primary lens, dominant in marketing and design:** Life OS with adaptive planning. Two combined ideas: one unified app for every domain of daily life (work, food, fitness, errands), and a plan that reshapes itself in response to the user's energy, mood, and shifting calendar throughout the day. The user does a quick energy check-in and the plan adjusts intensity and density accordingly.
 
-**Secondary lens, background support:** Adaptive planning. The user does a quick mood and energy check-in and the plan reshapes accordingly. This is not the headline feature but reinforces the warm, responsive, anti-rigid feel.
+**Secondary lens, background support:** Anti-overwhelm. The product is the opposite of stimulating productivity tools. Calm, refined, and quietly competent rather than energetic and gamified. This reinforces the butler tone and warm-dark aesthetic.
 
 **Paid-tier lens:** Quantified life. Trend charts, weekly reviews, correlation insights. This becomes a major selling point for the premium plan and serves the optimizer power-user.
 
@@ -63,7 +63,7 @@ This direction is set here in Layer 1 because it is foundational: it informs the
 
 ## Geographic Scope
 
-V1 launches in the United States only. The features that depend on local context (grocery stores, restaurants, transit) are best calibrated to a single country at first. English-speaking expansion to Canada, the United Kingdom, and Australia comes once US retention is proven. Non-English translations are explicitly post-acquisition or post-major-funding territory and are not part of the early product roadmap.
+V1 launches in the United States only. Launching in a single country at V1 keeps the timezone, holiday, billing, and content reference set narrow during the first iteration cycle. English-speaking expansion to Canada, the United Kingdom, and Australia comes once US retention is proven. Non-English translations are explicitly post-acquisition or post-major-funding territory and are not part of the early product roadmap.
 
 ## Platform Strategy
 
@@ -72,15 +72,6 @@ Both web and mobile ship on day one. They serve distinct purposes within a singl
 **Mobile app:** the daily revenue surface. Users open it throughout the day to see what comes next, mark items complete, do energy check-ins, and interact with the active plan. Mobile supports real editing including drag-and-reorder of blocks, full block detail views, and natural-language input, but remains optimized for execution rather than configuration. Deeper planning workstation features live on web.
 
 **Web app:** the planning workstation. Deeper configuration, full schedule editing, integrations management, account settings, and the quantified-life dashboards all live here. Users will typically use the web app weekly for planning sessions and the mobile app daily for execution.
-
-## Success Criteria
-
-Three months after public launch:
-
-- 5,000 total user signups, free and paid combined
-- 100 paying subscribers
-
-These targets function as decision triggers rather than ceilings. Hitting them on schedule triggers investment in scaling infrastructure and possibly paid acquisition. Missing them by half triggers a product-market-fit diagnostic. Beating them by five times triggers a re-evaluation of the indie versus startup path.
 
 ## AI Disclosure Philosophy
 
@@ -96,40 +87,15 @@ Layer 6 specifies a high-volume content strategy generated primarily by Claude w
 
 ## Founder Identity Strategy
 
-The founder remains anonymous until a major relevance milestone is reached. The exact threshold is intentionally left flexible in this layer and will be revisited as the project progresses. Candidate thresholds include reaching $50,000 monthly recurring revenue, securing a major press feature, entering an acquisition conversation, or the founder simply reaching personal comfort with public attention.
+The founder remains anonymous until a major relevance milestone is reached. The threshold is left to founder discretion and will be revisited if and when relevance arrives.
 
 ## Name
 
-**Status: deferred.** The name is not locked in Layer 1 and will be revisited closer to Layer 4 (Experience and Identity) or before public launch. Several premium candidates have been explored and rejected for .com availability or trademark conflicts. The current direction favors dignified, multi-syllable, classically-rooted names (Latin, Greek, or refined English) over short single-syllable invented words or compound smashed-together brand names.
-
-**Working assumption for documents and code:** the product can be referred to by any placeholder name during the build. Final name selection blocks marketing materials and app store listings but does not block build progress.
-
-**Direction for final selection when revisited:**
-
-- Premium, dignified, multi-syllable
-- Latin, Greek, or classical etymology preferred
-- No compound words ("Daysmith," "Hourkeep" style rejected)
-- No flat single-syllable invented words
-- Aesthetically aligned with warm-dark dusk-manor brand mood
-- Acceptable to use a thematically-appropriate alternative TLD (.life, .house, .care, .haus, .studio) rather than force a compromised .com
-- Strictly avoid .net, .mobi, and other TLDs that downgrade premium perception
-- Willing to pay reasonable premium for the right domain
-
-**Names explored and rejected:** Archaia (.com taken by comic publisher, meaning misaligned). Numa, Hearth, Aspen, Wexley, Veyla, Hovi, Brevin (all rejected for availability conflicts or insufficient brand fit). Halcyon was the strongest match conceptually (the meaning "calm period" aligns directly with anti-overwhelm positioning) but .com was unavailable and .app was priced at $15,000. Verity, Linea, and Selene were strong dignified contenders in the same register.
-
-## Ambition Track
-
-The default trajectory is indie scale with acquisition as the eventual exit. The targeted state after the first year is $5,000 to $20,000 in monthly recurring revenue with the founder remaining solo. Acquisition conversations become plausible once the product reaches $100,000 to $500,000 in annual recurring revenue and demonstrates strong retention. The startup path (raising venture capital, hiring a team, scaling aggressively) is held in reserve and only pursued if growth becomes explosive enough that capital constraints would limit otherwise inevitable success.
+**The product is named Vesper.** The name is locked across all subsequent layers, the brand identity, the package namespace, the App Store listing, and the marketing surface.
 
 ## Open Items From Layer 1
 
-The following items were intentionally deferred and need to be resolved before Layer 1 is fully closed:
-
-1. **Name selection.** Deferred to closer to Layer 4 or pre-launch. The name does not block build progress but does block app store listings, marketing pages, and trademark registration.
-
-2. **Founder reveal threshold.** Pick a specific revenue figure or event trigger rather than leaving it as "major milestone."
-
-3. Content scheduling overhead. Resolved in Layer 6. Founder time on content is approximately 30 minutes per week of Sunday batch review. Claude handles generation. Volume targets locked in Layer 6.
+All Layer 1 items have been resolved in subsequent layers. Name is Vesper. Content scheduling is approximately 30 minutes per week of Sunday batch review (Claude generates, founder approves), per Layer 6. Founder reveal threshold remains at founder discretion.
 
 ## What Was Considered and Rejected
 
@@ -140,7 +106,6 @@ The following decisions were actively considered during Layer 1 and rejected, re
 - **Fitness-first positioning:** rejected because fitness is one of many features and a fitness-first identity would mislead users about the breadth of the product.
 - **"Everyone who wants to be more productive":** rejected as a target audience because it provides no design constraints and no marketing focus.
 - **Loud, founder-visible build-in-public:** rejected due to founder's preference for anonymity and the AI-stigma constraint that limits how loudly the product can claim its mechanism.
-- **Startup track from day one:** rejected because the project economics work as a solo indie and venture funding would commit the founder to growth expectations that may not match personal goals.
 - **Cold dark aesthetic (Motion/Linear style):** rejected because it conflicts with the butler/warmth positioning. Warm dark is the chosen direction instead.
 - **Bright/light/playful aesthetic:** rejected because it conflicts with anti-overwhelm and dignified positioning.
 - **Compound smashed-together names:** rejected as a naming pattern because they read as effortful and non-premium.

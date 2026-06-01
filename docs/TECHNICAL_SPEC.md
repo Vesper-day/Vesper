@@ -52,7 +52,7 @@ Key web dependencies and their locked versions at project initialization:
 
 ### Mobile
 
-The mobile application is built on **Expo SDK 52** with **React Native** and TypeScript. iOS is the only target at V1. Android support is added at V1.5 using the same Expo codebase. The minimum iOS deployment target is **iOS 16.1**, which is the minimum version that supports the Dynamic Island on iPhone 14 Pro. Live Activity Push Starts specifically require **iOS 17.2+**; devices running iOS 16.1–17.1 fall back to persistent banner notifications as specified in Section 7.
+The mobile application is built on **Expo SDK 52** with **React Native** and TypeScript. iOS is the only target at V1. Android support is added at V1.5 using the same Expo codebase. The minimum iOS deployment target is **iOS 17.2**, raised from the earlier 16.1 floor so that Live Activity Push Start is guaranteed on every install with no version-based degraded-fallback code path (per the Phase 4 build-plan H-10 decision). 17.2+ covers the large majority of active iOS devices at launch, which is sufficient coverage for an indie V1. Dynamic Island support is a separate hardware axis, not a version axis: all supported installs run 17.2+, but devices without Dynamic Island hardware (iPhone 14 and earlier non-Pro models) fall back to persistent banner notifications as specified in Section 7. There is no longer an iOS-version-based fallback band (the former 16.1–17.1 banner case is eliminated by the raised target); the only fallback is hardware-based.
 
 Key mobile dependencies:
 
@@ -73,7 +73,6 @@ Key mobile dependencies:
 | react-native-reanimated | 3.x | Animations |
 | react-native-gesture-handler | 2.x | Gesture recognition |
 | react-native-draggable-flatlist | latest | Block reordering |
-| react-native-maps | latest | Map rendering (local intelligence) |
 
 ### Backend
 
@@ -81,7 +80,7 @@ The backend is split across two platforms that serve distinct purposes and remai
 
 **Next.js 15 API Routes on Vercel** handle all request-response logic for both the web and mobile clients. The mobile application authenticates via Supabase Auth, and the API routes validate the session token against Supabase before processing any request. This single-source architecture means the mobile app and web app share identical endpoints with no divergence.
 
-**Cloudflare Workers with Cron Triggers** handle all scheduled and autonomous jobs. The minute-level cron precision Cloudflare provides is required for the Live Activity Push Start logic. Vercel's free cron tier does not offer minute-level frequency. All six recurring workers — cache pre-warm, Live Activity pusher, trial reminder, dunning check, nightly reconciliation, and daily hard-delete — run on Cloudflare.
+**Cloudflare Workers with Cron Triggers** handle all scheduled and autonomous jobs. Cloudflare is used rather than Vercel because Vercel's free cron tier supports only daily cadence, while several of these workers require five-minute cadence (cache pre-warm, Live Activity pusher, and delayed-jobs tick in particular). Cloudflare's free cron supports arbitrary cadences including the five-minute schedule used here. All eight recurring workers — cache pre-warm, Live Activity pusher, delayed-jobs tick, email queue, trial reminder, dunning check, nightly reconciliation, and daily hard-delete — run on Cloudflare.
 
 Cloudflare Workers also receive the Stripe and Apple webhook payloads. Routing webhooks to Cloudflare rather than Vercel keeps cold-start latency lower and isolates the payment processing surface from the main API.
 
@@ -103,14 +102,14 @@ Cloudflare Workers also receive the Stripe and Apple webhook payloads. Routing w
 
 ### Hosting
 
-| Service | Platform | Initial Tier |
-|---|---|---|
-| Web app | Vercel | Hobby (free) |
-| Database + Auth | Supabase | Free |
-| Scheduled workers + webhooks | Cloudflare Workers | Free |
-| Email | Resend | Free (3k/month) |
-| Error monitoring | Sentry | Free (5k errors/month) |
-| Product analytics | PostHog | Free (1M events/month) |
+| Service | Platform | Initial Tier | Key constraints |
+|---|---|---|---|
+| Web app | Vercel | Pro ($20/seat/mo) — active from Phase 4 build start | Hobby TOS prohibits commercial use; Pro required from day one of any commercial project |
+| Database + Auth | Supabase | Free | 500 MB DB, 5 GB DB egress + 5 GB cached egress, 50K MAU; projects auto-pause after 7 days of inactivity |
+| Scheduled workers + webhooks | Cloudflare Workers | Free | 100K requests/day per worker, 10ms CPU per invocation |
+| Email | Resend | Free (3K/month) | Hard cap of 100 emails per day on free tier; launch-week sends may approach this |
+| Error monitoring | Sentry | Free (5K errors/month) | 1-user limit on Developer tier; second dashboard user requires Team ($26/mo) |
+| Product analytics | PostHog | Free (1M events/month) | 1-project limit, 1-year data retention on free |
 
 ---
 
@@ -284,8 +283,12 @@ Columns:
 - `tier` tier_enum NOT NULL DEFAULT 'standard' — values: standard, optimizer
 - `payment_source` payment_source_enum NULL — values: stripe, apple
 - `referred_by_user_id` uuid NULL REFERENCES users(id) ON DELETE SET NULL
-- `referral_code` text UNIQUE NULL — six-character base62 slug; populated by the post-paid-conversion trigger, NULL while the user is on trial or in any other pre-paid state. Used as the path component in `vesper.[tld]/r/{code}` referral URLs.
+- `referral_code` text UNIQUE NULL — six-character base62 slug; populated by the Stripe `checkout.session.completed` and Apple `SUBSCRIBED.INITIAL_BUY` webhook handlers when the user first transitions from `trial` to `active`. NULL while the user is on trial or in any other pre-paid state. Used as the path component in `vesper.[tld]/r/{code}` referral URLs. Generation logic lives in the webhook handler rather than in a Postgres trigger so that the slug-collision retry loop (regenerate on UNIQUE violation, up to 5 attempts) runs in application code where retry control is straightforward.
 - `onboarding_completed_at` timestamptz NULL
+- `last_warmed_at` timestamptz NULL — updated by the cache pre-warm Cloudflare Worker on each successful warm call; serves as the dedup guard against double-warming a user in the alarm-snooze loop case (user wakes 5:30, snoozes, wakes again 5:40 — both invocations otherwise issue a warm call)
+- `biometric_lock_enabled` boolean NOT NULL DEFAULT false — powers the optional iOS biometric lock setting specified in Layer 4; iOS-only at V1, with web relying on the operating-system lock screen as the equivalent layer
+- `sleep_target_bedtime` time NULL — local time-of-day (HH:MM, no date); stored as Postgres `time` rather than `timestamptz` so that DST transitions do not silently shift the user's stored target. The absolute timestamp for any given day is computed at read time using this column plus `users.timezone`.
+- `sleep_target_wake` time NULL — same semantics as `sleep_target_bedtime`
 - `created_at` timestamptz NOT NULL DEFAULT now()
 - `updated_at` timestamptz NOT NULL DEFAULT now()
 
@@ -389,6 +392,7 @@ Columns:
 - `details` jsonb NOT NULL DEFAULT '{}'::jsonb
 - `source` block_source_enum NOT NULL — values: ai_generated, user_added, google_calendar, recurring
 - `display_order` integer NOT NULL DEFAULT 0
+- `client_mutation_id` uuid NULL — written by every block mutation API; carried in Realtime broadcasts; used by the device self-mutation filter to drop a device's own writes from its own Realtime stream within a 30-second sliding window
 - `created_at` timestamptz NOT NULL DEFAULT now()
 - `updated_at` timestamptz NOT NULL DEFAULT now()
 
@@ -398,6 +402,12 @@ Indexes:
 - `idx_blocks_daily_plan_id` on (daily_plan_id) — for the "load all blocks for today" query
 - `idx_blocks_user_id_start_time` on (user_id, start_time) — for the "what's next" Dynamic Island query and the cron worker that fires Live Activity Push Starts at block boundaries
 - `idx_blocks_user_id_status` on (user_id, status) — for the "currently in-progress" lookup
+- `idx_blocks_client_mutation_id` on (client_mutation_id) WHERE client_mutation_id IS NOT NULL — partial index supporting the device-side self-mutation filter and post-hoc analytics on mutation round-trip latency
+
+Constraints:
+- `UNIQUE (user_id, client_mutation_id) WHERE client_mutation_id IS NOT NULL` — server-side idempotency on block mutations; prevents double-apply if client retries
+
+Realtime configuration: `ALTER TABLE blocks REPLICA IDENTITY FULL;` must be applied after table creation so that Supabase Realtime broadcasts carry the full updated row including `client_mutation_id`. Without this, the default replica identity sends only changed columns plus the primary key, and the self-mutation filter on the client cannot match the mutation ID.
 
 RLS policies: standard own-row pattern, with policies checking the denormalized `user_id` directly rather than joining `daily_plans`.
 
@@ -817,7 +827,7 @@ RLS policies:
 - SELECT: USING (auth.uid() = user_id) — users can read their own audit trail
 - No INSERT, UPDATE, or DELETE policies — only the SECURITY DEFINER trigger functions write here, and rows are never modified or deleted except via user-cascade
 
-Trigger functions: `audit_medications_changes()` and `audit_integrations_changes()`, each declared as `SECURITY DEFINER` and `STABLE`, both writing the appropriate row to `security_audit_log`.
+Trigger functions: `audit_medications_changes()` and `audit_integrations_changes()`, each declared as `SECURITY DEFINER` and `STABLE`, writing the appropriate row to `security_audit_log`. Audit coverage is intentionally scoped to medications (the most sensitive table per Layer 3) and integrations (OAuth token rows whose mutation history is needed for diagnosing integration breakage). The `subscriptions` table's mutation history is already captured by the `subscription_events` table covering every webhook event; `bills` and `push_tokens` are operational data without strong forensic need.
 
 ---
 
@@ -838,6 +848,116 @@ RLS policies:
 
 ---
 
+### 21. `hydration_log`
+
+Event log of hydration taps from the nutrition module. One row per tap. The daily hydration counter is derived by query rather than stored, so daily resets are implicit in the query time window and do not require a scheduled job or mutation. This table does not affect `base_profile_version`.
+
+Columns:
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `user_id` uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE
+- `logged_at` timestamptz NOT NULL DEFAULT now()
+- `count` integer NOT NULL DEFAULT 1 CHECK (count > 0)
+
+Indexes:
+- `idx_hydration_log_user_id_logged_at` on (user_id, logged_at DESC) — for the daily counter query `SELECT COUNT(*) WHERE user_id = $1 AND logged_at >= start_of_local_day($2)`
+
+RLS policies:
+- SELECT: USING (auth.uid() = user_id)
+- INSERT: WITH CHECK (auth.uid() = user_id)
+- No UPDATE or DELETE — entries are immutable; deletion only via user-cascade
+
+---
+
+### 22. `email_queue`
+
+Deferred email sends. A row is inserted when an email should be delivered at a future time (post-cancel win-back survey at +48h, and similar deferred sends). The daily-cron worker selects rows where `scheduled_for <= now()` and `sent_at IS NULL`, delivers via Resend, and marks `sent_at`. Idempotent: a second pickup finds `sent_at` populated and skips.
+
+Columns:
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `user_id` uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE
+- `template_name` text NOT NULL
+- `scheduled_for` timestamptz NOT NULL
+- `sent_at` timestamptz NULL
+- `payload` jsonb NOT NULL DEFAULT '{}'::jsonb
+- `created_at` timestamptz NOT NULL DEFAULT now()
+
+Indexes:
+- `idx_email_queue_pending` on (scheduled_for) WHERE sent_at IS NULL — for the cron worker pickup query
+
+RLS policies:
+- No public policies — service-role only
+
+---
+
+### 23. `delayed_jobs`
+
+Deferred job queue replacing any need for a third-party queue (Upstash QStash is not used). A row is inserted when a job should execute at a future time (subscription reconciliation 5 minutes after a Stripe or Apple webhook, and similar). The tick worker selects rows where `scheduled_for <= now()` and `processed_at IS NULL`, dispatches to the handler for `job_type`, and marks `processed_at`. Idempotent: a second pickup finds `processed_at` populated and skips.
+
+Columns:
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `job_type` text NOT NULL — values: 'reconcile_subscription', 'sync_google_calendar'
+- `payload` jsonb NOT NULL DEFAULT '{}'::jsonb
+- `scheduled_for` timestamptz NOT NULL
+- `processed_at` timestamptz NULL
+- `attempts` integer NOT NULL DEFAULT 0
+- `last_error` text NULL
+- `created_at` timestamptz NOT NULL DEFAULT now()
+
+Indexes:
+- `idx_delayed_jobs_pending` on (scheduled_for) WHERE processed_at IS NULL — for the tick worker pickup query
+
+RLS policies:
+- No public policies — service-role only
+
+---
+
+### 24. `cancellation_events`
+
+One row per cancellation, capturing the user's stated reason and subscription context. Supplements the PostHog `subscription_canceled` event with server-side persistence for long-term churn analysis. Written by the cancellation API route at cancellation time.
+
+Columns:
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `user_id` uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE
+- `free_text` text NULL — optional written response captured at cancellation time. The structured cancellation reason is stored on `subscriptions.cancellation_reason` (enum) and is the single source of truth for reason categorization; this table stores the free-text response and the cancellation context (archetype snapshot, subscription duration) for cohort analysis.
+- `archetype` archetype_enum NULL — snapshot of archetype at cancellation
+- `subscription_duration_days` integer NULL — days from trial_started_at to cancellation_events.canceled_at
+- `canceled_at` timestamptz NOT NULL DEFAULT now()
+
+Indexes:
+- `idx_cancellation_events_user_id` on (user_id)
+- `idx_cancellation_events_canceled_at` on (canceled_at DESC) — for cohort analysis
+
+RLS policies:
+- SELECT: USING (auth.uid() = user_id) — users can read their own record
+- No INSERT from client — service-role only at cancellation time
+- No UPDATE or DELETE — immutable
+
+---
+
+### 25. `calendar_events`
+
+User-created calendar events entered directly in Vesper's built-in calendar (as distinct from events synced from Google Calendar via integration). Participates in conflict detection and plan synthesis alongside integration events. Google Calendar events are fetched at synthesis time from the integration and are not stored in this table.
+
+Columns:
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `user_id` uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE
+- `title` text NOT NULL
+- `start_time` timestamptz NOT NULL
+- `end_time` timestamptz NOT NULL CHECK (end_time > start_time)
+- `rrule` text NULL — iCalendar RRULE string for recurring events; NULL for one-off events
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `updated_at` timestamptz NOT NULL DEFAULT now()
+
+Indexes:
+- `idx_calendar_events_user_id_start_time` on (user_id, start_time) — for synthesis-time range queries
+
+RLS policies:
+- Standard own-row: SELECT, INSERT, UPDATE, DELETE all gated on auth.uid() = user_id
+
+Trigger: `set_updated_at` attached in migration 13.
+
+---
+
 ## Migration Strategy
 
 ### Naming Convention
@@ -846,7 +966,17 @@ Supabase CLI default: `YYYYMMDDHHMMSS_description.sql`. Migrations are committed
 
 ### Migration Sequence
 
-Migrations run in foreign-key-dependency order. Tables that reference other tables must come after those referenced tables.
+Migrations run in foreign-key-dependency order. Tables that reference other tables must come after those referenced tables. The migration numbering allocation is documented in `docs/MIGRATION_NUMBER_ALLOCATION.md` (authored in build chat 003) and reserves contiguous ranges per build block so that mid-block additions land cleanly without rewriting numbers ahead of them.
+
+| Number range | Use |
+|---|---|
+| 1–13 | Block 1 foundation (initial schema — the migrations enumerated below) |
+| 14–30 | Reserved for Blocks 4–7 schema additions during build |
+| 31–50 | Reserved for Blocks 8–11 schema additions during build |
+| 100001–199999 | Seed migrations (truncate-and-replace template imports) |
+| 200001+ | Post-launch additions |
+
+The Block 1 foundation migrations:
 
 1. `20260601000001_enums_and_extensions.sql` — Enable the `pgsodium` and `pgcrypto` extensions. Create all enum types referenced below: archetype_enum, honorific_enum, subscription_status_enum, tier_enum, payment_source_enum, block_type_enum, block_status_enum, block_source_enum, priority_enum, task_status_enum, workout_level_enum, recipe_difficulty_enum, medication_frequency_enum, errand_frequency_enum, bill_frequency_enum, integration_provider_enum, integration_status_enum, push_platform_enum, cancellation_reason_enum, referral_event_enum, referral_credit_status_enum (values: pending, applied, voided — note that the prior `expired` status is replaced with `voided` to reflect the credit voiding semantics at V1), completion_event_enum, audit_operation_enum, platform_preference_enum.
 2. `20260601000002_users.sql` — Create `users` table, indexes, RLS, and the `handle_new_user()` trigger function.
@@ -858,11 +988,12 @@ Migrations run in foreign-key-dependency order. Tables that reference other tabl
 8. `20260601000008_subscriptions.sql` — Create `subscriptions` and `subscription_events` tables with their indexes, RLS policies, and CHECK constraints.
 9. `20260601000009_waitlist_and_referrals.sql` — Create `waitlist` and `referral_credits` tables with their indexes and RLS policies.
 10. `20260601000010_completion_log.sql` — Create `completion_log` table with indexes and RLS policies.
-11. `20260601000011_security_audit_log.sql` — Create `security_audit_log` table, the trigger functions `audit_medications_changes()` and `audit_integrations_changes()`, and attach those triggers to the `medications` and `integrations` tables.
+11. `20260601000011_security_audit_log.sql` — Create `security_audit_log` table. Create trigger functions `audit_medications_changes()` and `audit_integrations_changes()`, each SECURITY DEFINER. Attach both triggers to their respective tables.
 12. `20260601000012_deleted_user_email_hashes.sql` — Create `deleted_user_email_hashes` table.
-13. `20260601000013_updated_at_triggers.sql` — Create the generic `set_updated_at()` trigger function and attach it to every table with an `updated_at` column.
-14. `20260601100001_seed_workout_templates.sql` — Bulk insert seed data for `workout_templates` (~150 rows from JSON source file).
-15. `20260601100002_seed_recipe_templates.sql` — Bulk insert seed data for `recipe_templates` (~300 rows from JSON source file).
+13. `20260601000013_updated_at_triggers.sql` — Create the generic `set_updated_at()` trigger function and attach it to every table with an `updated_at` column. Create the `start_of_local_day(tz text) RETURNS timestamptz` function (LANGUAGE sql STABLE PARALLEL SAFE) that returns `date_trunc('day', now() AT TIME ZONE tz) AT TIME ZONE tz`. Used by the trial-regen cap query and the hydration daily counter query.
+14. `20260601000016_new_feature_tables.sql` — Create `hydration_log`, `email_queue`, `delayed_jobs`, `cancellation_events`, and `calendar_events` tables with their indexes and RLS policies. Apply `ALTER TABLE blocks REPLICA IDENTITY FULL`. The timestamp prefix `000016` (not `000014`) reflects the original allocation in the Blocks 4–7 reservation range (14–30); the list position here is sequential, the on-disk timestamp ordering is preserved by the prefix.
+15. `20260601100001_seed_workout_templates.sql` — Bulk insert seed data for `workout_templates` (~150 rows from JSON source file).
+16. `20260601100002_seed_recipe_templates.sql` — Bulk insert seed data for `recipe_templates` (~300 rows from JSON source file).
 
 ### Rollback Considerations
 
@@ -896,7 +1027,7 @@ Updates to seeded templates between releases happen via new seed migrations (for
 
 ### Reference Data Excluded From Seeding
 
-No other reference data requires seeding at V1. Geographic data, ZIP codes, currency tables, and similar reference sets are either fetched at runtime from third-party APIs (Mapbox for geocoding, Yelp for venues) or hardcoded as TypeScript constants in the application code (timezone list, archetype display names, module display order).
+No other reference data requires seeding at V1. Geographic data, ZIP codes, currency tables, and similar reference sets are either fetched at runtime from third-party APIs as needed in future versions or hardcoded as TypeScript constants in the application code (timezone list, archetype display names, module display order). No third-party geographic or venue API is integrated at V1.
 
 ---
 
@@ -980,7 +1111,7 @@ If a refresh token itself is expired or has been revoked (for example, after a u
 
 When a new user completes sign-in for the first time, Supabase Auth creates a row in the internal `auth.users` table. A Postgres trigger function `handle_new_user()` with `SECURITY DEFINER` fires `AFTER INSERT ON auth.users` and creates the matching `public.users` row and the corresponding `public.user_profiles` row in a single transaction. This means no application code is responsible for creating these rows; by the time the first API request arrives from a new user, both rows exist.
 
-The `handle_new_user()` function sets initial column values as follows: `users.email` is copied from `auth.users.email`; `users.archetype` defaults to `mixed` and is updated during onboarding; `users.timezone` defaults to `'America/Los_Angeles'` and is updated from the client's resolved timezone during onboarding step 1; `users.subscription_status` defaults to `trial`; `users.trial_started_at` is set to `now()` and `users.trial_ends_at` is set to `now() + interval '14 days'`. The `user_profiles.base_profile` and `user_profiles.modules_enabled` columns are initialized with their default empty structures.
+The `handle_new_user()` function sets initial column values as follows: `users.email` is copied from `auth.users.email`; `users.archetype` defaults to `mixed` and is updated during onboarding; `users.timezone` defaults to `'America/Los_Angeles'` and is updated from the client's resolved timezone during onboarding step 1; `users.subscription_status` defaults to `trial`; `users.trial_started_at` is set to `now()` and `users.trial_ends_at` is set to `now() + interval '7 days'`. The `user_profiles.base_profile` and `user_profiles.modules_enabled` columns are initialized with their default empty structures.
 
 ### Account Deletion Flow
 
@@ -1028,7 +1159,9 @@ User: [Layer 2 — user base context — CACHED]
        Generate today's plan.
 ```
 
-For Haiku calls (template selection, NL parsing, classification), only the system prompt (a shorter task-specific prompt) is cached. User context is included uncached in the user message because these calls are short and infrequent enough that the added context overhead is acceptable.
+For Haiku calls (template selection, NL parsing, classification), only the system prompt (a shorter task-specific prompt) is cached. User context is included uncached in the user message because these calls are short and infrequent enough that the added context overhead is acceptable. Haiku prompts use the Anthropic default five-minute cache TTL. The one-hour TTL was considered and rejected: the cache write cost rises from 1.25× to 2× base input rate (a sixty percent write penalty), and Haiku calls are too sporadic across the day (one or two per user per day in steady state for check-in questions and natural-language parsing) to amortize the heavier write through enough subsequent reads. The five-minute TTL captures the realistic clustering window (rapid successive edits during morning plan review) without paying the longer-TTL premium. Sonnet daily-plan synthesis also uses the default five-minute TTL because the cache pre-warm worker described below populates that window in the user's local timezone ahead of the morning plan call.
+
+AbortController-based cancellation propagates from the client SSE disconnect through the API route handler to the upstream Anthropic streaming call. When the client closes the EventSource (the user navigates away from the plan view during a slow generation, or the mobile app backgrounds mid-stream), the API route's controller fires and the underlying fetch to Anthropic aborts. This prevents the server from continuing to pay for tokens the user will not see and from holding a streaming connection open against a disconnected client.
 
 ### Prompt Constants and Versioning
 
@@ -1074,7 +1207,7 @@ The gate adds approximately 100ms to any call that triggers the Haiku review. Fo
 
 ### Cache Pre-Warm
 
-A Cloudflare Worker named `cache-prewarm` runs as a cron job scheduled for every minute and sweeps for users whose local time is between 05:20 and 05:30. For each such user, it makes a lightweight Anthropic API call using the cached layers (Layers 1, 2, and 3 from the plan context, with an empty Layer 4) to populate the Anthropic prompt cache. This ensures the morning plan generation call at approximately 06:00 in the user's timezone hits a warm cache, reducing both latency and cost for the most important daily call.
+A Cloudflare Worker named `cache-prewarm` runs as a cron job scheduled every five minutes (`*/5 * * * *`) and sweeps for users whose local time is between 05:20 and 05:30. For each such user, it makes a lightweight Anthropic API call using the cached layers (Layers 1, 2, and 3 from the plan context, with an empty Layer 4) to populate the Anthropic prompt cache. The five-minute cadence is sufficient because the 05:20–05:30 sweep window itself is ten minutes wide, so a user whose local time crosses 05:20 between two cron firings is still picked up on the next firing well ahead of the typical 06:00 plan generation. This ensures the morning plan generation call hits a warm cache, reducing both latency and cost for the most important daily call.
 
 ### Streaming
 
@@ -1098,19 +1231,28 @@ When an AI call fails — due to an API timeout, a rate limit error (HTTP 429), 
 
 All three failure states are logged to `completion_log` with `event_type = 'plan_fallback_served'` and a `value.failure_reason` field describing which step failed and why.
 
+A circuit breaker wraps the synthesize-plan call path. Three failures within a five-minute rolling window open the breaker. While the breaker is open, new synthesis requests bypass steps 1 and 2 of the degradation sequence entirely and serve the cached or hardcoded fallback plan directly; the upstream Anthropic call is not attempted. The breaker auto-closes after five minutes without a new failure, at which point synthesis requests resume the full three-step degradation sequence. While the breaker is open, the API response includes a flag that the client surfaces as the degraded-mode banner specified in Layer 4 ("Working slower than usual. Plans will resume shortly."); the application remains read-functional throughout. The breaker is a process-level guard against thundering-herd retries against a temporarily-unhealthy upstream and against runaway Anthropic spend during a sustained provider incident.
+
 ### Cost Estimate
 
-| Operation | Model | Est. cost per call (with caching) | Frequency |
+Per-call costs derived from current Anthropic pricing: Sonnet 4.6 at $3 input / $15 output per million tokens, Haiku 4.5 at $1 / $5 per million, cache read at 0.1× base input, cache write at 1.25× base input for the default five-minute TTL. Token counts assume the four-layer prompt structure specified above: approximately 7,500 cached input tokens (system prompt plus user base context plus filtered template subset), approximately 500 uncached input tokens (today's specifics), and approximately 2,000 output tokens (a structured plan covering eight useful blocks). Haiku call sizes are estimated against typical task scope.
+
+| Operation | Model | Per-call cost (derivation) | Frequency |
 |---|---|---|---|
-| Morning plan synthesis | Sonnet | ~$0.020 | Daily if user opens app |
-| Mid-day NL edits | Haiku | ~$0.001 per edit | 2–4×/day active users |
-| Voice gate Haiku reviews | Haiku | ~$0.0005 per string | Per AI-generated string >30w |
-| Evening check-in question | Haiku | ~$0.001 | Daily |
-| Weekly review (Sunday only) | Sonnet | ~$0.030 | Weekly (≈$0.004/day amortized) |
+| Morning plan synthesis (warm cache) | Sonnet | ~$0.034 — cache read 7,500 × $0.30/M + uncached 500 × $3/M + output 2,000 × $15/M | Daily if user opens app |
+| Morning plan synthesis (cold cache) | Sonnet | ~$0.060 — cache write 7,500 × $3.75/M + uncached 500 × $3/M + output 2,000 × $15/M | First call each day for users outside the pre-warm cohort |
+| Mid-day NL edit | Haiku | ~$0.0015 — uncached ~500 × $1/M + output ~200 × $5/M | 2–4×/day active users |
+| Voice gate Haiku review | Haiku | ~$0.0005 — small uncached input plus ~10-token verdict output | Per AI-generated string >30 words |
+| Evening check-in question | Haiku | ~$0.001 — ~300 uncached input × $1/M + ~100 output × $5/M | Daily |
+| Weekly review (Sunday only) | Sonnet | ~$0.058 — warm cache read + larger output (~3,500 tokens) | Weekly (≈$0.008/day amortized) |
 
-Realistic daily total per fully active user: approximately **$0.030**. Monthly at full daily activity: approximately **$0.90**. Expected actual range accounting for days the user does not open the app: **$0.15–$0.25 per active user per month**. The cost target ceiling is $0.30.
+**Daily total per active user.** A prewarmed user hitting warm cache on the morning plan: approximately $0.034 + 2×$0.0015 + $0.001 + $0.0005 + $0.008 = approximately **$0.047 per active day**. A cold-cache user (no prewarm pathway active, typically a trial user or a user without the sleep alarm configured): approximately $0.060 + same accessories = approximately **$0.073 per active day**.
 
-Trial cost for a non-converting 14-day trial user: approximately **$1.40–$2.10** in AI spend.
+**Monthly per active paying user.** Assuming 15–20 active days per month at a blended cold/warm daily cost, monthly AI cost is approximately **$1.00 to $1.50 per active paying user, with $1.20 as the planning midpoint**. Derivation: a paying user with the sleep alarm configured hits the prewarm pathway most mornings, so daily cost trends toward the warm-cache $0.047 figure; at 15 active days that's ~$0.71, at 20 days ~$0.94. A paying user without the sleep alarm, or hitting cold cache on days outside the prewarm window, trends toward $0.073/day; at 15 days that's ~$1.10, at 20 days ~$1.46. Blending at roughly 50/50 prewarm coverage produces ~$0.060/day average; at 15 days that's $0.90, at 20 days $1.20. The $1.00–$1.50 range covers the realistic span of these scenarios. Perfect prewarm coverage would lower the figure toward $1.00, while a population that engages without configuring the sleep alarm would push it toward $1.50.
+
+Earlier drafts targeting $0.15 to $0.30 per active user per month relied on a 5-to-7-active-days-per-month engagement assumption (consistent with a churning user, not an engaged daily-use user) and an understated output token count of approximately 1,000 tokens (incompatible with a structured plan covering eight blocks). The corrected figures above use 15–20 active days and 2,000 output tokens.
+
+**Trial cost per non-converter.** Most trial users are cold-cache because the prewarm pathway requires sleep module configuration that most new users defer past the first week. A non-converting trial user active on 4 to 7 days during the seven-day window incurs roughly $0.073 in daily cold-cache cost (per the daily-total derivation above), plus an amortized share of the weekly Sunday review (~$0.058 spread across 4–7 days, adding ~$0.008–$0.015 per active day). Combined: 4 × ($0.073 + $0.015) ≈ $0.35 (low engagement); 7 × ($0.073 + $0.008) ≈ $0.57 ≈ $0.55 (full engagement). Planning range: **$0.35 to $0.55 per non-converting trial user, $0.45 as the midpoint**.
 
 ---
 
@@ -1133,42 +1275,6 @@ When a new or modified Google Calendar event is detected via the sync webhook an
 This model was chosen over silent auto-regeneration (which burns inference cost on every conflict regardless of whether the user cared about the affected block) and over an inline "Fix this" UI affordance (which would introduce a conflict surface inconsistent with the calm aesthetic). The chosen behavior matches the butler voice posture: the butler notices a change, raises it quietly, and acts only when authorized.
 
 Implementation note: the `daily_plans.regeneration_count` is incremented when the user accepts a prompted regeneration, and a `plan_regenerated` event is written to `completion_log` with the trigger source recorded as `calendar_conflict` to distinguish prompt-driven regenerations from user-initiated ones for analytics.
-
-### Mapbox
-
-**Purpose at V1:** Map rendering in the local intelligence UI (errand sequence view, nearby venue suggestions), geocoding to resolve addresses entered during onboarding to `(lat, lng)` coordinates, routing to compute traffic-aware transit buffers between location-bound events, and distance calculation for errand batch optimization.
-
-**Endpoints used:**
-
-| Endpoint | Use case |
-|---|---|
-| `GET /geocoding/v5/mapbox.places/{query}.json` | Resolve address text to coordinates during onboarding |
-| `GET /directions/v5/mapbox/driving-traffic/{coordinates}` | Traffic-aware transit time between two location-bound events |
-| `GET /directions/v5/mapbox/driving/{coordinates}` | Non-traffic routing for errand sequence (Google OR-Tools handles ordering, Mapbox returns durations) |
-| Mapbox GL JS (web) / react-native-maps with Mapbox provider (mobile) | Map tile rendering |
-
-**API key:** The Mapbox public token is stored as `NEXT_PUBLIC_MAPBOX_TOKEN` for client-side map rendering. A secret token (with more restrictive scope) is stored as `MAPBOX_SECRET_TOKEN` for server-side geocoding and routing calls made from Next.js API routes.
-
-**Rate limits and free tier:** The Mapbox free tier includes 50,000 map loads per month, 100,000 geocoding requests per month, and 100,000 directions requests per month. At V1 user volumes these limits are not approached. Requests are cached aggressively: geocoded addresses for a user's known locations are stored in `users.location_lat` and `users.location_lng` at onboarding and refreshed only if the user updates their location. Routing responses for recurring location pairs (home → gym, home → office) are cached in-memory in the Cloudflare Worker for the duration of the worker instance (effectively per-invocation), which avoids redundant API calls when multiple users share common route pairs.
-
-**MapLibre GL fallback:** If Mapbox costs become a concern post-scale, the application can swap to MapLibre GL for client-side rendering with a one-line change to the map provider, since the APIs are wire-compatible. MapLibre GL uses OpenStreetMap tiles, which are free.
-
-### Yelp Fusion
-
-**Purpose at V1:** Restaurant and cafe suggestions for nutrition blocks where the user is not cooking at home, and cafe suggestions for focus blocks the user wants to take outside.
-
-**Endpoints used:**
-
-| Endpoint | Use case |
-|---|---|
-| `GET /v3/businesses/search` | Find restaurants or cafes near user location |
-| `GET /v3/businesses/{id}` | Fetch details for a specific venue |
-
-**Authentication:** Yelp Fusion uses an API key in the `Authorization: Bearer {key}` header. The key is stored as `YELP_API_KEY` and used only from server-side API routes and Cloudflare Workers.
-
-**Request parameters for restaurant search:** `location` (constructed from `users.location_lat` and `users.location_lng` as `"{lat},{lng}"`), `categories` (`restaurants`), `sort_by` (`rating`), `limit` (5 results maximum per query), `open_now` (`true`). For cafe/focus-space search: same parameters with `categories=coffee,cafes` and `attributes=wifi`.
-
-**Rate limit and cap behavior:** The Yelp Fusion free tier allows 5,000 API calls per day. The cache-first strategy ensures most user requests never hit the Yelp API. At onboarding, the user's nearest five restaurants and three cafes are pre-fetched and the result is stored in `user_profiles.base_profile` under a `local_places` key (not in the schema as a separate table — this is stored as a JSONB sub-object). These pre-fetched results are refreshed weekly via a Cloudflare Worker. Daily plan generation uses the cached results rather than making a live Yelp call. Live Yelp calls are made only when the user explicitly requests a new venue suggestion (for example, "suggest somewhere different for dinner tonight"), which is an uncommon operation. If the daily 5,000-call cap is hit (extremely unlikely at V1 volumes), the API returns HTTP 429 and the application falls back to the cached results silently without surfacing an error to the user.
 
 ### TheMealDB and ExerciseDB (Seed-Only)
 
@@ -1206,15 +1312,26 @@ When the Expo app launches and the user has granted notification permission, `ex
 
 ### Cloudflare Worker: Live Activity Pusher
 
-The `live-activity-pusher` Cloudflare Worker runs every minute via cron trigger (`*/1 * * * *`). Its execution sequence:
+Live Activity transitions are device-handled wherever possible. The Live Activity payload includes ActivityKit's `staleDate` parameter set to the block's `end_time`; the SwiftUI widget extension uses this parameter to transition between blocks at the natural boundary without requiring a server push for the cosmetic transition itself. The device renders the per-minute countdown locally using the `endTime` field in the content state and rolls the activity over to a server-provided next-block payload (sent ahead of time) when the `staleDate` passes. Push is reserved for genuine state-change events: user actions (mark complete, reschedule), plan regeneration that re-orders upcoming blocks, and the next-block hand-off in the case where the previous block's payload did not pre-arm the next-block content (typically because the previous block ended via early user action rather than at its scheduled `end_time`).
 
-1. Query Supabase for all `blocks` rows where `start_time` is between `now()` and `now() + interval '60 seconds'` (block starting) or `end_time` is between `now()` and `now() + interval '60 seconds'` (block ending), filtered to users with status `active` or `trial`.
+The `live-activity-pusher` Cloudflare Worker runs every five minutes via cron trigger (`*/5 * * * *`) rather than every minute. Its execution sequence:
+
+1. Query Supabase for all `blocks` rows where `start_time` is between `now()` and `now() + interval '5 minutes'` and which require a server-initiated next-block start (the prior block's pre-armed `staleDate` does not cover this start, or the prior block ended early via user action), filtered to users with status `active` or `trial`.
 2. For each block transition found, fetch the user's `push_tokens` row to get `live_activity_token`.
-3. Determine event type: `start` if the block is beginning, `end` if the block is finishing.
+3. Determine event type: `start` if the block is beginning, `end` if the block is finishing as the consequence of an external trigger (plan regeneration, manual reschedule).
 4. For `end` events: check whether the next block starts within 30 minutes. If yes, immediately build a `start` event for the next block. If the gap is more than 30 minutes, send only the `end` event.
 5. Build the APNs payload (see below).
 6. POST to `https://api.push.apple.com/3/device/{live_activity_token}` with appropriate headers.
 7. Log failures to Sentry (invalid token → mark `push_tokens.live_activity_token = null`; other errors → log with user_id and block_id for investigation).
+
+User-action transitions (mark complete, reschedule, manual block creation) push immediately from the API route that handles the action rather than waiting for the next worker tick. The worker exists to handle scheduled boundary transitions that the device's `staleDate` does not cover; the API route handles all user-initiated transitions synchronously.
+
+### Required Info.plist Keys
+
+Two Info.plist keys are required for Live Activities to function. Without them the widget extension builds successfully but activities silently fail at runtime, which is a particularly painful failure mode because the build succeeds and the device-side code appears correct. Both are specified in build chat 077.
+
+- `NSSupportsLiveActivities: true` — declares that the app supports Live Activities at all. Required for any Live Activity to start.
+- `NSSupportsLiveActivitiesFrequentUpdates: true` — declares that the app uses frequent updates (sub-hourly cadence). Required for the per-minute countdown rendering and for the `staleDate`-driven transitions to fire reliably.
 
 ### APNs Payload Structure
 
@@ -1305,7 +1422,7 @@ content-type: application/json
 
 ### Update Cadence
 
-The worker fires every minute but does not send an update payload every minute per user. Updates are sent only at block start and block end transitions. The `minutesRemaining` value in the `content-state` is computed by the SwiftUI widget extension on the device using the `endTime` timestamp, not by the server at each update, so the countdown is accurate without server-side updates. This keeps APNs traffic minimal: typically 2 payloads per block (start and end), not one per minute.
+The worker fires every five minutes (`*/5 * * * *`, consistent with the cron table in §10) and does not send an update payload every cycle per user. Updates are sent only at block start and block end transitions. The `minutesRemaining` value in the `content-state` is computed by the SwiftUI widget extension on the device using the `endTime` timestamp, not by the server at each update, so the countdown is accurate without server-side updates. This keeps APNs traffic minimal: typically 2 payloads per block (start and end), not one per cycle.
 
 ### SwiftUI Widget Extension
 
@@ -1321,7 +1438,7 @@ Tapping "Mark complete" from the expanded state sends a `buttonPressed` Activity
 
 ### Non-Dynamic-Island Fallback (iPhone 14 and Earlier)
 
-Devices running iOS 16.1–17.1 or devices without a Dynamic Island (iPhone 14 and earlier non-Pro models) receive a persistent banner notification instead. The same Cloudflare Worker detects that `live_activity_token` is null for these devices and falls back to sending a standard APNs push notification to the device's regular `token`. The notification displays the block title and end time and is not interactive. It is sent once per block start and is not updated mid-block.
+Devices without a Dynamic Island (iPhone 14 and earlier non-Pro models) receive a persistent banner notification instead. Because the deployment target is iOS 17.2, every supported install has Live Activity Push Start available at the OS level, so the fallback is triggered purely by hardware (no Dynamic Island), never by iOS version. The same Cloudflare Worker detects that `live_activity_token` is null for these devices and falls back to sending a standard APNs push notification to the device's regular `token`. The notification displays the block title and end time and is not interactive. It is sent once per block start and is not updated mid-block.
 
 ### Android (V1.5)
 
@@ -1363,6 +1480,10 @@ The API route returns `{ url: session.url }` and the client redirects the browse
 
 **Idempotency:** Every webhook event is written to `subscription_events` with `provider = 'stripe'` and `event_id = event.id` before any state mutation. The unique constraint on `(provider, event_id)` causes a duplicate insert to fail with a unique violation. The handler catches this error and returns HTTP 200 immediately without re-processing the event, making webhook handling exactly-once.
 
+**Signature timestamp tolerance:** The Stripe webhook handler sets the signature verification `tolerance` parameter to one year (effectively unbounded) rather than Stripe's default 300 seconds. Stripe retries failed deliveries over a 72-hour window, and a tight timestamp tolerance would cause legitimate late-delivery retries to be rejected as expired. Replay protection is enforced exclusively through the `(provider, event_id)` unique constraint above; the timestamp check is therefore non-load-bearing for security and is deliberately relaxed.
+
+**Concurrent transition safety:** Every state-mutating webhook handler begins its transaction with `SELECT * FROM subscriptions WHERE user_id = $1 FOR UPDATE` to row-lock the subscription row against concurrent cross-provider events. Without the row lock, a Stripe `customer.subscription.deleted` arriving simultaneously with an Apple `SUBSCRIBED.INITIAL_BUY` (the user cancels on web while completing an iOS purchase) can produce a race where both handlers compute the new state from the pre-mutation row and the later writer overwrites the earlier writer's transition. The `FOR UPDATE` lock serializes the two handlers and produces the correct converged state regardless of arrival order.
+
 **Stripe SDK version:** `stripe` npm package pinned to `^14.0.0`.
 
 ### Apple In-App Purchase Configuration
@@ -1379,7 +1500,9 @@ The API route returns `{ url: session.url }` and the client redirects the browse
 
 **App Store Server Notifications V2:** The notification URL is configured in App Store Connect under Your App → App Information → App Store Server Notifications. The URL is `https://[worker-subdomain].workers.dev/webhooks/apple`. Both production and sandbox notification URLs are configured (using the same worker with an `environment` field in the payload to distinguish them).
 
-**JWS verification in Cloudflare Worker:** Incoming App Store Server Notifications are signed JWS payloads. The worker verifies the signature using Apple's public keys fetched from `https://appleid.apple.com/auth/keys`. The worker caches Apple's public keys for 24 hours to avoid refetching on every notification. After verification, the worker parses the `signedPayload` to extract the `notificationType`, `subtype`, and the inner signed transaction info.
+**JWS verification in Cloudflare Worker:** Incoming App Store Server Notifications are signed JWS payloads. The worker extracts the `x5c` certificate chain from the JWS header (a three-element array containing the leaf signing certificate, the intermediate certificate, and the root certificate). The worker validates the chain against the pinned **Apple Root CA — G3** certificate (downloaded from `https://www.apple.com/certificateauthority/AppleRootCA-G3.cer` and shipped with the worker). After chain validation, the public key is extracted from the verified leaf certificate and used to verify the JWS signature. The Apple Root CA — G3 certificate itself is cached indefinitely as a build-time asset; the per-notification cost is only the chain validation, which is local and fast. After signature verification, the worker parses the `signedPayload` to extract the `notificationType`, `subtype`, and the inner signed transaction info. The signed payload's timestamp is verified against a one-year tolerance for the same reason as Stripe: Apple retries notification delivery over multi-day windows, and replay protection lives in the `(provider, event_id)` idempotency constraint rather than in the timestamp check.
+
+**Apple Root CA pinning:** The Apple Root CA certificates used to verify the JWS chain are pinned in code with both the current root and the upcoming root present in the pin set, so the application continues verifying notifications across an Apple PKI rotation without an emergency deploy. The chat 086a Apple PKI Monitor worker checks the published Apple root certificate set weekly and alerts at the six-month-before-expiry threshold.
 
 **Handled Apple notification types:**
 
@@ -1395,7 +1518,11 @@ The API route returns `{ url: session.url }` and the client redirects the browse
 
 Idempotency uses the same `subscription_events` table and `(provider, event_id)` unique constraint, with `provider = 'apple'` and `event_id` set to the `originalTransactionId + '_' + notificationType + '_' + signedDate`.
 
-**Small Business Program:** The Vesper developer account qualifies for Apple's Small Business Program (under $1M in annual proceeds), reducing the Apple commission from 30% to 15% from day one. Enrollment requires acknowledgment in App Store Connect during the app submission process. Net revenue per iOS subscriber after the 15% commission: approximately **$17.00 per month** on the $19.99 price.
+**Small Business Program:** The Vesper developer account qualifies for Apple's Small Business Program from day one because annual proceeds are under the $1M threshold. Apple's commission under the program is 15% on subscriptions from the first transaction. The non-program "30% year one, 15% year two" structure is the default for developers who do not enroll and does not apply to Vesper. Enrollment is completed in App Store Connect well ahead of any live transactions; the exact activation window per Apple's published Small Business Program terms is short (on the order of weeks following approval) and is verified against Apple's developer documentation at the time of enrollment. Net revenue per iOS subscriber after the 15% commission ($19.99 × 0.85 = $16.9915): approximately **$16.99 per month** on the $19.99 price.
+
+### Day-6 Trial Conversion Prompt
+
+On the user's sixth day of trial (24 hours before trial expiration), the first app open of that day surfaces a full-screen modal: title "Trial ends tomorrow," body "Continue with Vesper for $19.99/month," primary button "Subscribe," secondary button "Maybe later." The modal is shown at most once per user per trial; dismissing it sets `users.trial_soft_prompt_dismissed_at` and prevents re-display. The Subscribe button routes web users to Stripe Checkout and iOS users to the StoreKit purchase flow specified above. Both shown and dismissed states emit PostHog events (`trial_soft_prompt_shown`, `trial_soft_prompt_dismissed`) for analytics. This is the only in-app surface specifically tied to trial-end conversion; the `trial-reminder` Cloudflare Worker continues to handle email reminders at the 3-day, 1-day, and 0-day checkpoints in parallel.
 
 ### Subscription State Machine
 
@@ -2021,7 +2148,9 @@ These endpoints accept inbound webhook payloads from Stripe and Apple. They are 
 
 ### Vercel
 
-The web application deploys on the **Vercel Hobby tier** at launch. The Hobby tier provides 100 GB bandwidth per month, 100 serverless function executions per day (effectively unlimited for a low-user launch), and unlimited deployments. Every push to the `main` branch triggers a production deploy. Every pull request generates a preview deployment at a unique URL (used for reviewing UI changes before merge).
+The web application deploys on **Vercel Pro ($20/seat/month)**, active from the start of Phase 4 build. Vercel's Terms of Service restrict the Hobby plan to personal, non-commercial use; a commercial subscription product requires Pro from day one regardless of launch status.
+
+The Hobby tier (used during build) provides 100 GB bandwidth per month, 100,000 serverless function invocations per day, and unlimited deployments. The Pro tier raises these to 1 TB bandwidth per month and 1 million serverless function invocations per day; the included $20/month covers usage-based costs at V1 volumes with significant headroom. Every push to the `main` branch triggers a production deploy. Every pull request generates a preview deployment at a unique URL (used for reviewing UI changes before merge).
 
 **Environment variables** are configured in the Vercel Dashboard under Project Settings → Environment Variables, with separate values for `preview` and `production` environments. The `preview` environment points to a staging Supabase project (or the same Supabase project with a test schema if branch databases are not yet configured). The complete set of environment variables required by the web application:
 
@@ -2030,9 +2159,6 @@ The web application deploys on the **Vercel Hobby tier** at launch. The Hobby ti
 | `NEXT_PUBLIC_SUPABASE_URL` | Public | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public | Supabase anon key (safe for client) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server only | Supabase service role key (never exposed to client) |
-| `NEXT_PUBLIC_MAPBOX_TOKEN` | Public | Mapbox public token for client-side maps |
-| `MAPBOX_SECRET_TOKEN` | Server only | Mapbox secret token for server-side routing/geocoding |
-| `YELP_API_KEY` | Server only | Yelp Fusion API key |
 | `STRIPE_SECRET_KEY` | Server only | Stripe secret key |
 | `STRIPE_WEBHOOK_SECRET` | Server only | Stripe webhook signing secret |
 | `STRIPE_PRICE_ID` | Server only | Stripe price ID for the standard monthly plan |
@@ -2043,11 +2169,11 @@ The web application deploys on the **Vercel Hobby tier** at launch. The Hobby ti
 | `SENTRY_DSN` | Public (web) | Sentry DSN for web error reporting |
 | `NEXT_PUBLIC_APP_URL` | Public | Production app URL (`https://vesper.[tld]`) |
 
-**Upgrade trigger:** Upgrade from Hobby to Pro ($20/month) when any of the following are hit: 500+ daily active users, bandwidth approaching 80 GB/month, or build minutes consistently hitting the 100/day ceiling.
+**Vercel Pro is already active from Phase 4 build start.** No Hobby→Pro cutover is required. Monitor Pro tier usage against the 1 TB bandwidth and 1M function invocation ceilings; at V1 volumes both are unlikely to be approached within the first year.
 
 ### Supabase
 
-The database and auth run on a single **Supabase Free tier** project. Free tier limits: 500 MB database storage, 1 GB file storage, 50,000 monthly active users, 2 GB egress per month, 7-day log retention.
+The database and auth run on a single **Supabase Free tier** project during build. Free tier limits: 500 MB database storage, 1 GB file storage, 50,000 monthly active users for Auth, 5 GB database egress per month, 5 GB cached egress per month, and 7-day log retention. The free tier also auto-pauses projects after seven consecutive days of inactivity, which is a production risk for any window where the app receives no traffic; this is one of the triggers for the Supabase Pro upgrade below.
 
 **Project configuration:**
 - Supabase Auth settings: email magic link enabled, Google and Apple OAuth providers enabled, password auth disabled.
@@ -2057,7 +2183,7 @@ The database and auth run on a single **Supabase Free tier** project. Free tier 
 
 **Environment separation:** At V1 on the free tier, a single Supabase project serves both preview and production. Preview deployments (Vercel PR previews) connect to the same Supabase project but operate on test user data. When Supabase is upgraded to Pro, branch databases become available and each PR preview gets an isolated database branch.
 
-**Upgrade trigger:** Upgrade to Supabase Pro ($25/month) when any of the following are hit: database approaching 400 MB storage, MAU approaching 40,000, egress approaching 1.5 GB/month, or when branch database isolation is needed for safe PR testing.
+**Upgrade trigger:** Upgrade to Supabase Pro ($25/month) when any of the following are hit: database approaching 400 MB storage, MAU approaching 40,000, database egress approaching 4 GB/month, when branch database isolation is needed for safe PR testing, or before any production window where seven days of low traffic could trigger the free-tier inactivity pause.
 
 ### Cloudflare Workers
 
@@ -2067,8 +2193,10 @@ All Workers are deployed via Wrangler CLI. The `wrangler.toml` at the root of th
 
 | Worker name | Cron | Purpose |
 |---|---|---|
-| `cache-prewarm` | `*/1 * * * *` | Pre-warm Anthropic prompt cache for users whose local time is 05:20–05:30 |
-| `live-activity-pusher` | `*/1 * * * *` | Send APNs Live Activity start/end payloads at block boundaries |
+| `cache-prewarm` | `*/5 * * * *` | Pre-warm Anthropic prompt cache for users whose local time is 05:20–05:30 |
+| `live-activity-pusher` | `*/5 * * * *` | Send APNs Live Activity start/end payloads at block boundaries |
+| `delayed-jobs-tick` | `*/5 * * * *` | Pick up `delayed_jobs` rows whose `scheduled_for` has elapsed; dispatch to handler for `job_type` |
+| `email-queue` | `*/15 * * * *` | Pick up `email_queue` rows whose `scheduled_for` has elapsed; deliver via Resend; mark `sent_at` |
 | `trial-reminder` | `0 8 * * *` | Send trial-ending reminders for users at 3-day, 1-day, and 0-day checkpoints |
 | `dunning-check` | `0 4 * * *` | Check for `past_due` users whose dunning window has elapsed; transition to `read_only` |
 | `reconciliation` | `0 3 * * *` | Reconcile `subscription_status` across Stripe/Apple state |
@@ -2148,16 +2276,51 @@ PostHog is initialized in both the web and mobile applications using the `postho
 | `trial_ended_no_convert` | — | PH only |
 | `subscription_canceled` | `provider`, `reason` | PH only |
 | `dynamic_island_mark_complete` | `blockType` | PH only |
+| `realtime_connection_state_changed` | `state`, `reason`, `plan_date`, `retry_count` | PH only |
+| `offline_queue_flush_started` | `queued_mutation_count` | PH only |
+| `offline_queue_flush_completed` | `succeeded_count`, `conflict_count`, `network_error_count`, `total_duration_ms` | PH only |
+| `nl_command_submitted` | `input_length_chars`, `source` | PH only |
+| `nl_command_parsed` | `command_type`, `parse_latency_ms` | PH only |
+| `nl_command_applied` | `command_type`, `apply_outcome`, `apply_latency_ms` | PH only |
+| `alarm_scheduled` | `wake_target_local`, `scheduled_at`, `snooze_minutes` | PH only |
+| `alarm_fired` | `fired_at`, `latency_from_target_ms` | PH only |
+| `alarm_dismissed` | `action`, `dismissed_at` | PH only |
+| `medication_notification_schedule_failed` | `medication_id`, `scheduled_times_count`, `error_class` | PH only |
+| `calendar_conflict_detected` | `conflict_count`, `user_action_pending` | PH only |
+| `calendar_conflict_resolved` | `user_action`, `conflict_count` | PH only |
+| `push_token_registered` | `platform`, `has_live_activity_token`, `device_id_hash` | PH only |
+| `live_activity_started` | `block_id`, `success` | PH only |
+| `live_activity_ended` | `block_id`, `success` | PH only |
+| `live_activity_update_failed` | `block_id`, `success`, `error_code` | PH only |
+| `rate_limit_tripped` | `endpoint`, `limiter_name`, `window_seconds`, `retry_after_seconds` | PH only |
 
 No PII is sent to PostHog. User identity is tracked using the Supabase user UUID (`posthog.identify(userId)`). Email addresses, names, and any other personally identifying fields are never included as event properties.
 
+### `completion_log.value` Constraints for NL Command Events
+
+Natural-language command events written to `completion_log` (event_type `nl_command_used` for the analytics surface, mirrored to PostHog) store only the parsed `PlanEditCommand` structure plus a SHA-256 hash of the raw user input string. The raw user text is never persisted. The hash is used for dedup analytics (counting unique commands across users without storing the commands themselves) and for diagnosing parsing failures by reproducing test inputs against the hash, which the user can re-enter manually if asked to reproduce a bug. This posture aligns with the Layer 5 medication-grade privacy floor: anything the user typed into the butler input surface could in principle include sensitive context, and the safe default is to not store it.
+
+### Realtime Connection Ceiling and Alert
+
+Supabase Realtime on the free tier caps concurrent connections at 200. A PostHog cohort alert is configured to fire when concurrent Realtime connections reach 150 (seventy-five percent of the ceiling), giving operational lead time to upgrade to the Pro tier before users experience connection rejection. The alert is provisioned in chat 097a alongside the rest of the operational alerting suite.
+
+### Operational Alerting Thresholds
+
+Three categories of operational alert fire to the founder's email at launch:
+
+- Sentry: error rate exceeds 10 new errors per minute (any surface); any error in the `live-activity-pusher` or `reconciliation` workers; new error type first seen in production (daily digest).
+- Anthropic spend: an Anthropic-side daily-budget alert fires at 80% of the daily budget (warning) and 100% (action required). The budget is set at the V1 expected-spend ceiling plus headroom; the 80% threshold leaves intervention time before the 100% hard ceiling.
+- Stripe revenue dip: a Stripe alert fires when daily revenue falls by more than 30% versus the trailing 7-day average. Surfaces churn cliffs, dunning failures spreading across the cohort, or webhook processing breakage masquerading as a revenue cliff.
+
+All three alert sets are provisioned in chat 097a.
+
 ### Three Primary Funnels
 
-**Funnel 1 — Signup to Activation:** `user_signed_up` → `onboarding_completed` → `plan_generated`. Activation is defined as a user generating their first plan. The target activation rate is 70%+ of trial signups.
+**Funnel 1 — Signup to Activation:** `user_signed_up` → `onboarding_completed` → `plan_generated`. Activation is defined as a user generating their first plan. The funnel exists as diagnostic instrumentation: when trial-to-paid conversion moves, this funnel shows whether the cause is upstream signup friction, onboarding dropoff, or failure to reach the first-plan moment.
 
-**Funnel 2 — Activation to Paid:** `plan_generated` (first plan) → `trial_converted`. Measured at the 14-day trial window. The target trial-to-paid conversion rate is 15–25%.
+**Funnel 2 — Activation to Paid:** `plan_generated` (first plan) → `trial_converted`. Measured at the 7-day trial window. The planning figure for trial-to-paid conversion is 5 to 8 percent, anchored to ChartMogul's 2026 study of 200 SaaS products showing an 8.9 percent average for opt-in / no-card-required trials, with the indie B2C consumer subset typically below that average. Conversion clearing the 5 percent threshold and monthly paid churn staying under 10 percent together constitute the operative health check for the business.
 
-**Funnel 3 — Paid to Day 30 Retention:** `trial_converted` → (still `active` 30 days later). Measured by checking `subscription_status` for cohorts at D30. The target D30 paid retention is 70%+.
+**Funnel 3 — Paid to Day 30 Retention:** `trial_converted` → (still `active` 30 days later). Measured by checking `subscription_status` for cohorts at D30. This funnel exists as instrumentation for the monthly churn measurement; the operative measure is monthly paid churn staying under approximately 10 percent.
 
 ### Public Open-Metrics Dashboard
 
@@ -2375,19 +2538,17 @@ The following items were flagged during the architecture phase or surfaced durin
 
 ---
 
-**1. pgsodium key rotation procedure**
+**1. pgsodium key rotation procedure — Resolved**
 
-The spec states that the pgsodium encryption key for OAuth tokens in the `integrations` table is rotatable. The rotation procedure (generate new key, re-encrypt all existing rows, swap the active key, retire the old key) is not yet specified as a concrete migration pattern and runbook. This is a security-sensitive operation and must not be improvised.
-
-**Resolution needed before:** The first time an OAuth token is encrypted in production, which is the first Google Calendar connection. The rotation procedure should be documented as a runbook in the `workers/` or `packages/db/` directory before go-live.
+The rotation procedure is documented as a concrete runbook in `docs/RUNBOOKS/PGSODIUM_KEY_ROTATION.md`, authored in build chat 063. The runbook covers: generating the new key via the pgsodium key-management API, running the re-encryption migration that decrypts each `integrations` row with the old key and re-encrypts with the new key inside a single transaction, atomically swapping the active key reference, and retiring the old key after a verification window. The runbook also specifies the rollback procedure if the re-encryption migration fails partway through. The first OAuth token encryption in production (the first Google Calendar connection) is unblocked by the runbook's existence; the rotation itself is exercised on a regular cadence and is no longer a deferred decision.
 
 ---
 
-**2. Supabase Realtime conflict on simultaneous web and mobile edits**
+**2. Optimistic concurrency on block mutations — Resolved**
 
-Last-write-wins is the stated conflict resolution for simultaneous plan edits across devices. The exact merge surface is unspecified: if the user reorders blocks on web and simultaneously marks a block complete on mobile, both writes succeed and the Realtime subscription delivers both to the other device. The `PATCH /api/v1/blocks/:blockId` endpoint uses a single-field update (status only, or time only, or order only), so partial overwrites on different fields of the same block are safe. The unsafe scenario is two concurrent `displayOrder` updates on different blocks in the same plan. If both writes succeed in the same Postgres transaction window, the resulting order may be inconsistent.
+The resolution expanded scope beyond the original Open Question framing. Rather than guarding only `displayOrder` updates with a plan-level `updated_at` check, the API-layer optimistic concurrency check applies to every block mutation: the client sends the block's `updated_at` value alongside its mutation request, and the API route rejects the mutation with HTTP 409 if the row's current `updated_at` is newer than the value the client sent. The client refetches and re-applies the local intent against the fresh state, or surfaces the conflict to the user when re-application is non-trivial. This pattern lands in build chats 026 and 027 alongside the broader block mutation API surface. The Realtime self-mutation filter (specified in the §3 `blocks.client_mutation_id` column and the Layer 3 Realtime section) prevents the originating device from re-rendering its own optimistic write, which closed the residual flicker case the optimistic concurrency check alone did not cover.
 
-**Resolution needed before:** The drag-and-drop reorder feature is built. Consider wrapping the `displayOrder` update in an optimistic concurrency check using a plan-level `updated_at` timestamp, rejecting updates that arrive with a stale base version and prompting the client to refresh.
+The earlier sketch of a SELECT-trigger-based `in_progress` transition is also obsolete: Postgres has no SELECT trigger and the computation cannot fire on read. The `effective_status` for a block (whether it should render as `in_progress` based on current time relative to `start_time`/`end_time` and the stored `status`) is computed at serializer time in the API route rather than at the database. This computation is implemented in chats 026 and 027 alongside the mutation surface.
 
 ---
 

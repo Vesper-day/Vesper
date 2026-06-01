@@ -10,7 +10,7 @@ Decisions in this layer interact directly with Layer 3's technical architecture 
 
 ## Working Direction From Prior Layers
 
-The product is a Life OS for young professionals, launching in the United States only at V1, with a butler-tone voice and warm-dark aesthetic. The business model is a two-week free trial converting to paid, with no permanent free tier. The trial requires no credit card upfront, includes every V1 feature, and converts to a paid subscription only when the user explicitly opts to continue at the trial's conclusion. The trial-end flow surfaces butler-voice reminders at three days before, one day before, and on the end date, with two clean options (continue or end) on the end-date screen. The post-trial and post-cancellation states transition through a seven-day read-only continuation mode, then a thirty-day archive, then hard delete. Cancellation is deliberately frictionless, with no retention modals, no last-minute discount offers, and no adversarial confirmation prompts. A win-back survey arrives forty-eight hours after cancellation via email, framed as a no-oriented question that respects the user's exit decision. The cost target for AI usage is approximately $0.30 per active user per month, with realistic expected cost in the $0.15 to $0.25 range. Stripe Checkout, Customer Portal, and Pricing Tables are the hosted payment infrastructure choices locked in Layer 3. The founder operates anonymously, with anonymity preserved through the build phase and into public launch.
+The product is a Life OS for young professionals, launching in the United States only at V1, with a butler-tone voice and warm-dark aesthetic. The business model is a one-week free trial converting to paid, with no permanent free tier. The trial requires no credit card upfront, includes every V1 feature, and converts to a paid subscription only when the user explicitly opts to continue at the trial's conclusion. The trial-end flow surfaces butler-voice reminders at two days before, one day before, and on the end date, with two clean options (continue or end) on the end-date screen. The post-trial and post-cancellation states transition through a seven-day read-only continuation mode, then a thirty-day archive, then hard delete. Cancellation is deliberately frictionless, with no retention modals, no last-minute discount offers, and no adversarial confirmation prompts. A win-back survey arrives forty-eight hours after cancellation via email, framed as a no-oriented question that respects the user's exit decision. The realistic AI cost is approximately $1.00 to $1.50 per active paying user per month, with $1.20 as the planning midpoint. This is derived from Sonnet 4.6 ($3/$15 per million input/output tokens) and Haiku 4.5 ($1/$5) against a blended cold/warm cache pattern at 15 to 20 active days per month. Earlier $0.30 to $0.50 figures used an understated output-token count and an engagement assumption (5 to 7 days per month) consistent with a churning user rather than an engaged one. Stripe Checkout, Customer Portal, and Pricing Tables are the hosted payment infrastructure choices locked in Layer 3. The founder operates anonymously, with anonymity preserved through the build phase and into public launch.
 
 Layer 5 builds entirely within those constraints.
 
@@ -18,11 +18,21 @@ Layer 5 builds entirely within those constraints.
 
 The pricing model is a **paid trial converting to a monthly subscription** with no permanent free tier and no annual billing option at V1. Each component of that sentence carries weight and is justified below.
 
-**Paid trial rather than freemium.** A permanent free tier was rejected during Layer 2 brainstorming. Freemium models work best when the free tier costs the operator near-zero per user and when the upgrade path is feature-driven. Neither condition holds here: every active user, free or paid, incurs measurable AI cost (template selection, plan synthesis, edits), so a free tier would burn margin indefinitely without conversion. The two-week trial captures the same psychological benefit (try before you buy, no upfront friction) without subsidizing non-converting users in perpetuity.
+**Paid trial rather than freemium.** A permanent free tier was rejected during Layer 2 brainstorming. Freemium models work best when the free tier costs the operator near-zero per user and when the upgrade path is feature-driven. Neither condition holds here: every active user, free or paid, incurs measurable AI cost (template selection, plan synthesis, edits), so a free tier would burn margin indefinitely without conversion. The one-week trial captures the same psychological benefit (try before you buy, no upfront friction) without subsidizing non-converting users in perpetuity.
 
-**Two weeks rather than seven or thirty days.** Seven days is too short for the engine to demonstrate value; the base profile model takes the first one to two weeks to personalize against the user's actual patterns. Thirty days is too long; per-user trial AI cost at thirty days approaches $3 to $4 per non-converter, which compounds badly across the funnel. Fourteen days is the empirically-tested sweet spot for productivity software (Notion, Sunsama, Motion all use fourteen or fifteen).
+**Seven days rather than fourteen or thirty days.** Seven days is a shorter window than the base profile model would ideally have to personalize against the user's patterns, and the trade-off is acknowledged honestly: an extra week would offer modestly more surface for the engine to settle in. The seven-day choice is nonetheless correct for V1 on four grounds.
 
-**No card required upfront.** This is locked from Layer 4's onboarding flow ("Two weeks free. No card required."). The friction reduction at signup outweighs the conversion penalty at trial end. Requiring a card upfront converts more trial users to paid because the default action becomes "do nothing and get charged," but the signup conversion rate drops materially. For an indie launch optimizing for top-of-funnel signups and word-of-mouth, no-card-required is correct.
+The first is unit economics. Trial users are cold-cache by default because the sleep-alarm prewarming pathway requires module configuration that does not happen in week one. Fourteen days of trial usage at approximately $0.074 per fully-engaged day equals $1.04 in AI spend per non-converting trial user; at four to five active days within fourteen, approximately $0.30 to $0.37. Seven days at the same daily rate equals $0.52 fully-engaged or $0.30 to $0.37 partially-engaged, with $0.45 as the planning midpoint. The halving of cumulative cost applies to the ninety-plus percent of trial signups who never convert (at a realistic six percent conversion rate). At V1 funnel volumes the difference is material; at scale it dominates the trial-cost line item entirely.
+
+The second is that the base profile is more portable than the original "one to two weeks to personalize" framing assumed. Plan quality on day one through seven is already strong because the prompt-context architecture (Layer 1's voice and structural specification, Layer 2's user base context, Layer 3's filtered template subset) carries most of the signal that determines plan quality. Only Layer 4, today's specifics, varies day to day. The engine does not need fourteen days of accumulated behavior to demonstrate value; it needs one good morning brief and several adequate iterations after that. Seven days is sufficient for both.
+
+The third is urgency without manufactured scarcity. A seven-day window creates natural decision pressure without invoking the countdown timers and "limited spots" tactics Layer 1 explicitly rejects. The day-six soft prompt with one-tap pay (specified below) captures committed users at low friction, and users who have not decided by day seven are unlikely to have decided at day fourteen either; an extra week of indecision usually resolves the same way the first week did.
+
+The fourth is competitive validation. Empirically tested trial lengths in productivity SaaS span seven to fourteen days, and both points are defensible. Sunsama and Notion sit at fourteen; many comparable indie tools sit at seven. The seven-day choice trades a small expected reduction in conversion rate for materially better trial-cost economics, and the trial length itself is a Layer 5 decision that can extend to ten or fourteen days in a Phase 5 revision without requiring schema or architecture changes if post-launch data warrants it.
+
+**No card required upfront.** This is locked from Layer 4's onboarding flow ("One week free. No card required."). The friction reduction at signup outweighs the conversion penalty at trial end. Requiring a card upfront converts more trial users to paid because the default action becomes "do nothing and get charged," but the signup conversion rate drops materially. For an indie launch optimizing for top-of-funnel signups and word-of-mouth, no-card-required is correct.
+
+**End-of-trial soft prompt with one-tap pay.** On trial day six, twenty-four hours before the trial ends, Vesper surfaces a soft prompt offering one-tap conversion via Apple Pay on iOS or Stripe Link on web. A single biometric confirmation converts the user; users who do nothing let the trial expire to read-only. This pattern captures committed users at materially lower friction than a manual checkout flow, with industry benchmarks for one-tap-pay conversion in the twenty-five to thirty percent range against the fifteen percent typical of plain no-card trials. The prompt itself is not a default-yes pre-authorization, so no surprise charges occur; the user takes a deliberate action or the trial ends quietly. This preserves the no-card-required posture at signup while recovering most of the conversion benefit that card-required-upfront flows obtain by manipulating the default.
 
 **Monthly billing only at V1.** Annual billing with a discount was considered and rejected. Three reasons. First, annual discounts implicitly signal that monthly pricing is inflated, undermining the premium positioning. Second, an annual plan introduces complexity around mid-year cancellations, pro-rated refunds, and renewal timing that the V1 codebase should not carry. Third, offering a discount at all can read as a struggling-startup signal; absence of a discount reads as confidence in the product. Annual billing is deferred to V2 or V3, introduced only if data shows users explicitly requesting it for budgeting reasons.
 
@@ -32,7 +42,7 @@ The pricing model is a **paid trial converting to a monthly subscription** with 
 
 One paid tier exists at V1: Standard. There is no free tier and there is no second paid tier.
 
-**Vesper Standard.** $19.99 per month. Includes all eight V1 pillars without restriction: the AI plan engine, all seven modules (work, fitness, nutrition, sleep, errands, medication, finance), the local intelligence layer, the calendar dual surface (Google Calendar plus built-in), the mobile-and-web platform parity, the natural-language input surface, the adaptive onboarding flow, and the Dynamic Island integration. The two-week free trial includes the same complete feature set, with the same usage limits (which is to say, no usage limits beyond the underlying API rate limits which are not user-facing).
+**Vesper Standard.** $19.99 per month. Includes all seven V1 pillars without restriction: the AI plan engine, all seven modules (work, fitness, nutrition, sleep, errands, medication, finance), the calendar dual surface (Google Calendar plus built-in), the mobile-and-web platform parity, the natural-language input surface, the adaptive onboarding flow, and the Dynamic Island integration. The one-week free trial includes the same complete feature set, with the same usage limits (which is to say, no usage limits beyond the underlying API rate limits which are not user-facing). Trial accounts are capped at two plan generations per local day; paid accounts are capped at five per rolling hour. The trial cap protects margin on non-converting users without degrading the core experience for anyone actively evaluating the product.
 
 ## Tier Structure at V1.5 (Forward-Looking)
 
@@ -48,11 +58,11 @@ The $19.99 monthly price is anchored against four reference points. First, compa
 
 Second, target audience income. Young professionals ages twenty-two to thirty-two in their first decade of career typically earn $60,000 to $150,000 per year. A $19.99 per month subscription equals approximately 0.16 percent to 0.4 percent of annual income. For a tool the user touches daily and that compounds time savings across an entire life domain, this price point is well within the easy-yes range.
 
-Third, unit economics. AI cost at realistic usage is in the $0.15 to $0.25 per active user per month range per Layer 3. Apple's In-App Purchase commission at year one is thirty percent on $19.99, yielding roughly $14 in net revenue per iOS subscriber. After year one, or through Apple's Small Business Program (which a startup at V1 user counts automatically qualifies for at under $1 million in annual app revenue), the commission drops to fifteen percent, yielding roughly $17 in net revenue per iOS subscriber. Stripe processing on web subscribers at 2.9 percent plus thirty cents yields roughly $19 in net revenue per web subscriber. The blended margin after AI cost and processing comfortably exceeds eighty percent.
+Third, unit economics. AI cost at realistic usage is approximately $1.00 to $1.50 per active paying user per month per Layer 3, with $1.20 as the planning midpoint. Vesper qualifies for Apple's Small Business Program from day one because the developer account has not exceeded $1 million in App Store proceeds, so Apple's commission is fifteen percent on subscriptions from the first transaction. Net revenue per iOS subscriber after Apple's fifteen percent is approximately $16.99 on the $19.99 price; after $1.20 AI cost, net contribution is approximately $15.79. Stripe processing on web subscribers at 2.9 percent plus thirty cents, plus Stripe Tax Basic for Checkout at 0.5 percent (approximately $0.10 on $19.99), yields approximately $19.01 in net revenue per web subscriber; after $1.20 AI cost, net contribution is approximately $17.81. The blended margin after AI cost and processing is approximately 79 to 89 percent.
 
 Fourth, positioning consistency. A $9.99 price would undercut the premium butler/concierge framing established in Layers 1 and 4 and signal a generic productivity utility. A $24.99 price would narrow the addressable market without delivering enough additional value perception to justify the increase at V1. The $19.99 price holds the premium positioning while preserving accessibility, and leaves room to raise to $24.99 in a future price experiment once retention data and willingness-to-pay are proven.
 
-The price is also a round-enough number to read cleanly in marketing materials. "$19.99 per month" or "twenty dollars per month" both work in butler-voice copy ("After fourteen days, twenty dollars per month").
+The price is also a round-enough number to read cleanly in marketing materials. "$19.99 per month" or "twenty dollars per month" both work in butler-voice copy ("After seven days, twenty dollars per month").
 
 ## Currency and Geographic Scope
 
@@ -62,17 +72,21 @@ Pricing is presented as $19.99 USD in all surfaces (landing page, pricing table,
 
 ## Free Trial Mechanics
 
-The free trial is fourteen calendar days starting at the moment of account creation. Trial mechanics are mostly locked in prior layers but are consolidated here for the Layer 5 record.
+The free trial is seven calendar days starting at the moment of account creation. Trial mechanics are mostly locked in prior layers but are consolidated here for the Layer 5 record.
 
-**Trial onset.** The user creates an account via email magic link, Google OAuth, or Apple Sign In. The `trial_started_at` field on the user row is set to the current timestamp, and `trial_ends_at` is set to fourteen days forward. The `subscription_status` field is set to `trial`. No payment method is collected during onboarding.
+**Trial onset.** The user creates an account via email magic link, Google OAuth, or Apple Sign In. The `trial_started_at` field on the user row is set to the current timestamp, and `trial_ends_at` is set to seven days forward. The `subscription_status` field is set to `trial`. No payment method is collected during onboarding.
 
-**Trial scope.** The trial includes the full V1 feature set without restriction. Every module, every integration, every AI-generated plan operates exactly as it would for a paying subscriber. There is no usage cap, no feature gating, and no surface that hints at restriction. The user experiences exactly what they would experience as a paying subscriber.
+**Trial scope.** The trial includes the full V1 feature set without restriction. Every module, every integration, every AI-generated plan operates exactly as it would for a paying subscriber. The single exception is a soft cap of two plan generations per local day, applied only to trial accounts; the cap protects margin on non-converting trial users without degrading the experience of any user actively evaluating the product. Paid accounts are capped at five generations per rolling hour as a runaway-cost ceiling rather than a usage limit. Neither cap is surfaced as a usage meter; the user experiences exactly what they would experience as a paying subscriber.
 
-**Trial reminders.** A Cloudflare Worker runs daily at 9:00 AM in the user's local timezone and checks for users whose `trial_ends_at` falls three days, one day, or zero days from the current date. The worker sends transactional emails via Resend at each of these checkpoints, with copy locked in Layer 4's copy library. In-app, the ambient butler line and a soft banner on the plan view surface the same reminders, also with locked copy.
+**Trial reminders.** A Cloudflare Worker runs daily at 9:00 AM in the user's local timezone and checks for users whose `trial_ends_at` falls two days, one day, or zero days from the current date. The worker sends transactional emails via Resend at each of these checkpoints, with copy locked in Layer 4's copy library. In-app, the ambient butler line and a soft banner on the plan view surface the same reminders, also with locked copy.
 
-**Trial-to-paid conversion.** On the trial end date, the user is presented with two options: continue (which routes to Stripe Checkout on web, or initiates an Apple StoreKit purchase flow on iOS) or end (which transitions the account to the seven-day read-only continuation state). The choice is presented in butler voice without persuasion friction: "Your two weeks are up." with two unstyled buttons. No retention copy, no discount offer, no countdown timer.
+**Day-five optional payment capture.** On trial day five, Vesper surfaces an opt-in prompt offering to save a payment method now for a frictionless conversion tomorrow. On iOS, a single Apple Pay sheet saves the card via StoreKit without charging it. On web, a Stripe Setup Intent captures the card without charging. Users who decline proceed through the standard day-six and day-seven flows unchanged. The prompt is informational and consent-based, not a default-yes pre-authorization.
 
-**Trial extension policy.** No extensions are offered by default. The trial is fourteen days, with no manipulation. The founder retains discretion to extend a specific user's trial manually via the admin interface in genuine cases (technical issues that prevented the user from evaluating the product, for example). This discretion is not advertised and is exercised case-by-case.
+**Day-six one-tap conversion prompt.** Twenty-four hours before the trial ends (day six), users who saved a payment method on day five see a one-tap conversion prompt. A single biometric confirmation converts them; users who did not save a method see an informational reminder with a CTA to the standard Checkout or StoreKit flow. Users who take no action on either prompt let the trial proceed to its natural end-date prompt the following day.
+
+**Trial-to-paid conversion.** On the trial end date, the user is presented with two options: continue (which routes to Stripe Checkout on web, or initiates an Apple StoreKit purchase flow on iOS) or end (which transitions the account to the seven-day read-only continuation state). The choice is presented in butler voice without persuasion friction: "Your week is up." with two unstyled buttons. No retention copy, no discount offer, no countdown timer.
+
+**Trial extension policy.** No extensions are offered by default. The trial is seven days, with no manipulation. The founder retains discretion to extend a specific user's trial manually via the admin interface in genuine cases (technical issues that prevented the user from evaluating the product, for example). This discretion is not advertised and is exercised case-by-case.
 
 **Trial abuse prevention.** A single email address cannot start more than one trial. Account-level deduplication is enforced at signup. Repeat trial signups using different email addresses are an accepted leakage at V1 given the friction such enforcement would impose on legitimate users; if leakage becomes material post-launch, IP-level rate limiting or device fingerprinting can be added.
 
@@ -80,7 +94,7 @@ The free trial is fourteen calendar days starting at the moment of account creat
 
 The subscription lifecycle is modeled as a state machine with seven states. The `subscription_status` field on the user row tracks the current state. State transitions are triggered by user actions (subscribing, canceling), payment events (charges succeeding, charges failing, dunning timing out), or scheduled jobs (trial ending, archive period ending).
 
-**State 1: trial.** Active during the fourteen-day trial window. User has full access. No charges are made. `trial_ends_at` drives transitions out of this state.
+**State 1: trial.** Active during the seven-day trial window. User has full access. No charges are made. `trial_ends_at` drives transitions out of this state.
 
 **State 2: active.** The user has converted to a paid subscription. Charges are made monthly on the conversion anniversary. Full access continues. This is the steady state of a successful conversion.
 
@@ -104,9 +118,9 @@ Two payment systems run in parallel: Apple's In-App Purchase for iOS subscribers
 
 iOS subscribers convert to paid through Apple's StoreKit framework. The conversion flow is triggered when the user taps continue on the trial-end screen or on the in-app upgrade surface. StoreKit presents Apple's native payment sheet, which uses the payment method already on the user's Apple ID (typically a card, but also Apple Cash, Apple Pay-linked bank accounts, or App Store credit). The transaction completes through Apple, and the user is enrolled in an auto-renewing monthly subscription billed by Apple.
 
-Apple's commission is thirty percent on the first year of a subscription and fifteen percent thereafter, per Apple's standard subscription commission structure. The product also qualifies automatically for Apple's Small Business Program, which reduces the commission to fifteen percent from day one for developers earning less than one million dollars in proceeds across all their apps in a calendar year. Enrollment in the Small Business Program is automatic upon meeting the eligibility criteria but requires acknowledgment in App Store Connect; the founder enrolls during the App Store submission process.
+Vesper qualifies for Apple's Small Business Program from day one because the developer account has not exceeded $1 million in App Store proceeds across all associated apps in the previous calendar year. Under the Small Business Program, Apple's commission is fifteen percent on all in-app purchases including subscriptions, applied from the first transaction. The standard "thirty percent year one, then fifteen percent thereafter" structure is the non-Small-Business-Program default and is not the path Vesper operates under. Enrollment requires acknowledgment in App Store Connect and the new Paid Applications agreement; the founder enrolls during the App Store submission process. The reduced rate takes effect fifteen days after the end of the fiscal month in which Apple approves the enrollment.
 
-Net revenue per iOS subscriber after Apple's fifteen percent (assuming Small Business Program enrollment) is approximately $17 per month on the $19.99 price.
+Net revenue per iOS subscriber after Apple's fifteen percent commission ($3.00 on $19.99) is approximately $16.99 per month.
 
 Apple handles billing, payment method storage, payment retries on failure, refund requests, tax calculation and remittance for the App Store transaction itself, and dunning logic. The product receives notifications via Apple's App Store Server Notifications V2 webhook, which posts to a Cloudflare Worker endpoint with subscription lifecycle events: initial purchase, renewal, billing retry, billing recovery, expiration, refund, revoke. The webhook handler updates the `subscription_status` field on the user row accordingly.
 
@@ -120,7 +134,7 @@ Web subscribers convert to paid through Stripe Checkout, a hosted checkout page 
 
 Stripe Customer Portal handles subscription management: payment method updates, viewing of past invoices, and cancellation. The portal is hosted by Stripe and styled to match Vesper's warm-dark design system to the extent Stripe's customization options allow (logo, accent color, and font selection). Users access the portal through a "manage subscription" link in their account settings, which generates a portal session via the Stripe API and redirects.
 
-Stripe's processing fee is 2.9 percent plus thirty cents per transaction in the United States. Net revenue per web subscriber on the $19.99 price is approximately $19.
+Stripe's processing fee is 2.9 percent plus thirty cents per transaction in the United States, approximately $0.88 on $19.99. Stripe Tax Basic for Checkout adds approximately $0.10 per transaction (0.5% on $19.99). Net revenue per web subscriber on the $19.99 price is approximately $19.01 after both fees.
 
 ### Payment Methods Enabled
 
@@ -144,9 +158,9 @@ Cryptocurrency is not enabled at V1. Stripe does not directly support crypto sub
 
 ### Stripe Tax
 
-Stripe Tax is enabled from launch. The service automatically calculates sales tax on each transaction based on the customer's billing address and the product's tax category (digital service, SaaS), and remits collected tax to the appropriate state authority. Stripe Tax pricing is $0.50 per transaction plus 0.5 percent of the transaction amount, which works out to approximately $0.60 per $19.99 monthly transaction.
+Stripe Tax is enabled from launch. The service automatically calculates sales tax on each transaction based on the customer's billing address and the product's tax category (digital service, SaaS), and remits collected tax to the appropriate state authority. Stripe Tax Basic pricing for no-code integrations (which includes Stripe Checkout, the path Vesper uses) is 0.5 percent per transaction where tax is registered, which works out to approximately $0.10 per $19.99 monthly transaction. The alternative pricing tier ($0.50 per transaction) applies only to direct Stripe API integrations, not Checkout.
 
-The alternative (manually tracking nexus by state and registering for sales tax in each state where revenue exceeds the nexus threshold) is significantly more operationally complex and risks underpayment penalties if a threshold is missed. The $0.60 per transaction cost of Stripe Tax is cheap insurance.
+The alternative (manually tracking nexus by state and registering for sales tax in each state where revenue exceeds the nexus threshold) is significantly more operationally complex and risks underpayment penalties if a threshold is missed. The $0.10 per transaction cost of Stripe Tax is cheap insurance.
 
 Apple handles tax calculation and remittance independently for App Store transactions. No additional tax infrastructure is needed for iOS subscribers.
 
@@ -184,9 +198,9 @@ Apple sends its own emails to the user during billing recovery (these are sent f
 
 ## Refund Policy
 
-The stated refund policy is straightforward: no refunds. The two-week free trial is the try-before-you-buy period. After the trial converts to paid, charges are not refundable.
+The stated refund policy is straightforward: no refunds. The one-week free trial is the try-before-you-buy period. After the trial converts to paid, charges are not refundable.
 
-This policy is documented in the terms of service and on the pricing page in plain language: "After your two-week free trial, monthly subscriptions are non-refundable. Cancel anytime to stop future charges."
+This policy is documented in the terms of service and on the pricing page in plain language: "After your one-week free trial, monthly subscriptions are non-refundable. Cancel anytime to stop future charges."
 
 Two practical exceptions modify this nominal policy.
 
@@ -194,7 +208,7 @@ Two practical exceptions modify this nominal policy.
 
 **Founder discretion.** For web subscribers via Stripe, the founder retains discretion to issue refunds case-by-case in genuine hardship situations (technical issues that prevented use, accidental charges, etc.). This discretion is exercised manually through the Stripe dashboard and is not advertised or surfaced in user-facing copy. Refunds in these cases happen as one-off acts of customer service, not as policy.
 
-The no-refund stated policy is aligned with the trial-based model. The trial gives users two weeks of full access at zero cost. The implicit contract is that the user has made an informed decision at the conversion moment. Refunding charges after that would create perverse incentives for abuse and erode the trial-as-evaluation-period framing.
+The no-refund stated policy is aligned with the trial-based model. The trial gives users one week of full access at zero cost. The implicit contract is that the user has made an informed decision at the conversion moment. Refunding charges after that would create perverse incentives for abuse and erode the trial-as-evaluation-period framing.
 
 ## Cancellation
 
@@ -207,6 +221,8 @@ The cancellation flow is locked in Layer 2 and Layer 4 and is summarized here fo
 **State transition.** The subscription transitions to `read_only` immediately upon cancellation confirmation. The seven-day read-only window followed by thirty-day archive applies, identical to the post-dunning lifecycle path.
 
 **Win-back survey.** Forty-eight hours after cancellation, a transactional email arrives asking the user a single no-oriented question ("Was there anything we could have done differently?"). The email is intentionally light: no required fields, no surveys with multiple pages, no incentive offered to fill it out. Responses are aggregated for retrospective analysis. No automated response is sent; if the user replies and the founder wants to follow up, the founder does so manually.
+
+**Referral pending-count display posture.** The referral panel in account settings surfaces only credits in the `applied` state — credits that have produced a real discount on the user's invoice. Credits in the `pending` state (issued but not yet applied to a billing cycle) are intentionally not displayed to the referrer. The Layer 4 anti-gamification posture rejects pending-credit displays because they create a disappointment surface: a pending credit that voids (because the referrer churns before consuming it, or because the referee refunds) becomes a visible loss the user noticed and was tracking. Showing only applied credits avoids that surface entirely and keeps the panel honest about value already delivered rather than value provisionally earned.
 
 The philosophy is that an adversarial cancellation flow generates short-term retention bumps at the cost of long-term goodwill. A user who cancels cleanly and feels respected is more likely to resubscribe later (or recommend the product despite their own exit) than a user who fought through a retention gauntlet. This aligns with Layer 1's anti-overwhelm posture and the Cialdini ethical test that frames all persuasion principles in the butler voice (would a fully informed user feel satisfied with their decision twenty-four hours later?).
 
@@ -229,33 +245,31 @@ The unit economics ground every pricing decision in real numbers. The analysis b
 - Gross revenue: $19.99
 - Apple commission (15%): $3.00
 - Net revenue: $16.99
-- AI cost (realistic, ~$0.20): $0.20
-- Net contribution per iOS subscriber: $16.79
+- AI cost (realistic V1, ~$1.20): $1.20
+- Net contribution per iOS subscriber: $15.79
 
 **Per-subscriber monthly economics, web via Stripe:**
 
 - Gross revenue: $19.99
 - Stripe processing (2.9% + $0.30): $0.88
-- Stripe Tax fee (~$0.60): $0.60
-- Net revenue: $18.51
-- AI cost (realistic, ~$0.20): $0.20
-- Net contribution per web subscriber: $18.31
+- Stripe Tax fee (~$0.10): $0.10
+- Net revenue: $19.01
+- AI cost (realistic V1, ~$1.20): $1.20
+- Net contribution per web subscriber: $17.81
 
-The blended net contribution per paying subscriber, assuming roughly even split between iOS and web conversion (which is unknown until launch data is available), is approximately $17.50 per month.
+The blended net contribution per paying subscriber, assuming roughly even split between iOS and web conversion (which is unknown until launch data is available), is approximately $16.80 per month. The AI cost figure of $1.20 reflects realistic V1 measurement at typical engagement (15 to 20 active days per month, blended cold/warm cache). An aspirational reduction to approximately $1.00 per month is plausible once prewarm cache coverage stabilizes and output token discipline holds across diverse user prompts. The lower aspirational figures appearing in earlier drafts were derived from understated output token assumptions and an engagement model inconsistent with an engaged daily-use product.
 
-**Trial cost per non-converter.** Fourteen days of trial usage at approximately $0.10 to $0.15 per day in AI spend equals $1.40 to $2.10 in sunk AI cost per non-converting trial user. There is no payment processing cost during trial since no charge is made.
+**Trial cost per non-converter.** Trial users are cold-cache by default because the sleep-alarm prewarming pathway requires module configuration that does not happen in week one. Realistic daily cost during trial is approximately $0.074 (cold-cache Sonnet plan generation at $0.060 plus approximately $0.014 in Haiku edits and check-in operations). A fully engaged seven-day non-converter costs approximately $0.52; a partially engaged non-converter active on four or five of the seven days costs approximately $0.30 to $0.37. The planning midpoint per non-converter is approximately $0.45. There is no payment processing cost during trial since no charge is made. The seven-day trial halves the cumulative non-converter burden that a fourteen-day trial would produce. At $16.80 blended net contribution, one paying subscriber covers the trial cost of approximately 37 non-converters at the planning midpoint.
 
-**Blended customer acquisition cost on a five percent trial-to-paid conversion rate.** At five percent conversion, every paying customer is paired with nineteen non-converting trials. Sunk trial AI cost across nineteen non-converters at $1.75 average is approximately $33 in trial AI spend per paying customer acquired through the organic top-of-funnel. This is in addition to whatever paid acquisition cost is incurred for the funnel itself; at V1 paid acquisition is held in reserve and not actively spent. The implied CAC purely from trial overhead is $33 per paying customer.
+**Cost model recalibration.** The realistic planning figure is $1.20 per active paying user per month, with $1.00 to $1.50 as the operating range depending on engagement intensity and cache hit rate. Aspirational reduction to approximately $1.00 per month is plausible once prewarm coverage stabilizes; further reduction below $1.00 would require either substantially lower output token counts (which conflicts with plan utility) or substantially higher cache hit rates (which conflicts with the structure of a once-per-day plan generation pattern). Earlier $0.30 and $0.35 to $0.50 figures relied on understated output tokens and an engagement model inconsistent with engaged daily-use behavior.
 
-**Payback period.** At $17.50 net contribution per paying subscriber per month and $33 acquisition overhead from trial AI cost, the payback period is approximately two months. After two months of paying subscription, the cost of all the non-converting trials is recovered and the subscriber becomes net positive.
+**Blended customer acquisition cost on a six percent trial-to-paid conversion rate.** At six percent conversion (the planning midpoint for an indie B2C consumer subscription app with an opt-in no-card-required trial; five percent baseline plus an estimated one to two percentage points from the day-six soft prompt), every paying customer is paired with approximately 15.7 non-converting trials. Sunk trial AI cost across those non-converters at approximately $0.45 each is approximately $7.07 in trial AI spend per paying customer acquired through organic top-of-funnel. This is in addition to whatever paid acquisition cost is incurred for the funnel itself; at V1 paid acquisition is held in reserve and not actively spent. The implied CAC purely from trial overhead is approximately $7 per paying customer. The fifteen to twenty-five percent conversion rates appearing in earlier drafts were sourced from B2B SaaS benchmarks (First Page Sage, OpenView) that do not apply to consumer indie products; the applicable benchmark is ChartMogul 2026's 8.9 percent average for opt-in trials across 200 SaaS products, with the indie B2C subset below that average.
 
-**Lifetime value at retention assumptions.** Modeling LTV requires assumptions about churn. If monthly churn is five percent, average lifetime is twenty months, yielding LTV of $350 per subscriber. If monthly churn is ten percent (a more conservative assumption for a new product), average lifetime is ten months, yielding LTV of $175. Both are well above the $33 CAC, confirming the model is economically sound at the assumed conversion rate.
+**Payback period.** At $16.80 blended net contribution per paying subscriber per month and approximately $7 acquisition overhead from trial AI cost, the payback period from trial-cost recovery is within the first billing cycle. The subscriber is net positive on operational margin from month one. AI run-rate during the active subscription ($1.20 per month) is the dominant ongoing cost, not recovered trial overhead.
 
-**Sensitivity to conversion rate.** At three percent trial-to-paid conversion (pessimistic), trial AI cost per paying customer rises to $55. Payback period extends to three months. Still healthy.
+**Lifetime value at retention assumptions.** Modeling LTV requires assumptions about churn. If monthly churn is five percent, average lifetime is twenty months, yielding LTV of approximately $336 per subscriber ($16.80 × 20). If monthly churn is ten percent (a more conservative assumption for a new product), average lifetime is ten months, yielding LTV of approximately $168. Both substantially exceed the approximately $7 trial-cost CAC, confirming the model is economically sound at the realistic six percent conversion assumption.
 
-**Sensitivity to conversion rate at eight percent (optimistic).** Trial AI cost per paying customer drops to $20. Payback period drops to one month.
-
-The unit economics are robust across a range of conversion rates. The price point is defensible.
+**Sensitivity to conversion rate.** At a pessimistic three percent conversion (soft prompt producing essentially no uplift over a weak organic baseline), trial AI cost per paying customer rises to approximately $14.55 (97 non-converters at $0.45 each divided by 3 conversions). Payback period from trial recovery remains under one billing cycle. At an optimistic ten percent conversion (closer to the ChartMogul opt-in average), trial AI cost per paying customer drops to approximately $4.05 (90 non-converters at $0.45 each divided by 10 conversions). Payback period is same-cycle. The unit economics are robust across the realistic three to ten percent range for an indie B2C consumer app. The price point is defensible across this range.
 
 ## Legal Foundation
 
@@ -270,7 +284,7 @@ The policy discloses, at minimum, the following:
 - Identity and contact information of the operator (the LLC name and a contact email)
 - Categories of personal data collected (email, name if provided, archetype selection, location with permission, calendar events synced via integration, fitness data when fitness module is enabled, dietary preferences from nutrition module, medication entries, financial entries from finance module)
 - Purposes for which data is processed (delivering the product's core function, AI-driven personalization, billing, communications, analytics)
-- Categories of third parties data is shared with (Supabase for hosting, Anthropic for AI processing, Mapbox for mapping, Yelp for restaurant data, Stripe and Apple for payments, Resend for transactional email, PostHog for analytics, Sentry for error tracking)
+- Categories of third parties data is shared with (Supabase for hosting, Anthropic for AI processing, Stripe and Apple for payments, Resend for transactional email, PostHog for analytics, Sentry for error tracking)
 - The explicit statement that Anthropic does not use API data for model training
 - The explicit statement that medication, finance, and other sensitive module data is not shared with third parties beyond what is required for the product's core function
 - User rights under CCPA (right to know, right to delete, right to opt out of sale, right to non-discrimination)
@@ -291,7 +305,7 @@ The terms include, at minimum:
 - Acceptance of terms (using the product constitutes acceptance)
 - Description of the service (Life OS planning application)
 - Account responsibilities (accurate information, account security, single user per account)
-- Subscription terms (fourteen-day free trial, $19.99 per month after trial, monthly auto-renewal, cancellation policy, refund policy)
+- Subscription terms (seven-day free trial, $19.99 per month after trial, monthly auto-renewal, cancellation policy, refund policy)
 - User content and data (the user owns their data; Vesper has a limited license to process it for the purpose of delivering the service)
 - Prohibited uses (illegal activity, automated abuse, reverse engineering, distribution of the application, attempts to bypass authentication or access other users' data)
 - Disclaimer of warranties (service provided as-is)
@@ -378,7 +392,7 @@ The founder obtains an EIN from the IRS (free, online, approximately ten minutes
 
 Business liability insurance from a small-business carrier (Hiscox, Next, Thimble, or comparable) provides liability coverage in the $1M to $2M range for approximately $300 to $600 per year for a solo SaaS operator. This is the substitute for the LLC liability shield. For a product that handles sensitive user data (health, medication, location, finance entries), liability insurance is recommended regardless of entity structure.
 
-**LLC formation trigger.** The founder forms an LLC at a meaningful revenue threshold (recommended approximately $50,000 to $100,000 ARR, or whenever personal tax situation makes S-Corp election beneficial). At that point, the math flips: LLC overhead ($800 franchise tax plus formation costs) is a small fraction of annual revenue, and the additional liability shield and tax flexibility justify the cost. The structure at formation can be a California LLC (simpler, member name disclosed in CA records) or a New Mexico LLC registered as a foreign LLC in California (preserves more anonymity in public records, but $800 still applies plus NM registered agent fees).
+**LLC formation trigger.** The founder forms an LLC if and when revenue or liability exposure justifies the overhead ($800 annual California minimum franchise tax with no first-year waiver since AB85 expired January 2024, plus formation costs and registered agent fees). No specific ARR or timeline is committed; the trigger is the founder's own assessment of liability exposure against ongoing costs. At formation, the structure can be a California LLC (simpler, member name disclosed in CA records) or a foreign LLC (e.g., New Mexico) registered to do business in California (preserves more anonymity in public records, but the $800 California franchise tax still applies because the founder is a California resident).
 
 **Annual ongoing costs at V1 launch (sole prop path).** Approximately $400 to $700 per year: DBA renewal where applicable, business insurance, and the Apple Developer Program. No franchise tax. This is materially cheaper than the LLC path and appropriate for the pre-revenue and early-revenue stages.
 
@@ -390,11 +404,10 @@ Business liability insurance from a small-business carrier (Hiscox, Next, Thimbl
 
 ## Pricing Experiments
 
-Pricing experiments are deferred entirely to V3 per Layer 6 founder direction. No experimentation infrastructure (PostHog feature flags, A/B test allocation, holdout cohorts) is activated at V1 or V2. The documented experiments below remain on file for V3 consideration but are not run before then. The rationale is twofold: statistical significance on consumer SaaS experiments requires meaningful user volume that V1 will not have, and the founder has elected to focus on building a loyal paying base before introducing experimentation overhead.
+Pricing experiments are deferred to V3 per founder direction. No experimentation infrastructure (PostHog feature flags, A/B test allocation, holdout cohorts) is activated at V1 or V2. The documented experiments below remain on file for future consideration but are not run before V3. The rationale is twofold: statistical significance on consumer SaaS experiments requires meaningful user volume that an indie launch will not have for some time, and the founder has elected to focus on building a loyal paying base before introducing experimentation overhead.
+The experimental program described below is documented for future activation when post-launch volume is sufficient for meaningful signal. No specific signup count or timeline triggers activation; the trigger is the founder's assessment that data volume supports statistical signal.
 
-The experimental program described below is documented for activation after V1 has accumulated approximately five hundred to one thousand signups, which per Layer 1 success criteria should occur in months three to six post-launch.
-
-**Experiment 1: Trial length.** Test seven-day, fourteen-day, and twenty-one-day trial windows. Hypothesis: fourteen days is optimal, with shorter trials reducing conversion through insufficient time-to-value and longer trials reducing conversion through indecision and sunk cost extension. Measure conversion rate, time-to-conversion, and trial AI spend per non-converter.
+**Experiment 1: Trial length.** Test seven-day (V1 baseline), ten-day, and fourteen-day trial windows. Hypothesis: seven days is sufficient given the day-six soft prompt and prompt-context-driven plan quality on day one, but ten or fourteen days may produce meaningfully higher conversion if observed trial-to-paid conversion falls materially below the realistic 5 to 8 percent range for indie B2C opt-in trials. Measure conversion rate, time-to-conversion, trial AI spend per non-converter, and the trial-cost-per-paying-customer composite.
 
 **Experiment 2: Price point.** Test $14.99, $19.99, and $24.99 monthly prices for new signups. Hypothesis: $19.99 is in the sweet spot; $14.99 underprices premium positioning; $24.99 narrows TAM. Measure conversion rate, churn rate at thirty days, and net contribution per cohort.
 
@@ -408,78 +421,7 @@ The experimental infrastructure uses PostHog's feature flag and experimentation 
 
 ## Cross-Layer Updates Required
 
-This section documents specific text changes that must be applied to other layer documents to align with Layer 5 decisions. Apply these updates manually to the source documents.
-
-### LAYER_4_EXPERIENCE_IDENTITY.md
-
-**Update 1:** In the "Onboarding Flow" section, screen 17 (Trial confirmation), the headline currently reads "Two weeks free. No card required." with body text "After fourteen days, $[X] per month. Cancel anytime." Replace `$[X]` with `$19.99`.
-
-**Update 2:** In the "Marketing Visual Language" section, the landing page section 5 (Pricing and signup) currently reads "Two weeks free. After that, $[X] per month." Replace `$[X]` with `$19.99`.
-
-**Update 3:** In the "Copy Library: Empty States and Error States" section, add the following entries to the table:
-
-| Scenario | Copy |
-|---|---|
-| Successful first payment (web) | "Welcome aboard." |
-| Successful first payment (iOS) | "Welcome aboard." |
-| Apple-issued refund processed | "Apple has processed your refund. Your account is closing." |
-| Stripe payment method updated | "New payment method saved." |
-| iOS subscription expired (Apple side) | "Your subscription has ended. Your data stays here for seven days." |
-| Resubscribe from archive (iOS) | "Welcome back. Everything is as you left it." |
-| Resubscribe from archive (web) | "Welcome back. Everything is as you left it." |
-| Trial extension granted (admin discretion) | "Your trial has been extended. Thank you for your patience." |
-
-### LAYER_3_TECHNICAL_ARCHITECTURE.md
-
-**Update 1:** In the "Payments" section, add the following paragraph after the existing Stripe content:
-
-> The iOS application implements Apple In-App Purchase via StoreKit 2 for iOS subscribers, in parallel with Stripe for web subscribers. App Store Server Notifications V2 are received via a dedicated Cloudflare Worker endpoint that verifies the signed JWS payload using Apple's public keys, parses the event type, and updates the user row's `subscription_status` field accordingly. The product enrolls in Apple's Small Business Program automatically upon meeting the under-$1M-revenue eligibility criterion, reducing the Apple commission from thirty percent to fifteen percent. Subscription state from Apple and Stripe is reconciled on the user row, with the most recent active subscription treated as the source of truth where duplicates exist.
-
-**Update 2:** In the "Database Schema" section, under the `users` table, add the following field:
-
-- `tier` (enum: standard, optimizer; default 'standard'; the optimizer value is unused at V1 and activates at V1.5)
-
-**Update 3:** In the "Database Schema" section, under the `users` table, add the following field:
-
-- `payment_source` (enum: stripe, apple; nullable; populated when subscription is active, indicates which billing provider is the source of truth for this user)
-
-**Update 4:** In the "Privacy and Compliance" section under "Regulatory Posture," replace the working assumption about Termly with the following confirmed statement:
-
-> The privacy policy and terms of service are generated using Termly at the Pro tier (~$20-$30 per month), customized for the product's specifics, and reviewed by counsel (~$500-$1,500 one-time) before public launch. Termly subscription activates approximately four weeks before launch, not during the build phase.
-
-### LAYER_2_PRODUCT_SCOPE.md
-
-**Update 1:** In the "Edge Cases" subsection of "User Flows," in the paragraph beginning "When the trial period ends," append the following sentence at the end of the paragraph:
-
-> The trial-to-paid price is $19.99 USD per month, monthly billing only at V1, with annual billing deferred to V2 or V3.
-
-### LAYER_1_FOUNDATION.md
-
-**Update 1:** In the "Open Items From Layer 1" section, item 2 ("Founder reveal threshold") remains open. No update.
-
-### OPEN_SOURCE_INVENTORY.md, PROJECT_OVERVIEW.md, BRAINSTORM_MASTER.md
-
-No changes required.
-
-## Open Items From Layer 5
-
-The following items are intentionally deferred or flagged for resolution outside Layer 5.
-
-**1. LLC formation trigger.** The founder operates as a sole proprietorship through V1 launch. LLC formation is deferred to a meaningful revenue threshold (recommended approximately $50,000 to $100,000 ARR). A CPA consultation at the formation trigger (approximately $200-$400) confirms the optimal structure and tax election at that point.
-
-**2. Optimizer tier pricing.** The $29.99 tentative price for the Optimizer tier at V1.5 is preliminary and locks during V1.5 development based on closed beta feedback and observed willingness-to-pay among V1 users requesting deeper functionality.
-
-**3. Pricing experiments.** All four documented experiments are deferred to post-launch, activated once user volume reaches statistical significance thresholds (approximately five hundred to one thousand active users).
-
-**4. International pricing.** Pricing in CAD, GBP, and AUD for V2 or V3 international expansion is deferred. Stripe and Apple both support multi-currency natively; the lift is small when expansion arrives.
-
-**5. Annual billing structure.** Deferred to V2 or V3. Discount level, terms (cancel anytime versus locked for the term), and refund policy on annual cancellations all decide at that point based on observed demand.
-
-**6. Reactivation campaigns.** The default V1 win-back posture is the single forty-eight-hour survey email. Whether to add additional touchpoints (thirty-day reactivation offer, etc.) is reviewed after six months of churn data is available.
-
-**7. Family or team plans.** Killed for V1 per Layer 2. Reviewed at V3 only if the user base explicitly demands it.
-
-**8. Educational discounts, nonprofit discounts, founder-network grants.** Not offered at V1. The single-price posture is held cleanly through V1 to preserve premium positioning. Reviewed at V2 only if a specific use case (large university adoption, founder-network bundle deal) emerges with clear demand signal.
+The cross-layer changes specified during Layer 5 drafting have been applied to the relevant source documents. Specifically: Layer 4's onboarding screen 17 and landing page section 5 price placeholders were resolved to $19.99; Layer 4's copy library received the additional payment-related empty-state and error-state entries; Layer 3's Payments section received the Apple In-App Purchase paragraph; Layer 3's users table received the tier and payment_source fields; Layer 3's Privacy and Compliance section received the Termly Pro tier statement; and Layer 2's User Flows edge case received the $19.99 pricing sentence. Layer 1's "Founder reveal threshold" open item remains open. No further cross-layer updates are pending. This section is retained as an audit trail and contains no action items.
 
 ## What Was Considered and Rejected
 
@@ -487,7 +429,7 @@ The following alternatives were actively considered during Layer 5 and rejected,
 
 **Freemium model with a permanent free tier.** Rejected for cost reasons (every active user incurs AI cost; free tier burns margin in perpetuity) and positioning reasons (free tiers signal commodity utility, not premium concierge). The trial captures the same try-before-you-buy benefit without ongoing margin drain.
 
-**Seven-day or thirty-day trial.** Rejected. Seven days is too short for the base profile to personalize. Thirty days is too long; trial AI cost compounds badly. Fourteen days is empirically validated as the sweet spot in productivity SaaS.
+**Thirty-day trial.** Rejected. Trial AI cost compounds badly at thirty days; per-non-converter cost would approach $1.20 to $1.60 versus the $0.45 planning midpoint the seven-day trial sinks. The longer surface for base-profile personalization is real but the marginal conversion lift is modest in productivity SaaS, and the cumulative funnel cost across non-converters does not justify the extension. The seven-day trial captured in the Pricing Model section above is the chosen length.
 
 **Card-required-upfront trial.** Rejected per Layer 4. Auto-charge on day fifteen is a common pattern that converts well but reads as dishonest given the marketing language ("free trial" while requiring payment information upfront). The no-card friction reduction at signup is consistent with the warm, anti-overwhelm brand posture.
 
@@ -519,7 +461,7 @@ The following alternatives were actively considered during Layer 5 and rejected,
 
 **Apple Developer enrollment as an individual.** Rejected. Discloses the founder's legal name on the App Store listing, compromising anonymity. Organizational enrollment with the LLC name preserves the brand-only public surface.
 
-**Refund window of seven days after first charge.** Rejected. The two-week trial is the evaluation period. A post-charge refund window would create gaming opportunities (user uses the product for two weeks free, pays, uses for another week, refunds, repeats with a new account). The no-refund stated policy is cleaner.
+**Refund window of seven days after first charge.** Rejected. The seven-day trial is the evaluation period. A post-charge refund window would create gaming opportunities (user uses the product for the seven-day trial free, pays, uses for another week, refunds, repeats with a new account). The no-refund stated policy is cleaner.
 
 **Generous pro-rated refunds on annual cancellations.** Not applicable at V1 since annual billing is not offered. Reviewed when annual is introduced.
 
@@ -529,6 +471,6 @@ The following alternatives were actively considered during Layer 5 and rejected,
 
 ## What's Next
 
-**Layer 6: Launch and Growth.** This layer locks the pre-launch waitlist landing page strategy (what the page says, what it captures, how it converts); the launch channel mix designed and prioritized (Product Hunt strategy and ideal launch day, Reddit subreddits with seeding plan, X and TikTok content cadence and themes with a weekly time budget capped at three to five hours and batched into dedicated content days); the content and marketing angles that thread the needle of subtle AI positioning; the founder content calendar with evergreen content versus reactive content; the analytics infrastructure (PostHog and Vercel Analytics) and the specific metrics that matter (signups, activation, day-1, day-7, day-30 retention, free-to-paid conversion rate, MRR, net revenue retention, churn reasons); and the post-launch growth experiments and decision triggers tied to Layer 1's three-month success criteria.
+**Layer 6: Launch and Growth.** This layer locks the pre-launch waitlist landing page strategy (what the page says, what it captures, how it converts); the launch channel mix designed and prioritized (Product Hunt strategy and ideal launch day, Reddit subreddits with seeding plan, X and TikTok content cadence and themes with a weekly time budget capped at three to five hours and batched into dedicated content days); the content and marketing angles that thread the needle of subtle AI positioning; the founder content calendar with evergreen content versus reactive content; and the analytics infrastructure (PostHog and Vercel Analytics) tracking trial-to-paid conversion rate and monthly paid churn as the operative measures. Specific signup or paying-subscriber count targets and tied diagnostic triggers are not used because they are not within direct founder control and do not drive business decisions.
 
 Per Layer 1, this layer is tactical and reversible throughout, appropriate for Sonnet rather than Opus. Begin the next chat by pasting the Brainstorm Master document, the Layer 1, Layer 2, Layer 3, Layer 4, and this Layer 5 document for full context.

@@ -2,7 +2,7 @@
 
 ## Purpose of This Document
 
-This document catalogs open-source libraries, free APIs, and free-tier tools the project leverages to reduce custom build work. The intent is that any component, integration, or piece of infrastructure that has a proven open-source equivalent gets forked or installed rather than rebuilt. Founder build time is reserved for the product's actual differentiators: the AI plan engine logic, the local intelligence orchestration, the warm-dark visual identity, and the butler-tone copy throughout the app.
+This document catalogs open-source libraries, free APIs, and free-tier tools the project leverages to reduce custom build work. The intent is that any component, integration, or piece of infrastructure that has a proven open-source equivalent gets forked or installed rather than rebuilt. Founder build time is reserved for the product's actual differentiators: the AI plan engine logic, the warm-dark visual identity, and the butler-tone copy throughout the app.
 
 This document is the reference Claude Code should consult before implementing any new feature. Before writing a custom calendar surface, drag-and-drop interaction, charting library, or notification system, the inventory below should be checked. If a listed component covers the need, fork or install it rather than rebuild.
 
@@ -65,21 +65,6 @@ The default disposition during the V1 build phase is to leave Cowork unused.
 - **react-big-calendar**: alternative web calendar library
 - **date-fns** or **Day.js**: lightweight date math libraries. Use date-fns for tree-shakability, Day.js for size
 
-### Local Intelligence Layer
-
-The local intelligence layer is the product's primary differentiator and also the largest potential API cost. Open-source and free-tier options dominate here.
-
-- **react-native-maps**: free map rendering on mobile
-- **Leaflet** with **react-leaflet**: totally free map rendering for web. No API key required. Uses OpenStreetMap tiles by default
-- **OpenStreetMap**: free POI data globally. The backbone of the cost-containment strategy
-- **Nominatim**: free geocoding from OpenStreetMap. Rate-limited but workable at low user counts; can self-host for higher volume
-- **Overpass API**: free POI queries against OpenStreetMap data
-- **OSRM**: free open-source routing engine. Self-hostable for full control or usable via the demo server at low volume
-- **Google OR-Tools**: free constraint solver and route optimizer. Useful for the errands batching feature where the system needs to compute the optimal sequence of stops
-- **Mapbox GL JS**: web map rendering with a generous free tier (50,000 map loads per month free at time of writing)
-- **Mapbox Directions API**: cheaper than Google Maps for routing, used by the project for traffic-aware buffers
-- **Yelp Fusion API**: free tier of 5,000 calls per day, sufficient for restaurant and cafe data at low user counts
-
 ### Drag and Drop, Reordering
 
 - **react-native-draggable-flatlist**: drag and reorder blocks on mobile
@@ -140,7 +125,7 @@ Workout and recipe template seeding leverages existing free databases rather tha
 ### Dynamic Island and Live Activities (iOS V1)
 
 - **expo-live-activities**: Expo module for iOS Live Activities. Active development. Saves the Swift bridging work that would otherwise be needed
-- **swift-activity-kit examples**: reference implementations on GitHub for the Live Activity Push Start lifecycle locked in Layer 2 Pillar 8
+- **swift-activity-kit examples**: reference implementations on GitHub for the Live Activity Push Start lifecycle locked in Layer 2 Pillar 7
 - **react-native-live-activities**: community React Native binding for ActivityKit
 
 ### Forms and Validation
@@ -204,7 +189,6 @@ The following are explicitly excluded from open-source forking because they are 
 
 - **AI Daily Plan Engine logic**: the base-plus-diff model, archetype selection, hybrid reshuffle algorithm, and proactive check-in surfacing are the product's core differentiator. No shortcut exists
 - **Template selection AI prompt design**: the prompts that drive fitness and nutrition template selection, energy-slider scaling, and contextual adaptation are proprietary product logic
-- **Local intelligence orchestration layer**: how grocery routing, restaurant suggestions, and errands batching specifically surface and interleave is product-specific
 - **Visual design and brand identity**: the warm-dark dusk-manor aesthetic is the product's positioning and must be original. Layer 4 work
 - **Onboarding flow choreography**: the adaptive branching between calendar-connected and no-plan users, the archetype tab interface, and the warm-tone copy are all specific to the product
 - **Natural-language input UX**: the surface design that avoids feeling like a chat bot is Layer 4 work
@@ -218,7 +202,7 @@ Stack assembly with aggressive open-source leverage versus building all infrastr
 
 ## Cost Summary
 
-Every component in this inventory is either fully open-source, free at low usage, or has a free tier sufficient for the project's V1 user count targets (5,000 signups at three months post-launch). Approximate paid API costs at low user counts are estimated as part of Layer 3's infrastructure cost analysis. The total recurring cost of the open-source inventory itself, before scaling beyond free tiers, is zero.
+Every component in this inventory is either fully open-source, free at low usage, or has a free tier sufficient for the project's V1 user count targets (early-stage user counts). Approximate paid API costs at low user counts are estimated as part of Layer 3's infrastructure cost analysis. The total recurring cost of the open-source inventory itself, before scaling beyond free tiers, is zero.
 
 ## Maintenance Notes
 

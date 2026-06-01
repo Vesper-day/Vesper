@@ -4,7 +4,7 @@
 
 Layer 6 translates the locked product, technical, experience, and business decisions from prior layers into a concrete, sequenced plan for getting Vesper from "built" to "in users' hands and generating revenue." Where Layer 1 set the strategic posture, Layer 2 defined what ships, Layer 3 defined how it is built, Layer 4 defined how it looks and sounds, and Layer 5 defined how it makes money, Layer 6 defines exactly what the founder does each week from now through three months post-launch to acquire users, convert them to paying subscribers, and measure whether the business is working.
 
-This layer produces eight sets of decisions: the master launch calendar with explicit week-by-week founder action items so nothing falls through the cracks during a long build; the waitlist strategy covering landing page mechanics, capture fields, tooling, and pre-launch nurture cadence; the launch channel mix designed and prioritized for maximum top-of-funnel signups across Product Hunt, Hacker News, Indie Hackers, Designer News, Reddit, BetaList, startup directories, newsletter pitches, and AMAs; the content strategy with five pillars, batched volume targets, and a Claude-driven generation workflow that drops the prior 3-to-5-hour weekly founder time cap; precise definitions of activation, day-one retention, day-seven retention, and day-thirty retention so that PostHog funnels can be wired against Layer 3's tracked events; the analytics stack with the specific metrics that drive every post-launch decision; the diagnostic decision triggers tied to Layer 1's three-month success criteria of 5,000 signups and 100 paying subscribers; and the policies on paid acquisition, referrals, and Android-waitlist communication.
+This layer produces six sets of decisions: the master launch calendar with explicit week-by-week founder action items so nothing falls through the cracks during a long build; the waitlist strategy covering landing page mechanics, capture fields, tooling, and pre-launch nurture cadence; the launch channel mix prioritized for top-of-funnel signups across Product Hunt, Hacker News, Indie Hackers, Designer News, Reddit, BetaList, startup directories, newsletter pitches, and AMAs; the content strategy with five pillars, batched volume targets, and a Claude-driven generation workflow that drops the prior 3-to-5-hour weekly founder time cap; precise definitions of activation, day-one retention, day-seven retention, and day-thirty retention so that PostHog funnels can be wired against Layer 3's tracked events; and the policies on referrals and Android-waitlist communication.
 
 Decisions in this layer interact with Layer 3's analytics infrastructure (PostHog event names already defined), Layer 4's marketing visual language (landing page sections and social aesthetics already locked), and Layer 5's win-back posture (single 48-hour survey email already locked). Where Layer 6 expands on or modifies prior-layer decisions, the change is documented explicitly in the cross-layer updates section at the end of this document.
 
@@ -12,7 +12,7 @@ Because Layer 6 is tactical and reversible throughout, it is appropriate for Son
 
 ## Working Direction From Prior Layers
 
-The product is Vesper, a Life OS for young professionals ages 22 to 32, launching in the United States only at V1. The brand voice is butler-modeled, warm but calm and quietly competent, never referring to itself as AI and never using emojis or exclamation points. The aesthetic is warm darkness rather than cold darkness. The business model is a two-week free trial at $19.99 per month, with no permanent free tier, no card required to start the trial, and a deliberately frictionless cancellation flow with a single 48-hour win-back survey email after exit. Both web and iOS mobile ship at V1, with Android arriving shortly after launch through friend-assisted development rather than waiting for V1.5. The founder maintains media anonymity, meaning no face on camera and no voice in recordings, but is comfortable with text-based outreach, newsletter pitches, and brand-account engagement on social platforms. Success criteria at three months are 5,000 total signups and 100 paying subscribers.
+The product is Vesper, a Life OS for young professionals ages 22 to 32, launching in the United States only at V1. The brand voice is butler-modeled, warm but calm and quietly competent, never referring to itself as AI and never using emojis or exclamation points. The aesthetic is warm darkness rather than cold darkness. The business model is a one-week (seven-day) free trial at $19.99 per month, with no permanent free tier, no card required to start the trial, and a deliberately frictionless cancellation flow with a single 48-hour win-back survey email after exit. Both web and iOS mobile ship at V1, with Android arriving shortly after launch through friend-assisted development rather than waiting for V1.5. The founder maintains media anonymity, meaning no face on camera and no voice in recordings, but is comfortable with text-based outreach, newsletter pitches, and brand-account engagement on social platforms. 
 
 Layer 6 builds entirely within those constraints.
 
@@ -91,11 +91,7 @@ Launch-day total founder time commitment: approximately 14 to 16 hours of contin
 
 **Project Week 31.** Publish the post-launch retrospective. One signature long-form essay on the Vesper domain blog, sharing transparent metrics (signups, conversion rate so far, churn reasons captured) in butler voice. This essay is the SEO compound asset Layer 6 commits to. It is also pitched to Indie Hackers and Hacker News as a "how it went" retrospective approximately one week post-launch, which is a known second-news-cycle moment that drives a smaller secondary traffic spike.
 
-**Project Weeks 31 through 33.** Monitor diagnostic checkpoints per the F1 decision-trigger table later in this document. The Month 1 checkpoint occurs at Project Week 34 (approximately 4 weeks post-launch). The Month 3 checkpoint occurs at Project Week 42 (approximately 12 weeks post-launch).
-
-**Project Week 34. Month 1 checkpoint.** Review the diagnostic table and take the action specified for the observed signup and paying-subscriber numbers.
-
-**Project Week 42. Month 3 checkpoint.** Review the diagnostic table against Layer 1's success criteria (5,000 signups, 100 paying subscribers). This is the major decision point.
+**Project Weeks 31 onward.** Monitor the operative measures weekly: trial-to-paid conversion rate, monthly paid churn rate, and net contribution per paying subscriber. Operative thresholds are conversion clearing approximately 5% and monthly paid churn staying under approximately 10%. Material drift from either threshold prompts diagnostic work on the relevant funnel stage (onboarding and trial value for conversion; first 30 days of paid experience for churn).
 
 **Project Week 31 onward.** Friends-assisted Android development begins post-launch per founder direction. The exact week Android shipping begins is contingent on friend availability and is not pinned in this calendar. Web access remains the path for all non-iOS users until Android ships.
 
@@ -109,7 +105,7 @@ This calendar is the operational backbone of Layer 6. The remainder of this docu
 
 The waitlist landing page is the cinematic Three.js scroll experience specified in Layer 4 (Marketing Visual Language section). It is built in Next.js, hosted on the chosen Vesper TLD, deployed via Vercel, and uses the existing design system from Layer 4 (espresso background, cream text, bronze accent, Fraunces and Inter typography). No third-party waitlist widget is embedded; the page is custom-built to preserve the cinematic experience without third-party visual artifacts.
 
-The five sections of the landing page are exactly as locked in Layer 4: Hero, What Vesper does, Modules, How it works, and Pricing and signup. The fifth section contains the only form on the page: a single email input field and a single iOS/Android segmented control, with a single "Begin" button. No additional capture fields are requested. The "Pricing and signup" copy already reads "Two weeks free. After that, $19.99 per month." with an additional line below indicating "iOS launching shortly. Web works everywhere in the meantime."
+The five sections of the landing page are exactly as locked in Layer 4: Hero, What Vesper does, Modules, How it works, and Pricing and signup. The fifth section contains the only form on the page: a single email input field and a single iOS/Android segmented control, with a single "Begin" button. No additional capture fields are requested. The "Pricing and signup" copy already reads "One week free. After that, $19.99 per month." with an additional line below indicating "iOS launching shortly. Web works everywhere in the meantime."
 
 ### Capture Fields
 
@@ -135,7 +131,7 @@ No other emails are sent to the waitlist during the build period. Restraint is c
 
 All waitlist users receive immediate access to the trial on launch day. No batched drip, no priority queue, no artificial scarcity. The launch-day email arrives at 12:10 AM Pacific on launch day, simultaneous with the Product Hunt page going live. Waitlist users have a slight head start over Product Hunt traffic in that the email arrives before most launch-day discovery channels have peaked.
 
-The trial signup flow is the same flow described in Layer 5 (no card required, 14-day trial, full feature access). The waitlist signup is matched to the trial signup by email address, and the `converted_to_user_id` field on the waitlist row is populated on conversion. This enables accurate measurement of waitlist conversion rate as a distinct funnel from launch-day cold traffic.
+The trial signup flow is the same flow described in Layer 5 (no card required, 7-day trial, full feature access). The waitlist signup is matched to the trial signup by email address, and the `converted_to_user_id` field on the waitlist row is populated on conversion. This enables accurate measurement of waitlist conversion rate as a distinct funnel from launch-day cold traffic.
 
 ## Launch Channel Mix
 
@@ -178,11 +174,11 @@ Tier 4 subreddits (r/biohackers, r/QuantifiedSelf, r/digitalminimalism) are not 
 
 ### BetaList
 
-Submission occurs in Project Week 23 (approximately 7 weeks before launch). BetaList free tier with no expedited fee. Approval typically takes 1 to 4 weeks; for consumer apps with a clear value proposition and warm-dark aesthetic, approval rates are reasonable. If approval times out the launch-week alignment, BetaList feature publishing can happen post-launch and still drives 90 to 500 signups based on observed indie data.
+Submission occurs in Project Week 23 (approximately 7 weeks before launch). BetaList free tier with no expedited fee. Approval typically takes 1 to 4 weeks; for consumer apps with a clear value proposition and warm-dark aesthetic, approval rates are reasonable. If approval times out the launch-week alignment, BetaList feature publishing can happen post-launch and still contributes incremental signup volume.
 
 ### Startup Directories
 
-A one-time carpet-bomb submission to approximately 20 startup discovery directories in Project Week 23, simultaneously with the BetaList submission. Each directory drives 20 to 100 signups individually but the aggregated SEO backlink value compounds over time. The submission list:
+A one-time carpet-bomb submission to approximately 20 startup discovery directories in Project Week 23, simultaneously with the BetaList submission. Aggregated SEO backlink value from these directories compounds over time. The submission list:
 
 - Launching Next
 - StartupBase
@@ -219,7 +215,7 @@ Email-only pitches in Project Week 25 (approximately 5 weeks pre-launch). The pi
 - **Every.to Superorganizers.** Productivity tools coverage; pitch angle: philosophy of calm scheduling versus optimization.
 - **Stratechery.** Long-shot but the pitch is free; angle: consumer software and the post-Notion landscape.
 
-Each pitch is approximately 150 words, brand-only, text-based, no video calls requested, no interviews requested. Pitches are sent from the Vesper domain email account. The expected response rate is approximately 5 to 15 percent; one or two newsletter pickups around launch week would be meaningful.
+Each pitch is approximately 150 words, brand-only, text-based, no video calls requested, no interviews requested. Pitches are sent from the Vesper domain email account. One or two pickups around launch week would be meaningful; response rates from cold newsletter pitches are highly variable and not targeted.
 
 ### Launch-Week AMA
 
@@ -323,13 +319,13 @@ These definitions are the precise specifications for PostHog funnel construction
 
 **Day-7 retention (D7).** A user is retained at day 7 when they log into the application on day 6 or day 7 post-signup (where day 0 is the signup day), have generated at least one plan in the prior 7 days, and have completed at least one block in the prior 7 days. In PostHog event terms, D7 retention is satisfied when a `plan_viewed` event fires on day 6 or 7, a `plan_generated` event has fired in the prior 7 days, and a `block_completed` event has fired in the prior 7 days.
 
-**Day-30 retention (D30).** A user is retained at day 30 when either (a) they have an `active` subscription status on day 30 (meaning they converted past the 14-day trial and are currently paying), or (b) they are still within the 14-day trial window on day 30 (only possible in the trial-overlap edge case where the user signed up exactly on day 16, which is unusual but covered for completeness) and have logged in within the last 3 days.
+**Day-30 retention (D30).** A user is retained at day 30 when they have an `active` subscription status on day 30 — meaning they converted past the 7-day trial and are still paying. The trial-overlap edge case present in the prior 14-day model is no longer applicable; the 7-day trial concludes well before the day-30 measurement window.
 
 **Cancellation reason capture.** On the cancellation screen (specified in Layer 5), a dropdown surfaces the following options: "Price too high", "Not using it enough", "Found an alternative", "Life change", "Technical issues", "Other". An optional free-text field accepts additional context. The selection is captured in PostHog as a `subscription_canceled` event with a `cancellation_reason` property holding the dropdown value, and a `cancellation_reason_text` property holding the optional free text. Per Layer 5, this capture happens at the cancellation moment, separate from the 48-hour win-back survey email which collects retrospective qualitative signal.
 
 ## Analytics Infrastructure
 
-The analytics stack is locked in Layer 3 (PostHog free tier, Vercel Analytics free with Hobby tier, Sentry free tier for error tracking, Supabase logs for database events). Layer 6 specifies the dashboards and funnels built on top of this stack.
+The analytics stack is locked in Layer 3 (PostHog free tier, Vercel Analytics included with Vercel Pro at $20/month — Pro is required from public launch because Hobby plan TOS prohibits commercial use, Sentry free tier for error tracking, Supabase logs for database events). Layer 6 specifies the dashboards and funnels built on top of this stack.
 
 ### Funnels and Dashboards
 
@@ -337,7 +333,7 @@ Three primary funnels are built in PostHog on or before launch day:
 
 **Funnel 1: Signup to activation.** Steps: `signed_up` → `onboarding_step_completed` (each step counted individually) → `onboarding_completed` → `first_plan_generated` → `block_completed`. Time window: 24 hours from `signed_up`. The drop-off at each step identifies which part of the onboarding flow is friction-causing.
 
-**Funnel 2: Activation to trial-to-paid conversion.** Steps: `signed_up` → `block_completed` (activation) → `trial_reminder_shown` (any of the three checkpoints) → `subscription_started`. Time window: 14 days from `signed_up`. This funnel measures the trial-to-paid conversion rate by stage of the trial.
+**Funnel 2: Activation to trial-to-paid conversion.** Steps: `signed_up` → `block_completed` (activation) → `trial_reminder_shown` (any of the three checkpoints) → `subscription_started`. Time window: 7 days from `signed_up`. This funnel measures the trial-to-paid conversion rate by stage of the trial.
 
 **Funnel 3: Trial-to-paid to D30 retention.** Steps: `subscription_started` → `plan_viewed` (on day 7 post-subscription) → `plan_viewed` (on day 30 post-subscription) → `subscription_active` (subscription_status = 'active' on day 30). This funnel measures early-stage churn signals.
 
@@ -347,47 +343,16 @@ Per the Indie Hackers launch strategy, a public open-metrics dashboard is built 
 
 The public dashboard is brand-authentic to the indie audience and serves as a trust signal that the founder is operating transparently. Privacy: no individual user data is exposed, only aggregate counts and revenue.
 
-## North-Star Metric and KPIs
+## Operative Measures
 
-### North-Star Metric
+Four metrics drive every post-launch decision. They are tracked weekly in the PostHog and Stripe dashboards.
 
-**Day-30 retention rate on trial cohorts.** Defined as: of users who began their trial in week W, the percentage who are still active (either as paid subscribers or in the unusual trial-overlap state) on day 30 post-signup. This metric is the earliest reliable signal of product-market fit: it captures whether users find enough value to stay through the trial-to-paid transition.
+- **Trial-to-paid conversion rate.** Percentage of trial users who convert to `subscription_status = active` within 7 days of signup. Operative threshold: clears approximately 5%. Material drift below 5% prompts diagnostic work on onboarding flow drop-off and trial value delivery.
+- **Monthly paid churn rate.** Of paying subscribers active at the start of month M, percentage who canceled or fell into the read-only continuation state by the end of month M. Operative threshold: stays under approximately 10%. Material drift above 10% prompts diagnostic work on the first 30 days of paid experience.
+- **AI cost per active paying user.** Total monthly AI spend on Sonnet and Haiku calls divided by count of active paying users. Operative threshold: stays near the $1.20 planning midpoint (range $1.00–$1.50). Material drift above $1.50 prompts review of output token discipline and cache hit rate.
+- **Net contribution per paying subscriber.** Gross revenue minus Apple commission (iOS) or Stripe processing plus Stripe Tax (web) minus AI cost. Operative threshold: stays positive across both surfaces. This is the single check that the business is economically sound on each marginal subscriber.
 
-D30 retention is preferred over signup volume, MRR, or activation rate as the north star because it is the metric most resistant to top-of-funnel manipulation. A burst of low-quality signups inflates signup volume but does not affect D30 retention. A premium price increases short-term MRR per converter but may erode D30 retention through pricing pressure. A loose activation definition inflates activation rate but does not affect D30 retention.
-
-### Supporting KPIs
-
-The following metrics are tracked weekly in the PostHog dashboard:
-
-- **Signups (cumulative, weekly cohort, source-attributed).** Volume signal.
-- **Activation rate.** Percentage of signed-up users who reach `block_completed` within 24 hours.
-- **D1 retention rate.** Percentage of signed-up users retained at day 1.
-- **D7 retention rate.** Percentage of signed-up users retained at day 7.
-- **D30 retention rate.** Percentage of trial users retained at day 30 (north star).
-- **Trial-to-paid conversion rate.** Percentage of trial users who convert to `subscription_status = active` within 14 days of signup.
-- **Monthly recurring revenue (MRR).** Total monthly subscription revenue, gross of refunds.
-- **Net revenue retention (NRR).** Cohort-based: of the MRR from users who subscribed in month M, what percentage of that MRR is still active in month M+3.
-- **Churn rate (monthly).** Of paying subscribers active at the start of month M, percentage who canceled or fell into the read-only continuation state by the end of month M.
-- **Cancellation reasons (breakdown).** Distribution of dropdown selections from the cancellation flow.
-
-The weekly review of these metrics is the operational backbone of post-launch growth decisions.
-
-## Decision Triggers
-
-This table is the diagnostic framework for evaluating progress against Layer 1's three-month success criteria (5,000 signups, 100 paying subscribers). The table contains founder-facing diagnostic guidance, not automated alerts or code triggers. The founder is the action-taker; the table is the rubric. Per founder direction, no pricing experiments or other automated tests are triggered by these checkpoints; experimentation is fully deferred to V3.
-
-| Checkpoint | Observed Outcome | Diagnostic Action |
-|---|---|---|
-| Month 1 (Project Week 34) | 1,000+ signups, 15+ paying | On track. Continue organic strategy. No paid spend. |
-| Month 1 | 500-999 signups, 5-14 paying | Slight underperformance. Audit channel performance: which channels drove the launch-week spike? Which have died? Continue with the working channels. |
-| Month 1 | Under 500 signups | Significant top-of-funnel issue. Diagnose: was the Product Hunt launch a dud? Did Hacker News pick up? Are Reddit posts ranking? Iterate on the channel mix or run a second launch wave with refined messaging. |
-| Month 1 | Over 2,000 signups | Overperformance. Hold paid spend. Monitor activation and conversion to ensure quality matches volume. |
-| Month 3 (Project Week 42) | 5,000+ signups, 100+ paying | Layer 1 success criteria hit. Begin V1.5 build per Project Overview Phase 8. Consider whether to trigger paid acquisition test at this point. |
-| Month 3 | 5,000+ signups, under 50 paying | Funnel break between signup and paid. The activation rate or trial-to-paid conversion rate is the issue, not top-of-funnel. Audit the onboarding flow drop-off in PostHog. Audit the value-during-trial experience. Consider whether the perceived value at $19.99 is misaligned. |
-| Month 3 | Under 2,000 signups, under 50 paying | Significant product-market fit signal absent. Pause feature work. Run 10 to 20 user interviews with both signed-up-but-not-converted users and never-signed-up waitlist holdouts. Consider pivot, repositioning, or re-launch. |
-| Month 3 | 25,000+ signups, 500+ paying | Breakout. Re-evaluate the indie versus startup-track decision per Layer 1. Consider whether to take on outside funding or accelerate hiring. |
-
-The diagnostic actions above are guidance, not mandates. The founder retains final discretion on every response.
+No signup-volume targets, paying-subscriber targets, or growth-curve projections are tracked. Scale follows from positive unit economics; absent those, scale is not the problem to solve.
 
 ## Growth Experiments
 
@@ -396,16 +361,6 @@ Per founder direction, all growth and pricing experiments are deferred to V3. No
 The rationale is twofold. First, statistical significance on consumer SaaS experiments requires meaningful user volume, and V1 will not have that volume in the first six months. Second, the founder has elected to focus on building a solid base of loyal paying customers before introducing experimentation overhead. Experiments require infrastructure, analysis time, and decision discipline that compete with feature work during the V1-to-V2 period.
 
 The previously documented experiments (trial length, price point, no-card-required versus card-required-upfront, annual billing prominence) remain on file in Layer 5 but are explicitly not run at V1 or V2.
-
-## Paid Acquisition Policy
-
-Paid acquisition is not triggered at V1. The default posture is purely organic through three months post-launch, monitored against the decision-trigger table above.
-
-Paid acquisition is reconsidered when monthly recurring revenue reaches approximately $10,000 (approximately 500 paying subscribers). At that threshold, the unit economics justify a small experimental paid budget of approximately $500 per month, tested against organic baseline. The decision to actually spend the budget is made by the founder at that point, not pre-committed.
-
-Channels eligible for paid acquisition at the $10k MRR threshold: Reddit ads (low CPM, audience-aligned), Twitter ads (audience-aligned but variable CPM), and possibly newsletter sponsorships (Beehiiv, Substack productivity newsletters in the $10K to $20K subscriber range). Search ads (Google, Apple Search Ads) are not prioritized at this threshold because the brand keyword (vesper) is the dominant entry point and competitor keywords are expensive.
-
-Influencer and creator partnerships are explicitly deferred until paid acquisition is generating revenue meaningfully above the spend, at which point paid creator partnerships become a scalable channel. None are pursued at V1.
 
 ## Referral Program
 
@@ -421,7 +376,7 @@ The settings panel surface uses the Layer 4 butler voice. The exact copy:
 
 > Pass this along, if you like.
 >
-> Anyone who joins through your link receives their first month complimentary. So do you, when they begin.
+> Anyone who joins through your link starts with the free trial. When they begin paying, your next month is half off.
 >
 > [Your link: vesper.studio/r/abc123def]
 
@@ -433,7 +388,7 @@ Referral attribution is captured via the URL parameter, stored on the new user's
 
 ### Expected Volume
 
-Quiet referrals are expected to be a low-percentage channel (5 to 10 percent of total signups in the first six months) but produce higher-quality users with stronger D30 retention. The expected behavior is a slow compounding rather than a spike. If referral-attributed signups exceed 25 percent of total signups, the policy is reviewed for any unintended virality dynamics.
+Quiet referrals are expected to be a low-percentage, slow-compounding channel rather than a spike. If referral-attributed signups become disproportionate to total signups, the policy is reviewed for any unintended virality dynamics.
 
 ## Android Communication
 
@@ -479,15 +434,13 @@ This section documents specific text changes that must be applied to other layer
 
 > The PostHog funnel and dashboard specifications are locked in Layer 6. Three primary funnels are built on or before launch day: signup-to-activation, activation-to-trial-to-paid, and trial-to-paid-to-D30-retention. Layer 6 specifies the exact event sequences and time windows for each funnel. A public open-metrics dashboard exposing aggregate signup counts, MRR, and trial-to-paid conversion rate is built using PostHog's public dashboard feature and Stripe's dashboard sharing feature. The dashboard URL is shared in the launch-day Indie Hackers post.
 
-**Update 2:** In the "Product Analytics" section, the parenthetical reference to Layer 1's success criteria can be expanded to reference Layer 6's diagnostic decision-trigger table for the post-launch interpretation framework.
-
-**Update 3:** A new event should be added to the PostHog event list: `referral_attribution` (fired at signup when a referral URL parameter is present) and `referral_conversion` (fired at paid conversion for users with a referral attribution on their row).
+**Update 2:** A new event should be added to the PostHog event list: `referral_attribution` (fired at signup when a referral URL parameter is present) and `referral_conversion` (fired at paid conversion for users with a referral attribution on their row).
 
 ### LAYER_4_EXPERIENCE_IDENTITY.md
 
 **Update 1:** In the "Marketing Visual Language" section, the landing page section 5 ("Pricing and signup") copy can be expanded to include the Android-soft-message line:
 
-> Copy resolves to: "Two weeks free. After that, $19.99 per month. iOS launching shortly. Web works everywhere in the meantime." Single email input field, single iOS/Android segmented control, single "Begin" button.
+> Copy resolves to: "One week free. After that, $19.99 per month. iOS launching shortly. Web works everywhere in the meantime." Single email input field, single iOS/Android segmented control, single "Begin" button.
 
 **Update 2:** In the "Copy Library" section, add the following waitlist email copy entries:
 
@@ -496,7 +449,7 @@ This section documents specific text changes that must be applied to other layer
 | Waitlist midpoint nurture | "Building." | Approximately 150 words in butler voice with one screen-recording GIF showing recent build progress. Closes with "Begin will be ready shortly." |
 | Waitlist launch day (iOS user) | "It is ready." | Approximately 80 words. Direct link to trial signup. App Store link below. |
 | Waitlist launch day (Android user) | "It is ready." | Approximately 80 words. Direct link to web trial signup. Soft note: "The web app is ready now and works on any device. The Android app is in development; we'll let you know when it's ready." |
-| Referral settings panel | (no email) | "Pass this along, if you like. Anyone who joins through your link receives their first month complimentary. So do you, when they begin." |
+| Referral settings panel | (no email) | "Pass this along, if you like. Anyone who joins through your link starts with the free trial as usual. When they begin paying, your next month is half off." |
 
 ### LAYER_5_BUSINESS_MONETIZATION.md
 
@@ -564,7 +517,7 @@ The following alternatives were considered during Layer 6 and rejected, recorded
 
 **Triggering pricing experiments at the Month 3 checkpoint.** Rejected per founder direction. All experimentation deferred to V3.
 
-**Automated alerting infrastructure for diagnostic checkpoints.** Rejected per founder direction. The decision-trigger table is founder-facing diagnostic guidance, reviewed manually at Month 1 and Month 3 checkpoints. No code-level triggers, automated emails, or alert systems are built.
+**Automated alerting infrastructure for KPI thresholds.** Rejected per founder direction. The four operative measures are reviewed manually in the weekly dashboard sweep. No code-level triggers, automated emails, or alert systems are built around conversion-rate or churn-rate thresholds.
 
 ## What's Next
 
