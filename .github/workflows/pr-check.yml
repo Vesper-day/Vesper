@@ -1,0 +1,75 @@
+# Gate workflow: runs on every PR targeting main.
+# Branch protection requires this workflow's status check before merge.
+# After this workflow's PR merges, manually enable branch protection:
+#   GitHub → Settings → Branches → Add rule → branch: main
+#   → Require status checks: "check" → Require PR before merging.
+
+name: PR Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: pr-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'   # caches pnpm store; keyed to pnpm-lock.yaml automatically
+
+      # Explicit node_modules cache — skips the linking phase on lockfile hit
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+            workers/*/node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: node-modules-${{ runner.os }}-
+
+      # Playwright browser cache — keyed to apps/web/package.json so it
+      # invalidates when the @playwright/test version changes, not just lockfile
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('apps/web/package.json') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter @vesper/web exec playwright install --with-deps chromium
+
+      - name: Build
+        run: pnpm build
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Playwright E2E tests
+        run: pnpm playwright
+        env:
+          CI: true

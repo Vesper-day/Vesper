@@ -6,17 +6,20 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "test": "turbo test",
+    "playwright": "playwright test --config apps/web/playwright.config.ts --pass-with-no-tests",
     "type-check": "turbo type-check",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md,json}\" --ignore-path .gitignore"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.0.0",
     "prettier": "^3.0.0",
     "turbo": "^2.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0"
   },
   "packageManager": "pnpm@9.15.0",
   "engines": {
