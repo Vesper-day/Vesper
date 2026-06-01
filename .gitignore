@@ -43,3 +43,14 @@ pnpm-debug.log*
 
 # Misc
 .vercel
+
+# Supabase CLI local cache
+supabase/.branches/
+supabase/.temp/
+supabase/snippets/
+
+# Remotion marketing experiments (local only)
+remotion/
+
+# Stray nested Claude config (real config lives at repo root)
+docs/.claude/

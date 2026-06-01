@@ -11,7 +11,8 @@
       "Skill(caveman:caveman)",
       "mcp__stripe__get_stripe_account_info",
       "mcp__stripe__stripe_api_execute",
-      "mcp__stripe__stripe_api_search"
+      "mcp__stripe__stripe_api_search",
+      "Bash(cargo *)"
     ]
   },
   "enabledMcpjsonServers": [

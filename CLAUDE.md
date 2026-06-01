@@ -25,9 +25,6 @@ pnpm lint
 # Build all packages in dependency order
 pnpm build
 
-# DB: generate migrations from schema changes
-pnpm --filter @vesper/db db:generate
-
 # DB: apply migrations to Supabase (uses SUPABASE_DIRECT_URL)
 pnpm --filter @vesper/db db:migrate
 
@@ -67,6 +64,10 @@ packages/ui    → @vesper/ui     Design tokens + Tailwind preset only (no compo
 ### Database
 - Postgres 15 via Supabase. Drizzle ORM. RLS on every table.
 - Schema files: `packages/db/src/schema/` (one file per domain group).
-- Migrations: `packages/db/migrations/` (Supabase CLI format).
+- Migrations: hand-written SQL in `packages/db/migrations/`, each with a matching `.down.sql`. Authored by hand — do NOT use `drizzle-kit generate` (ARCHITECTURE_DECISIONS Decision 01).
+- Migrations applied via Supabase CLI (`supabase db push`); Drizzle TS types are produced by introspecting the applied schema (`drizzle-kit pull`), never generated from TS schema into SQL.
 - `drizzle.config.ts` uses `SUPABASE_DIRECT_URL` (direct connection, not pooler).
 - API routes use `SUPABASE_DB_URL` (transaction pooler) with `prepare: false`.
+
+## Always-loaded rules
+@.claude/memory.md

@@ -39,7 +39,7 @@ Each entry states: the decision, the rationale (one sentence), and the consequen
 
 ## Decision 04 — Supabase Connection Pooling
 
-**Decision:** Use Supavisor in transaction mode (the `pgbouncer://` connection string, stored as `SUPABASE_DB_URL`) from all serverless contexts. Direct connections (`SUPABASE_DIRECT_URL`) used only from local development and from `drizzle-kit` migration runs.
+**Decision:** Use Supavisor in transaction mode (the `pgbouncer://` connection string, stored as `SUPABASE_DB_URL`) from all serverless contexts. Direct connections (`SUPABASE_DIRECT_URL`) used only from local development, from Supabase CLI migration runs (`supabase db push`), and from `drizzle-kit pull` type introspection.
 
 **Rationale:** Serverless functions create a new Postgres connection on every invocation; transaction-mode pooling reuses connections and prevents the free-tier connection limit from exhausting under concurrent load.
 
