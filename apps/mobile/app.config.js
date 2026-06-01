@@ -9,7 +9,7 @@ module.exports = {
   ios: {
     supportsTablet: false,
     bundleIdentifier: 'com.vesper.app',
-    deploymentTarget: '16.1',
+    deploymentTarget: '17.2',
     infoPlist: {
       NSLocationWhenInUseUsageDescription:
         'Vesper uses your location to surface nearby errands and optimise your route.',

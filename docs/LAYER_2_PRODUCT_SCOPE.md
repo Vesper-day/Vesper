@@ -8,27 +8,21 @@ This layer produces five sets of decisions: the core architectural choice betwee
 
 ## Working Direction From Layer 1
 
-The product is a Life OS with local intelligence for young professionals ages 22 to 32, secondarily serving ambitious students, with a paid power-user tier for quantified-self optimizers. The voice is butler-modeled (Jarvis as reference), warm but calm and quietly competent, never referring to itself as AI and never using emojis or exclamation points. The brand aesthetic is warm darkness rather than cold darkness, evoking dimly-lit libraries at dusk and old manor studies with modern function. The product launches in the United States only at V1. Web and mobile both ship at launch. Success criteria at three months are 5,000 total signups and 100 paying subscribers.
+The product is a Life OS for young professionals ages 22 to 32, secondarily serving ambitious students, with a paid power-user tier for quantified-self optimizers. The voice is butler-modeled (Jarvis as reference), warm but calm and quietly competent, never referring to itself as AI and never using emojis or exclamation points. The brand aesthetic is warm darkness rather than cold darkness, evoking dimly-lit libraries at dusk and old manor studies with modern function. The product launches in the United States only at V1. Web and mobile both ship at launch.
 
 Layer 2 builds entirely within those constraints.
 
-## Core Architectural Decision: Templates Over Generation
+## Core Architectural Decision: Template-Customization
 
-The single most consequential architectural decision in Layer 2 is how the product generates routines. Three approaches were considered.
+V1 ships with a curated library of approximately 150 workout templates tagged by goal, equipment, time available, and fitness level, and approximately 300 recipe templates tagged by dietary restrictions, cuisine, prep time, and macronutrient profile. The AI's job at runtime is to select and lightly modify the right template for the moment, rather than generate from nothing. This requires a single short AI call (selecting and adapting) instead of full from-scratch generation. Quality is high because the templates are pre-validated and the AI is layering personalization on top of proven structures.
 
-**Full AI generation** would have Claude generate every workout, meal plan, and routine from scratch for each user each day. This approach is the most flexible and gives the highest perception of personalization, but it carries substantial cost (roughly $0.05 to $0.15 per user per day in API spend, or $50 to $150 per month per 1,000 users on routine generation alone), and the per-call latency degrades responsiveness.
-
-**Pure scheduling** would have the product schedule and remind users about routines they bring in themselves, with no creation or recommendation logic. This is cheapest by far but loses the major differentiation that the product is supposed to deliver.
-
-**Templates with AI customization** is the chosen path for V1. The product ships with a curated library of approximately 150 workout templates tagged by goal, equipment, time available, and fitness level, and approximately 300 recipe templates tagged by dietary restrictions, cuisine, prep time, and macronutrient profile. The AI's job at runtime is to select and lightly modify the right template for the moment, rather than generate from nothing. This requires a single short AI call (selecting and adapting) instead of a full generative call, which is roughly ten to twenty times cheaper in API spend. Quality is also higher because the templates are pre-validated and AI is layering personalization on top of proven structures.
-
-The same template-customization approach applies across fitness, nutrition, sleep routines, and mindfulness breaks. The paid optimizer tier eventually unlocks deeper AI customization, and V2 introduces fuller generative routine creation as a paid feature. V1 is exclusively templates plus light AI selection.
+The same template-customization approach applies across fitness, nutrition, sleep routines, and mindfulness breaks. The paid optimizer tier (V1.5+) eventually unlocks deeper AI customization on top of the same template foundation.
 
 The energy check-in feeds this system. Energy is captured as a slider value (1 through 10) at the morning check-in, and that value scales intensity decisions: a low-energy day selects shorter workouts, easier recipes, and less aggressive task density; a high-energy day surfaces more demanding routines and a fuller schedule.
 
 ## V1 Final Pillar List
 
-Eight pillars ship at V1.
+Seven pillars ship at V1.
 
 ### Pillar 1: AI Daily Plan Engine
 
@@ -52,25 +46,17 @@ The seven modules are:
 
 **Fitness.** Template library of approximately 150 workouts tagged by goal (strength, cardio, fat loss, maintenance, mobility), equipment (gym, home, bodyweight, dumbbells, full barbell rack), time available (15, 30, 45, 60 minutes), and level. AI selects the right template for the moment based on user goal, energy slider, recovery state, and prior day's training. Free tier delivers selected templates with light personalization. Paid tier delivers fuller AI customization including physique-specific programming and cross-references to nutrition for fuel timing.
 
-**Nutrition.** Recipe template library of approximately 300 recipes, sourced via a combination of curated content and recipe API ingestion (Edamam or Spoonacular for food data and macros, TheMealDB for free baseline recipes). AI selects daily meals based on dietary restrictions captured at onboarding, time tolerance for cooking, food dislikes, and macronutrient targets if set. Grocery list auto-generates from the week's meal plan and routes to the user's nearest grocery via the local intelligence layer. Hydration tracking lives inside this module as a sub-feature rather than its own module.
+**Nutrition.** Recipe template library of approximately 300 recipes, sourced via a combination of curated content and recipe API ingestion (Edamam or Spoonacular for food data and macros, TheMealDB for free baseline recipes). AI selects daily meals based on dietary restrictions captured at onboarding, time tolerance for cooking, food dislikes, and macronutrient targets if set. Grocery list auto-generates from the week's meal plan as a simple checklist; the list does not route to a specific store. Hydration tracking lives inside this module as a sub-feature rather than its own module.
 
 **Sleep.** Bedtime routine prompts, wind-down rituals, target sleep duration tracking, and the integrated alarm. The alarm presents single-tap dismiss with two edge-to-edge buttons (SNOOZE and STOP) and does not require phone unlock. The energy check-in slider appears after dismiss, not before, to avoid gating the dismiss action.
 
-**Errands and Home.** Catch-all module for to-dos, recurring chores (trash day, laundry day, plant watering), and one-off errands (pharmacy, dry cleaning, returns, mail). Errands geo-batch via the local intelligence layer, surfacing as a routed sequence rather than a flat list. Shopping (non-grocery) lives here as a reminder-based feature rather than its own module.
+**Errands and Home.** Catch-all module for to-dos, recurring chores (trash day, laundry day, plant watering), and one-off errands (pharmacy, dry cleaning, returns, mail). Errands surface as a flat checklist with optional deadlines and recurring schedules. Shopping (non-grocery) lives here as a reminder-based feature rather than its own module.
 
 **Medication.** Pill timing, dose tracking, supplement scheduling, and refill reminders. Push notifications are permitted for this module specifically because the health stakes warrant intrusion. User manually enters medication name, dose, time, and frequency at module enable.
 
-**Finance.** Bill due dates, subscription tracking, savings goal nudges, and budget check-ins. The module starts in the off state by default. When enabled, the user manually enters what is due and when. The product does not connect to bank accounts, credit cards, or financial institutions at V1 or any planned version, both because the data acquisition cost is high and because the privacy surface is significant.
+**Finance.** Bill due dates, subscription tracking, savings goal nudges, and budget check-ins. The module starts in the off state by default. When enabled, the user manually enters what is due and when. The product does not connect to bank accounts, credit cards, or financial institutions at V1 or any planned version, both because the data acquisition cost is high and because the privacy surface is significant.\
 
-### Pillar 3: Local Intelligence Layer
-
-The differentiating capability. The layer cross-cuts every module and surfaces location-aware suggestions throughout the user's day.
-
-V1 surfaces include grocery routing (meal plan converts to shopping list, which routes to the user's nearest stocked grocery with optional Instacart or UberEats integration for delivery), restaurant and cafe suggestions (Yelp API for data, with separate cafe surface filtered by wifi availability and quiet rating for focus blocks away from home), errands batching (groups geographically clustered errands and suggests the optimal sequence), and traffic-aware buffers (auto-adds transit time between location-bound events using mapping API distance and traffic data).
-
-Cost containment is a primary architectural concern for the local intelligence layer. The strategy combines aggressive caching (places change slowly, so cached results refresh weekly rather than per-query), pre-fetching during onboarding (the user's nearest five groceries, three gyms, five cafes, and three pharmacies are computed once at signup and stored), rule-based logic for objective queries (distance math requires no AI), AI involvement only for subjective queries (best vibe match for tonight's dinner), free-tier API usage (Yelp Fusion's 5,000-call-per-day free tier covers low user counts; Google Places monthly free credits supplement; OpenStreetMap and Nominatim provide free POI and geocoding data as fallback), and Mapbox routing over Google Maps routing (similar quality, materially cheaper).
-
-### Pillar 4: Calendar Layer
+### Pillar 3: Calendar Layer
 
 Two surfaces. Google Calendar sync at V1 for users who already maintain an external schedule, and a built-in calendar at V1 for users who have not been planning their days at all. Both share the same underlying data model and feed the same plan engine.
 
@@ -78,21 +64,21 @@ The built-in calendar is built on top of a forked open-source foundation rather 
 
 Apple Calendar sync is deferred to V1.5. Outlook is V2.
 
-### Pillar 5: Mobile and Web Platform
+### Pillar 4: Mobile and Web Platform
 
-Both surfaces ship at V1, with iOS as the only mobile target. Android is deferred to V1.5 post-launch, both because Dynamic Island has no Android equivalent (requiring a different implementation strategy that is best built once the iOS version has proven product-market fit) and because focusing on a single mobile platform reduces V1 build cost meaningfully.
+Both surfaces ship at V1, with iOS as the only mobile target. Android ships as a friend-assisted fast-follow after V1 launch, with no committed delivery date; web access remains the path for all non-iOS users until Android ships.
 
 Mobile is no longer display-only. This is a refinement of the Layer 1 platform strategy. The mobile surface supports real editing including drag-and-reorder of blocks, full block detail views, mark-complete and skip and reschedule actions, the natural-language input surface, and module enable and disable toggles. The mobile surface remains optimized for execution rather than configuration, but the constraint of mobile being purely a display surface has been lifted.
 
 Web remains the primary configuration surface. Profile setup, deep module preference editing, weekly planning sessions, integrations management, billing and account settings, and the paid-tier dashboards all live primarily on web. Both surfaces share the same Supabase-backed data layer with live sync between devices.
 
-### Pillar 6: Natural-Language Input Surface
+### Pillar 5: Natural-Language Input Surface
 
 The product accepts single-turn natural-language commands for plan edits ("move gym to 7pm," "add pick up package at 3," "remind me to call Mom tomorrow"). The user-facing implementation does not take the form of a traditional chat bar with a typing area at the bottom and a response line above. The experience should feel like part of life rather than a piece of technology.
 
 Specific implementation choices (voice input as primary, a subtle slide-up surface, a long-press gesture on the plan view, or some combination) are delegated to Layer 4 (Experience and Identity), where the broader interaction language for the product is designed. For Layer 2's purposes, the pillar is locked: natural-language single-turn commands are supported on both mobile and web, and the interaction surface is designed for grace rather than for chat-bot affordance.
 
-### Pillar 7: Adaptive Onboarding
+### Pillar 6: Adaptive Onboarding
 
 The onboarding flow balances tutorial and freedom. The product does not subject every user to ten minutes of guided setup, and it does not throw every user into an empty interface with no direction. Instead, the flow branches based on the user's existing planning behavior, captured by a single archetype selection.
 
@@ -106,9 +92,9 @@ For users without existing planning behavior, the flow includes a tutorial branc
 
 Both branches conclude with a brief four-to-five-screen tour explaining how to mark blocks complete, how to use the natural-language input surface, where the Dynamic Island integration lives, and where to find the weekly planning view. The tour is skippable.
 
-The two-week free trial includes everything; no V1 feature is gated behind paid plans during the trial period.
+The seven-day free trial includes everything; no V1 feature is gated behind paid plans during the trial period.
 
-### Pillar 8: Dynamic Island Integration
+### Pillar 7: Dynamic Island Integration
 
 The Dynamic Island serves as the always-present awareness surface that lets the butler stay quietly visible without intruding. The user does not need to open the app to know what is current; the next block appears in the Dynamic Island, and tapping expands to a richer summary.
 
@@ -118,19 +104,19 @@ This lifecycle is server-driven through the iOS 17.2+ Live Activity Push Start m
 
 The mindfulness module (originally proposed as a separate V1.5 module) folds into Dynamic Island integration. Brief breathing or reset cues surface as Live Activities during designated quiet moments rather than as full module content.
 
-Android receives the Dynamic Island equivalent via persistent ongoing notification in V1.5, after the iOS surface is proven.
+Android receives the ambient awareness surface via persistent ongoing notification when the Android app ships post-V1.
 
 ## V1.5 Roadmap
 
 V1.5 begins immediately after public launch and runs through the first four months of public availability. The intent is to layer in features that were genuinely close to V1 but cut for scope discipline.
 
-V1.5 includes voice input as a primary interaction mode (replacing or augmenting the natural-language surface specified in Layer 4), email AI-read for scheduling (with two confirmation gates: explicit opt-in to enable the feature at all, and per-action confirmation before any individual scheduling action), the default quantified-self dashboard on the paid tier, Apple Calendar sync, Android Dynamic Island equivalent via persistent ongoing notification, and the mood module (a light mood log tied to the existing energy check-in rather than a full journaling surface).
+V1.5 includes voice input as a primary interaction mode (replacing or augmenting the natural-language surface specified in Layer 4), email AI-read for scheduling (with two confirmation gates: explicit opt-in to enable the feature at all, and per-action confirmation before any individual scheduling action), the default quantified-self dashboard on the paid tier, Apple Calendar sync, the Android ambient awareness surface via persistent ongoing notification (subject to the Android shipping path), and the mood module (a light mood log tied to the existing energy check-in rather than a full journaling surface).
 
 ## V2 Roadmap
 
 V2 covers months four through ten post-launch. Features in this phase are substantive but each represents weeks-to-months of dedicated build time.
 
-V2 includes wearable integrations (Fitbit, Oura, Whoop, Apple Health, Google Fit), an Apple Watch companion app, the learning module (language practice blocks, course progress tracking, reading time, podcast queues), the travel module (trip mode with packing checklists, jet lag scheduling, transit timing), the career and work admin module (follow-ups, applications, networking touches, expense logging beyond pure calendar work), the hobbies module (creative practice block scheduling without routine creation), Outlook Calendar sync, multi-day planning views on web, and the introduction of fuller AI routine generation as a paid tier feature alongside the existing template-customization baseline.
+V2 includes wearable integrations (Fitbit, Oura, Whoop, Apple Health, Google Fit), an Apple Watch companion app, the learning module (language practice blocks, course progress tracking, reading time, podcast queues), the travel module (trip mode with packing checklists, jet lag scheduling, transit timing), the career and work admin module (follow-ups, applications, networking touches, expense logging beyond pure calendar work), the hobbies module (creative practice block scheduling without routine creation), Outlook Calendar sync, and multi-day planning views on web.
 
 ## V3 Roadmap
 
@@ -176,7 +162,7 @@ The following features are explicitly excluded from the product's roadmap and wi
 
 The build leverages open-source foundations wherever they meaningfully save time. Candidates identified in Layer 2 include the following.
 
-For calendar interface, react-native-calendars for mobile (MIT) and react-big-calendar or FullCalendar standard scheduler for web. For mapping, react-native-maps (free) or Mapbox SDK. For drag-and-reorder block editing, react-native-draggable-flatlist (MIT). For recipe seed data, TheMealDB free API as a baseline, supplemented by Edamam or Spoonacular for nutritional metadata. For workout template seed data, ExerciseDB (free API with over 1,000 exercises tagged by muscle group). For date and time pickers, react-native-date-picker. For charts and visualizations on the paid tier dashboards, Victory Native or react-native-svg-charts. For authentication interface patterns, Supabase auth UI components and Clerk's open examples as reference. For markdown rendering (recipes, settings explanations), react-native-markdown-display. For animations, Reanimated (the standard in modern React Native). For state management, Zustand (significantly lighter than Redux for a project of this size).
+For calendar interface, react-native-calendars for mobile (MIT) and react-big-calendar or FullCalendar standard scheduler for web. For drag-and-reorder block editing, react-native-draggable-flatlist (MIT). For recipe seed data, TheMealDB free API as a baseline, supplemented by Edamam or Spoonacular for nutritional metadata. For workout template seed data, ExerciseDB (free API with over 1,000 exercises tagged by muscle group). For date and time pickers, react-native-date-picker. For charts and visualizations on the paid tier dashboards, Victory Native or react-native-svg-charts. For authentication interface patterns, Supabase auth UI components and Clerk's open examples as reference. For markdown rendering (recipes, settings explanations), react-native-markdown-display. For animations, Reanimated (the standard in modern React Native). For state management, Zustand (significantly lighter than Redux for a project of this size).
 
 The intent is not to assemble a product from libraries but to skip the work of reimplementing solved problems. Visual identity, interaction patterns, and core engine logic are all built from scratch; commodity infrastructure is forked and restyled.
 
@@ -198,9 +184,9 @@ The daily journey is the returning user's central interaction with the product.
 
 The morning begins with the integrated alarm. The alarm presents two edge-to-edge buttons (SNOOZE and STOP) and dismisses on a single tap without requiring phone unlock. After dismiss, the energy check-in slider (1 through 10) appears as a single screen with a ten-second target time and a skip option (the slider is prompted but not gated).
 
-The morning brief follows. Today's plan displays with the next three blocks visible above the fold, weather for the day, and commute time to the first location-bound event. The brief is the primary surface the user sees first thing in the morning.
+The morning brief follows. Today's plan displays with the next three blocks visible above the fold and weather for the day. The brief is the primary surface the user sees first thing in the morning.
 
-Through the day, individual blocks expand on tap to show details (recipe steps for meal blocks, workout details for fitness blocks, task lists for focus blocks, errand routing for errands blocks). The user marks blocks complete, skipped, or rescheduled per block. The Dynamic Island surfaces the current block and the next block at all times during the day, managed server-side via Live Activity Push Starts and updates. The natural-language input surface is persistently available, accepting commands like "move gym to 7pm" or "add pick up package at 3pm."
+Through the day, individual blocks expand on tap to show details (recipe steps for meal blocks, workout details for fitness blocks, task lists for focus blocks, errand checklists for errands blocks). The user marks blocks complete, skipped, or rescheduled per block. The Dynamic Island surfaces the current block and the next block at all times during the day, managed server-side via Live Activity Push Starts and updates. The natural-language input surface is persistently available, accepting commands like "move gym to 7pm" or "add pick up package at 3pm."
 
 When a block ends without being marked complete, the engine proactively asks the user (in-app and via Dynamic Island only, never push notification) whether the block was completed. If the answer is no, the engine offers to reshuffle the missed block later in the day. When the engine can resolve the reshuffle silently within remaining time, it does. When time is insufficient, it surfaces a single prompt asking what to cut or move to tomorrow.
 
@@ -232,7 +218,7 @@ When the device is offline, the cached plan remains visible and any edits the us
 
 When a user enables a new module mid-trial, a brief one-to-two-screen mini-onboarding for that module fires, and the module integrates into the plan starting the next day.
 
-When the trial period ends, the product surfaces butler-voice reminders at three days before, one day before, and on the end date. The reminders mirror the user's state ("Three days left in your trial. You're finding a rhythm.") rather than push urgency. The end-date screen offers two options without persuasion friction: continue or end. On end, the product enters a read-only continuation mode for seven days during which the user can still view their plan but cannot edit or generate new plans, framed in continuation language ("Your data stays here for seven days, then archives for thirty more.") rather than punitive lockout copy. After seven days the account archives (not deletes) for thirty days, with a resubscribe option available throughout. The specific copy library for all trial-end, cancellation, and re-engagement states lives in the Layer 4 deliverable and is the single source of truth. The trial-to-paid price is $19.99 USD per month, monthly billing only at V1, with annual billing deferred to V2 or V3.
+When the trial period ends, the product surfaces butler-voice reminders at two days before, one day before, and on the end date. The reminders mirror the user's state ("Three days left in your trial. You're finding a rhythm.") rather than push urgency. The end-date screen offers two options without persuasion friction: continue or end. On end, the product enters a read-only continuation mode for seven days during which the user can still view their plan but cannot edit or generate new plans, framed in continuation language ("Your data stays here for seven days, then archives for thirty more.") rather than punitive lockout copy. After seven days the account archives (not deletes) for thirty days, with a resubscribe option available throughout. The specific copy library for all trial-end, cancellation, and re-engagement states lives in the Layer 4 deliverable and is the single source of truth. The trial-to-paid price is $19.99 USD per month, monthly billing only at V1, with annual billing deferred to V2 or V3.
 
 When a subscription payment fails, Stripe handles dunning. The product surfaces a soft butler-voice banner ("Your payment didn't go through. I'll keep things running while you sort it out."). After seven days of failed dunning, the product enters the same read-only continuation mode as trial-end, with matching continuation framing.
 
@@ -243,8 +229,6 @@ When multiple devices edit the same data simultaneously, the server timestamp wi
 ## What Was Considered and Rejected
 
 The following alternatives were actively considered during Layer 2 and rejected, recorded so they are not revisited.
-
-Full AI routine generation as the V1 architecture was rejected for cost reasons, with templates plus customization chosen instead. The full-generation approach is preserved for V2 paid-tier introduction.
 
 Push notifications as a general engagement surface were rejected. Push is permitted only for the medication module where health stakes warrant intrusion. All other proactive cues happen in-app or via Dynamic Island.
 
@@ -260,21 +244,9 @@ In-app therapy or counseling features were rejected on regulatory grounds.
 
 A fully-automatic reshuffle behavior (engine drops user commitments silently when conflicts arise) was rejected. The hybrid approach (silent when easy, prompted when cutting required) is the locked behavior.
 
-A free permanent tier was rejected in favor of the two-week trial converting to paid. The trial includes everything, not a stripped-down version.
+AA free permanent tier was rejected in favor of the seven-day trial converting to paid. The trial includes everything, not a stripped-down version.
 
-Cross-platform Dynamic Island delivery at V1 was rejected. iOS only at V1; Android persistent notification arrives V1.5.
-
-## Updates Required to Other Documents
-
-Three inconsistencies between Layer 2 and existing documents require either an update to those documents or an explicit acknowledgment that the documents are now out of date.
-
-The Layer 1 platform strategy describes mobile as "display-first and intentionally minimal in its editing capabilities." Layer 2 expands mobile to include real editing (drag-and-reorder, full edits, natural-language input). Layer 1 should be updated, or the inconsistency acknowledged in a revision note.
-
-The Project Overview document states the founder's time investment as fifteen to twenty hours per week. The founder has since indicated approximately eight hours per day (roughly fifty-six hours per week), which materially compresses the timeline. Project Overview should be updated to reflect actual capacity, and the build phase sequencing rethought accordingly.
-
-The Project Overview document lists Build Month 5 as the introduction of the mobile app shell, implying mobile is a later phase of the build. Layer 2 commits to mobile shipping at V1 alongside web. The build sequence in Project Overview should be restructured so that mobile work is interleaved with web work from Build Month 1 or 2 rather than introduced in Build Month 5.
-
-The Project Overview also describes the founder's AI subscription as Claude Max 5x ($100 per month). The founder has indicated the actual plan is Claude Pro ($20 per month). Project Overview should be updated to reflect the actual subscription level, with awareness that rate-limit windows are more constrained on the Pro plan than the Max 5x plan, which may affect the cadence of high-intensity Claude Code sessions.
+Cross-platform Dynamic Island delivery at V1 was rejected. iOS only at V1; the Android ambient awareness surface ships when the friend-assisted Android app ships post-V1.
 
 ## Open Items From Layer 2
 
@@ -282,12 +254,12 @@ A small number of items are intentionally deferred and need resolution at later 
 
 The specific user-facing implementation of the natural-language input surface (voice input, slide-up panel, long-press gesture, or combination) is deferred to Layer 4 (Experience and Identity), where the broader interaction language is designed.
 
-The specific dollar amount of the post-trial subscription, the discount structure if any for annual versus monthly billing, and the exact feature split between the free trial and the post-trial paid tier are deferred to Layer 5 (Business and Monetization). Layer 2 locks only that there is a two-week trial including all features and that the post-trial state is paid-only with no permanent free tier.
+The specific dollar amount of the post-trial subscription, the discount structure if any for annual versus monthly billing, and the exact feature split between the free trial and the post-trial paid tier are deferred to Layer 5 (Business and Monetization). Layer 2 locks only that there is a seven-day trial including all features and that the post-trial state is paid-only with no permanent free tier.
 
 Resolved in Layer 6. Android waitlist users receive the launch-day email with web-app-first messaging and a soft "Android app in development" note without specific timeline commitment. Friend-assisted Android development begins immediately post-V1 launch rather than being deferred to V1.5.
 
 ## What's Next
 
-**Layer 3: Technical Architecture.** Tech stack selection with reasoning across Next.js for web, React Native for mobile, Supabase for database and authentication, Stripe for payments, and the specific AI model strategy (Claude Sonnet versus Haiku for different roles within the engine). Full database schema design covering user profiles, base models, daily plans, task units, module state, template libraries, completion data, and subscription state. Authentication strategy across web and mobile with social login support. AI architecture specification including how user context is constructed and passed in, prompt template structure with versioning, fallback handling for AI errors, caching strategy for repeated requests, and cost-per-user estimates against the template-customization model locked in Layer 2. Integration list with priorities and effort estimates (Google Calendar at V1, Apple Calendar at V1.5, Apple Health and Google Fit at V2, mapping APIs, grocery delivery APIs, Yelp API). Live Activity Push Start infrastructure design for the Dynamic Island integration locked in Pillar 8. Hosting and infrastructure choices including Vercel tiers, Supabase tiers, and the thresholds at which paid plans get triggered. Data privacy and storage approach including encryption at rest, deletion on account closure, logging for debugging, and GDPR and CCPA compliance basics.
+**Layer 3: Technical Architecture.** Tech stack selection with reasoning across Next.js for web, React Native for mobile, Supabase for database and authentication, Stripe for payments, and the specific AI model strategy (Claude Sonnet versus Haiku for different roles within the engine). Full database schema design covering user profiles, base models, daily plans, task units, module state, template libraries, completion data, and subscription state. Authentication strategy across web and mobile with social login support. AI architecture specification including how user context is constructed and passed in, prompt template structure with versioning, fallback handling for AI errors, caching strategy for repeated requests, and cost-per-user estimates against the template-customization model locked in Layer 2. Integration list with priorities and effort estimates (Google Calendar at V1, Apple Calendar at V1.5, Apple Health and Google Fit at V2). Live Activity Push Start infrastructure design for the Dynamic Island integration locked in Pillar 7. Hosting and infrastructure choices including Vercel tiers, Supabase tiers, and the thresholds at which paid plans get triggered. Data privacy and storage approach including encryption at rest, deletion on account closure, logging for debugging, and GDPR and CCPA compliance basics.
 
 Layer 3 is an Opus-tier session because decisions made here are the hardest to change later. Begin the next chat by pasting the Brainstorm Master document, the Layer 1 document, and this Layer 2 document for full context.

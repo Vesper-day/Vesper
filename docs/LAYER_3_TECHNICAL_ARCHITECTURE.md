@@ -10,7 +10,7 @@ This layer assumes the decisions locked in Layer 1 (positioning, audience, voice
 
 ## Working Direction From Prior Layers
 
-The product is a Life OS for young professionals with a butler-tone voice, warm-dark aesthetic, and local intelligence layer. It ships as a Next.js web application alongside an Expo iOS mobile application at V1, with Android via Expo arriving at V1.5. Eight pillars ship at V1: the AI plan engine, the seven modules (work, fitness, nutrition, sleep, errands, medication, finance), the local intelligence layer, the calendar dual surface (Google Calendar plus built-in), the mobile-and-web platform parity, the natural-language input surface, the adaptive onboarding flow, and the Dynamic Island integration. The architecture is template-customization: approximately 150 workout templates and approximately 300 recipe templates ship with the product, the AI selects an appropriate template daily based on user context (goal, energy, equipment, dietary needs, time available), and the AI modifies the selected template for personalization. The business model is a two-week free trial converting to paid, with an AI cost target of approximately $0.30 per active user per month, a US-only V1 launch, and an anonymous founder.
+The product is a Life OS for young professionals with a butler-tone voice and warm-dark aesthetic. It ships as a Next.js web application alongside an Expo iOS mobile application at V1, with Android via Expo arriving as a friend-assisted fast-follow post-V1 (no committed delivery date). Seven pillars ship at V1: the AI plan engine, the seven modules (work, fitness, nutrition, sleep, errands, medication, finance), the calendar dual surface (Google Calendar plus built-in), the mobile-and-web platform parity, the natural-language input surface, the adaptive onboarding flow, and the Dynamic Island integration. The architecture is template-customization: approximately 150 workout templates and approximately 300 recipe templates ship with the product, the AI selects an appropriate template daily based on user context (goal, energy, equipment, dietary needs, time available), and the AI modifies the selected template for personalization. The business model is a one-week free trial converting to paid, with a realistic AI cost of approximately $1.00 to $1.50 per active paying user per month (planning midpoint $1.20, derived from Sonnet 4.6 and Haiku 4.5 token pricing against a blended cold/warm cache pattern at 15 to 20 active days per month), a US-only V1 launch, and an anonymous founder.
 
 ## Technology Stack
 
@@ -52,7 +52,7 @@ The backend is split across two platforms, each playing to its strengths and rem
 
 **Next.js 15 API routes on Vercel** handle all request and response logic for both the web and mobile applications. The mobile app authenticates via Supabase Auth (which Next.js validates against) and hits the same endpoints the web app uses. This single-source-of-truth architecture eliminates the need for a separate mobile backend and keeps the API surface minimal. API routes handle daily plan generation (calling the Anthropic API server-side), plan edits (drag-and-reorder, mark complete, reschedule), template library queries, integration sync (Google Calendar pulls), subscription state management (Stripe webhooks), and user profile reads and writes.
 
-**Cloudflare Workers with Cron Triggers** handle scheduled jobs. Block-boundary Live Activity Push Starts, weekly digest prompts, dunning checks for failed payments, and template library cache refreshes all run as Cloudflare Workers. The free tier covers 100,000 requests per day, and minute-level cron precision is available, which is required for the Live Activity transitions. Vercel's free cron tier does not offer minute-level frequency.
+**Cloudflare Workers with Cron Triggers** handle scheduled jobs. Block-boundary Live Activity Push Starts, weekly digest prompts, dunning checks for failed payments, and template library cache refreshes all run as Cloudflare Workers. The free tier covers 100,000 requests per day. Cron cadence is five minutes rather than minute-level; the slack is acceptable for Live Activity block-boundary transitions, which are not user-perceptible at sub-five-minute granularity. The five-minute cadence keeps the cron worker comfortably within the Cloudflare free tier.
 
 The split is deliberate: Next.js handles user-initiated requests on Vercel's serverless infrastructure, while Cloudflare handles autonomous timed actions. Each platform's strengths are used; each platform's costs stay within the free tier at V1 user counts.
 
@@ -64,6 +64,8 @@ Supabase Edge Functions are not used at V1. If a database-adjacent trigger emerg
 
 A single Supabase project is used at V1, on the free tier (500MB database, 1GB storage, 2GB egress per month, 50,000 monthly active users). Upgrade to the Pro tier ($25 per month) is triggered at approximately 500 active users or when the free tier limits begin to bite.
 
+Supabase Realtime on the free tier caps concurrent connections at 200. The Pro upgrade trigger therefore fires earlier in the Realtime dimension than in the database or MAU dimensions: a PostHog cohort alert is configured to fire at 150 concurrent connections (seventy-five percent of the free-tier ceiling) so the Pro upgrade is in flight before the ceiling is reached and connection-rejection errors surface to users. This alert is provisioned during build chat 097a alongside the rest of the operational alerting suite.
+
 ### AI
 
 **The Anthropic API is the sole AI provider at V1.** No multi-provider abstraction is used. Two models are deployed in a tiered fashion:
@@ -71,6 +73,8 @@ A single Supabase project is used at V1, on the free tier (500MB database, 1GB s
 **Claude Haiku 4.5** handles cheap, fast operations: template selection (which workout template fits this user's context), natural-language command parsing (translating "move gym to 7pm" into a structured edit), simple classification tasks (assigning block types to ambiguous calendar events), and brief check-in question generation. Haiku is roughly one-twelfth the cost of Sonnet per token. These tasks involve short prompts and short outputs, where Sonnet's added reasoning provides minimal benefit.
 
 **Claude Sonnet 4.6** handles high-quality reasoning: daily plan synthesis (the core morning plan generation), weekly review reasoning (the Sunday planning session), contextual template adaptation when a template's standard parameters do not fit the user's situation, and the "what's not working" prompt that fires after three failed regeneration attempts. These tasks involve longer prompts, complex reasoning, and benefit materially from Sonnet's quality.
+
+The model split runs against an aggressive optimization stack rather than as a naive call pattern. Haiku prompts use the default five-minute cache TTL. A one-hour TTL was considered and rejected: the write cost rises from 1.25× input rate to 2× input rate (a sixty percent write penalty), and Haiku calls are too sporadic across the day (one or two per user per day for check-in questions and natural-language parsing) to amortize the heavier write cost. The five-minute TTL captures the realistic clustering window (rapid successive edits during morning plan review) without paying the longer-TTL premium. Sonnet daily-plan synthesis retains the default five-minute TTL because the cache pre-warm worker (specified later in this document) populates that window at 5:30 AM in the user's local timezone, thirty minutes ahead of the typical morning brief. The production system prompts apply caveman-style compression to butler-voice specification fidelity, reducing token count without altering the voice specification itself. The butler voice gate runs full review on every freeform AI-generated string and samples constraint-heavy outputs (daily plan synthesis is constraint-heavy because the JSON schema and butler voice already act as guardrails on the model) at roughly twenty percent rather than one hundred percent, holding gate cost proportional to the genuine voice-drift risk. A circuit breaker wraps the synthesize-plan call path: three failures within five minutes opens the breaker, new requests route directly to the cached or hardcoded fallback rather than retrying through the upstream Anthropic API, and the degraded-mode banner specified in Layer 4 surfaces while the breaker is open. The breaker auto-closes after five minutes without a new failure.
 
 Claude Opus never runs at user-request time. It is reserved for prompt design and engine logic development during Claude Code conversations.
 
@@ -80,25 +84,13 @@ Claude Opus never runs at user-request time. It is reserved for prompt design an
 
 **Stripe** provides three hosted features used at V1: Stripe Checkout for subscription signup, Customer Portal for self-service plan management, and Pricing Tables embeddable in the landing page. All three are free to use; the only cost is the standard transaction fee (2.9% plus 30 cents in the United States). Webhook handlers in Next.js API routes update subscription state in Supabase whenever Stripe sends events (subscription created, payment failed, subscription canceled, and so on).
 
-The iOS application implements Apple In-App Purchase via StoreKit 2 for iOS subscribers, in parallel with Stripe for web subscribers. App Store Server Notifications V2 are received via a dedicated Cloudflare Worker endpoint that verifies the signed JWS payload using Apple's public keys, parses the event type, and updates the user row's `subscription_status` field accordingly. The product enrolls in Apple's Small Business Program automatically upon meeting the under-$1M-revenue eligibility criterion, reducing the Apple commission from thirty percent to fifteen percent. Subscription state from Apple and Stripe is reconciled on the user row, with the most recent active subscription treated as the source of truth where duplicates exist.
+The iOS application implements Apple In-App Purchase via StoreKit 2 for iOS subscribers, in parallel with Stripe for web subscribers. App Store Server Notifications V2 are received via a dedicated Cloudflare Worker endpoint that verifies the signed JWS payload using Apple's public keys, parses the event type, and updates the user row's `subscription_status` field accordingly. The product enrolls in Apple's Small Business Program upon meeting the under-$1M-revenue eligibility criterion, reducing the Apple commission from thirty percent to fifteen percent. Enrollment is not automatic: Apple reviews each application, and the reduced rate takes effect fifteen days after the end of the fiscal month in which Apple approves the enrollment, so the founder enrolls early (during App Store submission prep) to ensure the 15% rate is active before the first live transaction. Subscription state from Apple and Stripe is reconciled on the user row, with the most recent active subscription treated as the source of truth where duplicates exist.
 
 ### Email
 
-**Resend** handles transactional email. The free tier covers 3,000 sends per month, comfortable for V1 user counts. React Email is used for template authoring (emails are written as JSX components, sharing the design language with the rest of the application for visual consistency).
+**Resend** handles transactional email. The free tier covers 3,000 sends per month with a 100/day cap; the daily cap can bind earlier than the monthly during traffic bursts, so the operational upgrade trigger (per the build plan's SCALING_THRESHOLDS) is 2,500/month sustained or any single day exceeding 80 sends. Comfortable for V1 user counts. React Email is used for template authoring (emails are written as JSX components, sharing the design language with the rest of the application for visual consistency).
 
-The transactional emails sent at V1 are: welcome (after signup), magic link sign-in code, trial ending in three days, trial ending in one day, trial ended (subscribe or cancel), payment failed (handled by Stripe with a confirmation note from Resend), subscription canceled, account deletion grace period started, and account deletion finalized.
-
-### Maps and Local Intelligence
-
-**Mapbox** is the primary mapping provider for routing, map rendering, and geocoding within the application. The free tier covers 50,000 map loads per month, comfortable within V1 user counts.
-
-**MapLibre GL** is held in reserve as a fully open-source escape hatch. Mapbox went closed-source in 2020 and MapLibre is the maintained community fork. The APIs are compatible, so a swap is low-effort if Mapbox costs ever become a problem at scale.
-
-**OpenStreetMap with Nominatim** provides free geocoding and POI data as a secondary source. The public Nominatim server is rate-limited; self-hosting is available if higher volume is needed at scale.
-
-**Yelp Fusion API** provides restaurant and cafe data: name, rating, hours, photos, and address. The free tier covers 5,000 calls per day, generous at V1 user counts. Cafes can be filtered by wifi availability and quiet rating for focus blocks away from home.
-
-**Google OR-Tools** handles the errands batching feature, which computes the optimal sequence of stops given the user's start location, the stops to make, and time constraints. The library is free and open-source and runs server-side in Cloudflare Workers.
+The transactional emails sent at V1 are: welcome (after signup), magic link sign-in code, trial ending in two days, trial ending in one day, trial ended (subscribe or cancel), payment failed (handled by Stripe with a confirmation note from Resend), subscription canceled, account deletion grace period started, and account deletion finalized.
 
 ### Analytics and Observability
 
@@ -278,7 +270,7 @@ There is no `streaks` or `badges` table, since gamification was rejected. There 
 
 ## AI Architecture
 
-The AI architecture executes the template-customization model with aggressive prompt caching and tiered model selection to hit the cost target of approximately $0.30 per active user per month.
+The AI architecture executes the template-customization model with aggressive prompt caching and tiered model selection to hit the cost target of approximately $1.20 per active paying user per month (planning midpoint; $1.00 to $1.50 range, per §AI Cost Analysis below).
 
 ### Model Tiering
 
@@ -294,9 +286,9 @@ Anthropic's prompt caching feature allows marking portions of a prompt as cached
 
 Every plan-related AI call has the following structure. The first cache layer is large and stable: the system prompt establishing the butler voice, structural instructions, and output format rules. The second cache layer is medium-sized and stable per user: the user's base profile, archetype, and module configuration. The third cache layer is medium-sized and slowly changing: the relevant subset of the template library. The uncached portion is small: today's specific input including the energy slider value, calendar events for today, and pending tasks.
 
-The uncached portion is typically a few hundred tokens. The cached portion is several thousand tokens. The result is that a daily plan generation call costs roughly $0.015 to $0.025 with caching, versus $0.10 to $0.15 without caching.
+The uncached portion is typically a few hundred tokens (approximately 500 for today's specifics). The cached portion is several thousand tokens (approximately 7,500 across the system prompt, base profile, and filtered template subset). Output tokens dominate the per-call cost regardless of cache state because cache only discounts input. A warm-cache daily plan generation call costs approximately $0.034 (cache read 7,500 × $0.30/M = $0.0023 + uncached input 500 × $3/M = $0.0015 + output 2,000 × $15/M = $0.030). A cold-cache call costs approximately $0.060 (cache write 7,500 × $3.75/M = $0.028 + uncached input $0.0015 + output $0.030).
 
-A scheduled Cloudflare Worker pre-warms the cache for each active user at 5:30am in the user's local timezone, thirty minutes before the most common 6:00am morning brief. This ensures the morning brief itself hits the cache, delivering both lower cost and faster response.
+A Cloudflare Worker pre-warms the cache for users who have the sleep module enabled and an active alarm set, firing thirty minutes before the alarm time. This ensures the morning brief hits a warm cache for that cohort — lower cost and faster response. Users without the sleep module enabled (web users, iOS users who have disabled sleep, and all Android users at V1.5) receive cold-cache first-plan generation at approximately $0.060 per call rather than the warm-cache $0.034. The cache discount on warm calls saves approximately $0.026 per plan synthesis. The spend-monitor budget formula accounts for this blended hit rate.
 
 ### Streaming Strategy
 
@@ -323,7 +315,7 @@ The template subset is computed by the application before the AI call. Workouts 
 
 ### Prompt Versioning
 
-Prompts are stored as TypeScript constants in the `@halcyon/ai` package (placeholder package name), version-controlled in git. Each prompt has a version constant alongside it:
+Prompts are stored as TypeScript constants in the @vesper/ai package, version-controlled in git. Each prompt has a version constant alongside it:
 
 ```typescript
 export const DAILY_PLAN_SYNTHESIS_PROMPT = `...`;
@@ -340,11 +332,11 @@ When an AI call fails (timeout, API error, or malformed response despite structu
 
 ### Cost Projection
 
-At the $0.30 per-user-per-month target with prompt caching active, the per-user-per-day economics break down approximately as follows. Morning plan generation, using Sonnet with cached context, costs roughly $0.020 per call. Two to four mid-day edits, using Haiku with cached context, total roughly $0.005. The evening check-in question, using Haiku with cached context, costs about $0.001. The weekly review, using Sonnet on Sunday only, costs roughly $0.030 amortized to $0.004 per day across the week. The daily total comes to roughly $0.030 per fully active user per day, or approximately $0.90 per month at maximum daily usage.
+Per-user-per-day economics at steady state with prompt caching active. Morning plan generation using Sonnet 4.6 with cached context costs approximately $0.034 per call for prewarmed users and $0.060 for cold-cache users (output tokens dominate; cache only discounts input). The prewarmed cohort is iOS sleep-alarm users only; all other users hit cold cache on first plan. Two to three mid-day Haiku edits at approximately $0.002 each total approximately $0.006. The evening check-in question via Haiku costs approximately $0.001. The weekly Sonnet 4.6 review on Sunday costs approximately $0.047, amortized to $0.007 per day. The daily total for a fully active prewarmed user is approximately $0.048; for a cold-cache user, approximately $0.074.
 
-Realistic usage adjusts downward because not every user opens the app every day and not every user triggers all operations. Expected actual cost is in the $0.15 to $0.25 range per active user per month, comfortably below the $0.30 ceiling.
+Realistic blended cost accounts for the mixed cohort. The honest planning figure is approximately $1.00 to $1.50 per active paying user per month, with $1.20 as the midpoint. This assumes 15 to 20 active days per month at a blended cold/warm daily cost. The earlier $0.35 to $0.50 monthly figure implied 5 to 7 active days per month, which describes a user already churning rather than an engaged user of a daily-use Life OS. An aspirational reduction to approximately $1.00 per month is plausible once prewarm coverage and output token discipline stabilize in production. The $0.30 figure that appeared in earlier drafts was derived from an understated output-token assumption and is not retained.
 
-The free trial cost is a meaningful consideration. Fourteen days of trial usage at approximately $0.10 to $0.15 of AI spend per non-converter equals $1.40 to $2.10 sunk per non-paying trial user. At a five percent conversion rate, the blended cost per paying customer (including the cost of all non-converting trials) is roughly $30 in trial AI spend plus the converter's ongoing AI usage. This is sustainable at a $15 per month subscription.
+The free trial cost is a meaningful consideration. Trial users are essentially 100% cold-cache because the sleep-alarm prewarming pathway requires module configuration that does not happen in week one. The realistic daily cost during trial is approximately $0.074 (cold-cache plan generation plus Haiku edits and check-in). A fully engaged seven-day non-converter costs approximately $0.52 in AI spend; a partially engaged non-converter active on four or five of the seven days costs approximately $0.30 to $0.37. The planning midpoint is approximately $0.45 per non-converter. At a realistic six percent trial-to-paid conversion (five percent baseline plus an estimated one to two percentage points from the day-six soft prompt; B2C indie consumer subscription benchmarks from ChartMogul 2026 place opt-in trials at 8.9 percent average, with indie B2C below that), every paying customer is paired with approximately 15.7 non-converters. Trial AI cost across non-converters is approximately $7 per paying customer acquired through organic top-of-funnel. The subscriber becomes net positive on operational margin within the first billing cycle. The operational spend monitor uses the formula: max($5/day floor, $1.50 per active-plus-trial user per month divided by 30), with alerts at 80 percent (warning), 100 percent (action), and 200 percent (runaway bug panic).
 
 ## Authentication
 
@@ -360,14 +352,6 @@ Two-factor authentication is not implemented at V1. The added friction is high a
 
 Google Calendar (read-only) is the calendar integration at V1. The OAuth scope is `calendar.readonly`. The plan engine reads the user's calendar to detect fixed meetings and events, then schedules around them. Writing back to the user's calendar is deferred to V1.5 to keep V1 safer and simpler. Token refresh is handled in the background; when refresh fails, a persistent banner prompts the user to reconnect while the plan continues to generate from cached calendar data.
 
-Mapbox provides map rendering, geocoding for location capture during onboarding, routing for traffic-aware buffers between location-bound events, and distance calculations for errands batching.
-
-Yelp Fusion provides restaurant and cafe data: name, rating, hours, photos, and address. Cafes are separately filtered by wifi availability and quiet rating for focus blocks away from home.
-
-OpenStreetMap and Nominatim provide free fallback geocoding when Mapbox-tier billing becomes a concern at scale. Overpass API queries provide free POI data.
-
-Google OR-Tools runs in Cloudflare Workers for the errands batching feature, computing the optimal sequence of stops given the user's start location, the stops to make, and time constraints.
-
 ### V1.5 Integrations
 
 Google Calendar write access is added, so AI-placed blocks (gym, focus time, errands) appear in the user's Google Calendar. Apple Calendar gains both read and write support. Voice input is added via Whisper API for high-quality online recognition plus react-native-voice for an offline fallback that runs on-device.
@@ -378,7 +362,11 @@ Apple Health (sleep data, workout history, heart rate variability) and Google Fi
 
 ### Integration Architecture
 
-Each integration is implemented as a module in the `@halcyon/shared/integrations/` namespace. Modules expose a uniform interface (`connect`, `disconnect`, `sync`, `getStatus`) regardless of the underlying provider. This makes adding new providers incremental and keeps the plan engine agnostic to integration details. OAuth tokens are stored encrypted at rest using Supabase's pgsodium extension and rotated according to provider expiry rules.
+Each integration is implemented as a module in the `@vesper/shared/integrations/` namespace. Modules expose a uniform interface (`connect`, `disconnect`, `sync`, `getStatus`) regardless of the underlying provider. This makes adding new providers incremental and keeps the plan engine agnostic to integration details. OAuth tokens are stored encrypted at rest using Supabase's pgsodium extension and rotated according to provider expiry rules.
+
+Stripe and Apple App Store Server Notifications webhooks both configure their signature timestamp tolerance to an effectively unbounded one-year window rather than the providers' default short tolerances. Both providers retry failed deliveries over multi-day windows (Stripe up to seventy-two hours, Apple up to several days for some notification types), and a tight timestamp tolerance would cause legitimate late-delivery retries to be rejected as expired. Replay protection is enforced exclusively through the `(provider, event_id)` unique constraint on the `subscription_events` table, which guarantees exactly-once processing regardless of how many duplicate deliveries arrive. The timestamp check on these webhooks is therefore non-load-bearing and is deliberately relaxed; replay-attack defense is the idempotency constraint, not the timestamp tolerance.
+
+Apple Root CA certificates required to verify App Store Server Notification JWS payloads are pinned in code with both the current root and the upcoming root present in the pin set; this allows the application to continue verifying notifications across an Apple PKI rotation without an emergency deploy. The chat 086a Apple PKI Monitor worker checks the published Apple root certificate set on a weekly cadence and alerts the founder at the six-month-before-expiry threshold so that an updated pin set can be deployed well ahead of the rotation.
 
 ## Live Activity Infrastructure
 
@@ -394,7 +382,9 @@ Authentication uses token-based APNs auth with a `.p8` key issued by Apple. The 
 
 ### Server-Side Push Lifecycle
 
-A Cloudflare Worker fires every minute via Cron Trigger. The worker executes the following sequence. First, it queries Supabase for all blocks across all users where the `start_time` or `end_time` falls within the next 60 seconds. Second, for each transition found, it looks up the user's APNs Live Activity token. Third, it builds the Live Activity payload (block title, end time, next block preview). Fourth, it sends the payload to APNs at `https://api.push.apple.com/3/device/<token>`. Fifth, APNs delivers the payload to the user's device, where iOS displays the block in the Dynamic Island.
+Live Activity transitions are device-handled wherever possible. ActivityKit's `staleDate` parameter on the Live Activity payload lets the iOS widget extension transition between blocks at the block boundary without requiring a server push for the cosmetic transition itself; the device knows when the current block ends from the `staleDate` and renders the next-block state from a payload the server already provided. Push is reserved for genuine state-change events: user actions (mark complete, reschedule), plan regeneration that changes upcoming block order, and the next-block hand-off when the gap between blocks is short enough that the previous activity's `staleDate` does not naturally hand off to the next.
+
+A Cloudflare Worker handles the state-change cases on a five-minute cron cadence rather than every minute. The worker sweeps for blocks whose `start_time` falls within the next five minutes and which require a server-initiated next-block start (because the prior block has ended via user action ahead of schedule, or because the next-block payload was not pre-armed). For each such block it looks up the user's APNs Live Activity token, builds the Live Activity payload (block title, end time, next block preview), and sends the payload to APNs at `https://api.push.apple.com/3/device/<token>`. The minute-level cron of the prior design is no longer required because the device-side `staleDate` handles the per-minute countdown rendering and the cosmetic boundary transitions without server involvement.
 
 Apple's Live Activity active duration cap is approximately eight hours, with another four hours in a dismissed-but-recoverable state. A single Live Activity cannot reasonably persist across a full waking day. The architecture handles this by managing one Live Activity per block lifecycle: an Activity starts when the block begins, ends when the block completes (manually or by time), and immediately starts the next block's Activity if the next block is within an appropriate window. This sidesteps the eight-hour cap by chaining short-lived activities rather than maintaining one long-running activity per day.
 
@@ -414,6 +404,8 @@ Android has no Dynamic Island. The V1.5 equivalent is a persistent ongoing notif
 
 Supabase Realtime subscriptions are used for the plan view specifically. When a user edits their plan on the web application, the change writes to Postgres, and Supabase Realtime broadcasts the change to any subscribed clients. The mobile application, if open, receives the update within approximately one second.
 
+Self-mutation filtering uses a `client_mutation_id` column on the blocks table to distinguish a device's own writes from genuine cross-device updates. Every block mutation API writes a UUID into the column at write time, the Realtime broadcast carries the column unchanged, and the originating device drops any broadcast whose `client_mutation_id` is present in the device's recent-mutation set (a thirty-second sliding window held in memory). Without this filter the originating device would re-render its own optimistic update from the broadcast, producing a brief visual flicker as the local optimistic state and the round-tripped server state stutter through one another. The filter is implemented in build chat 037.
+
 The subscribed surfaces are the plan view (on any device the user is currently using) and the weekly planner when it is the active surface. Non-subscribed surfaces (which use simple refetch-on-focus) include settings, profile, module configuration, and billing.
 
 Realtime sync adds minor battery cost on mobile due to maintaining a websocket connection. The plan view's "magical sync" benefit is worth this tradeoff for the core surface. Other surfaces do not need the level of immediacy that Realtime provides, and refetch-on-focus is a simpler implementation.
@@ -432,7 +424,7 @@ PowerSync was considered as a more robust offline-first solution but rejected fo
 
 ### Vercel
 
-The web application is deployed on Vercel. The free Hobby tier covers 100GB bandwidth per month, 100 build minutes per day, and unlimited deployments. Upgrade to the Pro tier ($20 per month) is triggered when free tier limits begin to bite, typically around 500 to 1,000 active users depending on traffic patterns.
+The web application is deployed on Vercel Pro ($20 per month), active from the start of the build phase. The Hobby tier prohibits commercial use under Vercel's Terms of Service; Pro is required from day one of any commercial project. The Pro tier covers 1TB bandwidth per month, 1 million serverless function invocations per day, and unlimited deployments, with significant headroom through realistic V1 volumes.
 
 ### Supabase
 
@@ -442,7 +434,7 @@ Upgrade to the Pro tier ($25 per month) is triggered at approximately 500 active
 
 ### Cloudflare Workers
 
-The free tier includes 100,000 requests per day and 10ms of CPU time per request. The cron worker firing every minute consumes 1,440 requests per day (one per minute). Push notification dispatch consumes additional requests proportional to active users. The free tier is comfortable through approximately 5,000 active users.
+The free tier includes 100,000 requests per day and 10ms of CPU time per request. The cron worker firing every five minutes consumes 288 requests per day. Push notification dispatch consumes additional requests proportional to active users. The free tier is comfortable through realistic V1 user volumes.
 
 ### Apple Developer Program
 
@@ -452,13 +444,9 @@ $99 per year. Required for App Store distribution of the iOS application. No fre
 
 Approximately $15 per year, paid annually. The specific TLD selection per the warm-dark mood and the "thematically-appropriate alternative TLD" direction from Layer 1 happens during Layer 4 work or pre-launch.
 
-### Cost Triggers Summary
+### Operating Cost Posture
 
-The V1 launch operating cost is roughly $20 to $50 per month. This breakdown assumes Resend, Sentry, and PostHog are all on free tiers, the Apple Developer Program is amortized at $8.25 per month, and the domain is amortized at approximately $1.25 per month. Termly for privacy policy templating runs $10 to $30 per month if used.
-
-Costs scale meaningfully at approximately 500 to 1,000 active users, when Supabase Pro ($25 per month) and possibly Vercel Pro ($20 per month) become necessary. AI costs scale linearly with active user count, reaching $50 to $150 per month at 500 active users and $150 to $400 per month at 2,000 active users.
-
-The realistic Months 1 through 3 post-launch burn is in the $100 to $300 per month range. The founder has confirmed job income covers this bridging period before paying user revenue catches up.
+The operative measure is per-paying-subscriber margin, not annual cost ceilings or growth-tied projections. Infrastructure costs remain modest through realistic V1 volumes: Supabase, Cloudflare, Sentry, PostHog, and Resend remain on free tiers. Vercel is $20 per month (Pro tier, required from launch). Apple Developer Program is $99 per year. Domain registration is approximately $15 per year. Termly templating runs $120 to $360 per year depending on tier. AI cost scales linearly with active paying users at approximately $1.20 per user per month, recovered well within the first billing cycle through Apple SBP or Stripe net contribution. Projected scaling thresholds tied to specific user counts are not modeled because they do not drive any decision: if per-subscriber margin is positive and conversion clears approximately five percent, scale is self-funding.
 
 ## Privacy and Compliance
 
@@ -494,7 +482,7 @@ Per founder direction, medications are user-entered reminders that stay on the u
 
 ### App Privacy Disclosures
 
-Apple's App Store requires accurate App Privacy "nutrition labels." The application discloses the following categories of data collection: identifiers (email, user ID); health and fitness data (workout records and fitness data when the fitness module is enabled); sensitive information (dietary information from the nutrition module and medical information from the medication module); location data (precise location with user permission, used to provide local intelligence features); diagnostics (crash data and performance data via Sentry); and usage data (product interaction events via PostHog). All disclosures are accurate and kept current as the application evolves.
+Apple's App Store requires accurate App Privacy "nutrition labels." The application discloses the following categories of data collection: identifiers (email, user ID); health and fitness data (workout records and fitness data when the fitness module is enabled); sensitive information (dietary information from the nutrition module and medical information from the medication module); diagnostics (crash data and performance data via Sentry); and usage data (product interaction events via PostHog). All disclosures are accurate and kept current as the application evolves.
 
 ## Observability and Operations
 
@@ -508,41 +496,19 @@ Errors are tagged with the user_id (where the user is authenticated), the operat
 
 The events tracked at V1 include: signed up, onboarding step completed (one event per step), onboarding completed, first plan generated, plan viewed, block completed, block skipped, plan regenerated, module enabled, module disabled, trial reminder shown, subscription started, subscription canceled, cancellation reason captured, referral attribution (fired at signup when a referral URL parameter is present), and referral conversion (fired at paid conversion for users with a referral attribution on their row).
 
-Funnel analysis runs across these events to surface the activation and retention metrics aligned with Layer 1's success criteria (5,000 total signups and 100 paying subscribers at three months post-launch).
+Funnel analysis runs across these events to surface trial-to-paid conversion rate and monthly paid churn, which are the operative post-launch measures. Specific signup or paying-subscriber count targets are not used as planning anchors because they are not within direct founder control and do not drive technical decisions.
 
-Layer 6 specifies three primary PostHog funnels built on or before launch day: signup-to-activation (signed_up → onboarding_completed → first_plan_generated → block_completed within 24 hours), activation-to-trial-to-paid (signed_up → block_completed → trial_reminder_shown → subscription_started within 14 days), and trial-to-paid-to-D30-retention (subscription_started → plan_viewed on day 7 → plan_viewed on day 30 → subscription_status='active' on day 30). A public open-metrics dashboard exposing aggregate signup counts, MRR, and trial-to-paid conversion rate is built using PostHog's public dashboard feature and Stripe's dashboard sharing feature; the dashboard URL is shared in the launch-day Indie Hackers post.
+Layer 6 specifies three primary PostHog funnels built on or before launch day: signup-to-activation (signed_up → onboarding_completed → first_plan_generated → block_completed within 24 hours), activation-to-trial-to-paid (signed_up → block_completed → trial_reminder_shown → subscription_started within 7 days), and trial-to-paid-to-D30-retention (subscription_started → plan_viewed on day 7 → plan_viewed on day 30 → subscription_status='active' on day 30).
 
 ### Performance Monitoring
 
-Vercel Analytics (free with the Vercel Hobby tier) captures Core Web Vitals and page-level performance for the web application. PostHog session replays are available during the closed beta phase for diagnosing friction in specific user sessions.
+Vercel Analytics (included with the Vercel Pro tier) captures Core Web Vitals and page-level performance for the web application. PostHog session replays are available during the closed beta phase for diagnosing friction in specific user sessions.
 
 ### Logs
 
 Supabase logs capture database queries, authentication events, and Realtime activity. Vercel logs capture API route requests and serverless function executions. Cloudflare Workers logs capture cron worker activity. All three log sources are free with their respective platforms.
 
 Centralized log aggregation services (Logflare, Better Stack, Axiom) are not adopted at V1; the platform-native log surfaces are sufficient. Centralized aggregation is reconsidered at V2 if multi-platform correlation becomes a frequent debugging need.
-
-## Cost Analysis Summary
-
-The Year One estimated operating costs are summarized below. Wide ranges reflect the active user growth trajectory from launch through Month 12.
-
-| Item | Annual Cost Range |
-|------|------|
-| Domain registration | $15 |
-| Apple Developer Program | $99 |
-| Termly privacy policy templating | $120 to $360 |
-| Resend transactional email | $0 (free tier) |
-| Sentry error tracking | $0 (free tier) |
-| PostHog product analytics | $0 (free tier) |
-| Supabase database and auth | $0 to $300 (free tier through ~500 active users, then $25/month) |
-| Vercel hosting | $0 to $240 (free tier through traffic threshold, then $20/month) |
-| Cloudflare Workers | $0 (free tier covers V1 scale) |
-| Mapbox mapping | $0 (free tier covers V1 scale) |
-| Yelp Fusion API | $0 (free tier covers V1 scale) |
-| Anthropic API | $0 to $1,800 (scales with active user count) |
-| **Total estimated** | **$234 to $2,814** |
-
-At pre-launch and through the first months of public availability, monthly costs stay under $50. At meaningful post-launch traction (approximately 500 active users plus several thousand trial users in the funnel), monthly costs reach $200 to $400 during the bridging period. Beyond approximately 50 paying users at the $15 per month subscription tier, monthly revenue ($750) exceeds operating costs and the business becomes net cash flow positive on operations.
 
 ## Open Items From Layer 3
 
@@ -583,8 +549,6 @@ Storing AI prompts in a database table for live editing was rejected. Code-store
 Multi-region Supabase deployment was rejected. The US-only V1 launch means single-region (US East) deployment is appropriate. Multi-region deployment is reconsidered at international expansion in V3.
 
 Local on-device AI (Llama, Phi-3, Gemma running on the user's phone) was rejected. Quality is materially lower than Claude for the complex reasoning required for plan synthesis, and on-device inference imposes significant battery drain. The Anthropic API with aggressive prompt caching and model tiering is the chosen cost-containment strategy.
-
-Mapbox as a permanent lock was rejected in favor of an architecture that can swap to MapLibre GL if costs scale unexpectedly. Mapbox is the V1 choice for developer experience; the API compatibility with MapLibre means a swap is low-effort if needed.
 
 ## What's Next
 

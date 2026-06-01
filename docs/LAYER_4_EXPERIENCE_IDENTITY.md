@@ -10,7 +10,7 @@ Decisions in this layer cascade into every pixel of the build. Where Layer 4 exp
 
 ## Working Direction From Prior Layers
 
-The product is a Life OS for young professionals ages 22 to 32, with a butler-tone voice modeled on Jarvis from Iron Man. The brand aesthetic is warm darkness rather than cold darkness, evoking dimly-lit libraries at dusk and old manor studies with modern function. The product launches in the United States only at V1. Web and mobile both ship at launch, mobile-and-web parity with iOS-only on the mobile side at V1 and Android arriving at V1.5. Eight pillars ship at V1: the AI plan engine, the seven modules (work, fitness, nutrition, sleep, errands, medication, finance), the local intelligence layer, the calendar dual surface, mobile-and-web parity, the natural-language input surface, the adaptive onboarding flow, and the Dynamic Island integration. The architecture is template-customization with approximately 150 workout templates and 300 recipe templates plus AI selection and adaptation. The business model is a two-week free trial converting to paid. Anonymous founder, anonymous brand presence on social media until a major relevance milestone is reached.
+The product is a Life OS for young professionals ages 22 to 32, with a butler-tone voice modeled on Jarvis from Iron Man. The brand aesthetic is warm darkness rather than cold darkness, evoking dimly-lit libraries at dusk and old manor studies with modern function. The product launches in the United States only at V1. Web and mobile both ship at launch, mobile-and-web parity with iOS-only on the mobile side at V1; Android ships as a friend-assisted fast-follow post-V1 with no committed delivery date. Seven pillars ship at V1: the AI plan engine, the seven modules (work, fitness, nutrition, sleep, errands, medication, finance), the calendar dual surface, mobile-and-web parity, the natural-language input surface, the adaptive onboarding flow, and the Dynamic Island integration. The architecture is template-customization with approximately 150 workout templates and 300 recipe templates plus AI selection and adaptation. The business model is a one-week free trial converting to paid.
 
 Layer 4 builds entirely within those constraints.
 
@@ -169,7 +169,7 @@ Hybrid timing per Layer 1 direction: quick for user-initiated, considered for am
 
 ### Reduced Motion
 
-All animations swap for instant transitions when the user has reduced motion enabled. Detected via `prefers-reduced-motion` media query on web and `AccessibilityInfo.isReduceMotionEnabled` in React Native. This applies to time-of-day shifts, weather animations, page-turn transitions, idle dimming, click ripples, breath animations, and all Lottie sequences.
+All animations swap for instant transitions when the user has reduced motion enabled. Detected via `prefers-reduced-motion` media query on web and `AccessibilityInfo.isReduceMotionEnabled` in React Native. This applies to time-of-day shifts, page-turn transitions, idle dimming, click ripples, breath animations, and all Lottie sequences.
 
 ## Iconography
 
@@ -230,8 +230,6 @@ Vesper is not a tool the user opens. It is a place the user enters. Every surfac
 
 **Time-aware atmosphere.** The lighting and color temperature of the application shift gradually with the user's local time. Morning surfaces lean slightly warmer-bright (cream-shifted accents). Afternoon surfaces are neutral warm. Evening surfaces deepen toward espresso. Night surfaces are deepest. The shifts are gradual over 30-minute windows and barely perceptible at the moment, but distinctly different across the day. Implemented via CSS custom properties on web and a global theme provider in React Native, recomputing based on user's timezone.
 
-**Weather-aware atmosphere.** When local weather data is available via the existing Mapbox integration, subtle atmospheric layers reflect conditions. Rain manifests as faint vertical streak motion on the background of the plan view (1 percent opacity, slow scroll). Snow as subtle drift particles. Clear skies as a barely-visible warm glow around the top of the surface. None of these are obtrusive; users may not consciously notice them, but they register as Vesper knowing the world the user inhabits.
-
 **Lamplight cursor (web).** On the web application, the cursor casts a small warm radial light on whatever it hovers, brightening that area by approximately 8 percent while surrounding areas dim by approximately 3 percent. Like holding a lantern in a dim room. Implemented via radial gradient that follows mousemove with throttled CSS variable updates (60fps cap). On mobile, finger taps trigger a similar radial brightening at the touch point that fades in 600ms.
 
 **Block depth on hover.** Plan blocks subtly lift toward the cursor with parallax displacement on web. The block appears to come slightly forward (2 to 4 pixels of translateY, deeper shadow) as the cursor approaches. On click or tap, the block expands with a smooth motion that suggests picking up a card from a desk. Implemented via CSS transforms triggered by mousemove relative to block position.
@@ -267,7 +265,7 @@ The landing page is the most artistically ambitious surface and the first impres
 
 The page opens in a dim 3D-rendered manor study, built in Three.js with low-poly geometry to keep page weight under 4MB. As the user scrolls, the camera pans through the room in a choreographed sequence. Each scroll position reveals one piece of butler-voice copy that the user reads while the scene holds.
 
-Time-of-day lighting in the scene matches the visitor's local time. Visitors arriving in the morning see warmer dawn light through the window; visitors arriving at night see deeper shadows with only the desk lamp lit. Weather conditions are reflected subtly: rain on the window during rainstorms, soft snowfall through the window in winter conditions where the visitor's location is snowy.
+Time-of-day lighting in the scene matches the visitor's local time. Visitors arriving in the morning see warmer dawn light through the window; visitors arriving at night see deeper shadows with only the desk lamp lit.
 
 Easter eggs reward attentive visitors: readable book spines on the shelf (titles like "On Solitude," "The Art of Mornings," "A History of Quiet"), a watch on the desk showing the visitor's current time, a small open notebook with a Vesper aphorism handwritten.
 
@@ -395,13 +393,15 @@ Tap anywhere to skip to the interactive state immediately.
 
 ### Screen 2: Authentication
 
-Single screen. Three options stacked vertically:
+Single screen. Three options stacked vertically with equal visual weight:
 
 - Continue with Google
 - Continue with Apple
 - Continue with email
 
 Above options: Fraunces Display 2 "Sign in to continue." Below options: small Inter footnote "We never sell your data."
+
+Sign in with Apple is live equal-weight with Google and email magic link from V1 launch, not deferred. On iOS the system Sign in with Apple dialog handles the credential exchange with biometric confirmation; on web the same provider runs as a redirect-flow OAuth exchange. App Store Review guideline 4.8 requires Sign in with Apple to be offered whenever any other social login is offered on the iOS surface; absent it, App Store rejection on first submission is the near-certain outcome.
 
 ### Screen 3: How would you like to be addressed?
 
@@ -444,15 +444,7 @@ Headline: "Let's set up your schedule."
 
 Three-screen tutorial sequence explaining how to enter fixed weekly events into the native calendar (work hours, classes, recurring appointments).
 
-### Screen 6 (both branches): Location capture
-
-Headline: "Where are you based?"
-
-Mapbox map view with location pin. Use-current-location button at top, manual address entry below.
-
-Permission prompt copy: "Vesper uses your location to find nearby groceries, gyms, and cafes."
-
-### Screen 7: Sleep target
+### Screen 6: Sleep target
 
 Headline: "When does your day begin and end?"
 
@@ -460,19 +452,19 @@ Two time pickers: Wake time, Bed time.
 
 Below: "These set your quiet hours."
 
-### Screen 8: Goals
+### Screen 7: Goals
 
 Headline: "What are your two or three priorities right now?"
 
 Three open text fields. Skip available.
 
-### Screen 9: Modules
+### Screen 8: Modules
 
 Headline: "Which of these matters to you?"
 
 Seven module toggles with brief one-line descriptions. All seven on by default per Layer 2.
 
-### Screens 10 through 16: Per-module quick preferences
+### Screens 9 through 15: Per-module quick preferences
 
 Only enabled modules show preference screens. Each screen captures the minimum data needed for the module to function:
 
@@ -483,27 +475,27 @@ Only enabled modules show preference screens. Each screen captures the minimum d
 - Medication: entries (name, dose, time, frequency)
 - Bills: entries if Finance enabled
 
-### Screen 17: Trial confirmation
+### Screen 16: Trial confirmation
 
-Headline: "Two weeks free. No card required."
+Headline: "One week free. No card required."
 
-Body: "After fourteen days, $19.99 per month. Cancel anytime."
+Body: "After seven days, $19.99 per month. Cancel anytime."
 
 Button: "Begin"
 
-### Screen 18: First plan generation (cinematic loading state)
+### Screen 17: First plan generation (cinematic loading state)
 
 Atmospheric: candle flame Lottie animation centered on espresso background, flickering gently. Butler line below: "Preparing your first day..."
 
 Duration: 4 to 6 seconds. Resolves to the first plan reveal.
 
-### Screen 19: First plan reveal (cinematic, 1.5s entrance)
+### Screen 18: First plan reveal (cinematic, 1.5s entrance)
 
 Plan blocks fade in sequentially over 1.5 seconds, top to bottom. Butler line: "Your first day is ready."
 
 After 1.5s, CTA "Show me" appears, or auto-advances after 3 seconds if no interaction.
 
-### Screen 20: Brief tour (4 screens, skippable)
+### Screen 19: Brief tour (4 screens, skippable)
 
 Four overlay screens with skip available:
 
@@ -514,7 +506,7 @@ Four overlay screens with skip available:
 
 Each screen has a relevant UI screenshot or illustration on the right or below the copy.
 
-### Screen 21: Done
+### Screen 20: Done
 
 Single screen: "All set. Welcome to Vesper."
 
@@ -533,6 +525,10 @@ Only two categories of push notifications are sent at V1:
 1. **Medication reminders.** Push permitted because health stakes warrant intrusion. Sent at user-specified medication times.
 2. **Payment failures.** Push permitted because financial state warrants attention. Sent once per payment failure event, no follow-up pushes from the same event.
 
+### Medication Permission Posture
+
+If the user declines push notification permission at the system prompt, the medications module activates anyway; the module does not refuse to function on a denied permission state. Three behaviors mitigate the resulting reminder gap. First, at the moment the user adds a medication entry, a contextual in-app re-prompt asks whether to enable notifications now, framed as offering the medication module its intended surface rather than as a generic permission ask. Second, at each scheduled dose time, if the application is in the foreground, a prominent red-priority in-app banner displays the dose reminder; this is the only red-priority banner in the product and is reserved for this case. Third, the settings panel exposes a direct deeplink to iOS Settings → Vesper → Notifications so the user can re-grant permission without hunting through system settings. The posture is permission-soft rather than permission-gated, with the in-foreground banner carrying the burden when push is unavailable.
+
 ### All Other Proactive Cues
 
 Happen through:
@@ -550,6 +546,12 @@ Happen through:
 ### Notification Copy
 
 All notification copy follows the butler voice specification described in the Copy Library section below.
+
+## Settings Panel: Privacy
+
+Privacy controls live in a dedicated subsection of the settings panel. At V1 the subsection holds one optional control beyond the standard account-management surfaces (data export, account deletion, integration disconnect).
+
+**Optional biometric lock (iOS).** Off by default. When the user enables it, the application requires Face ID or Touch ID confirmation on cold start and on foreground return from background after sixty or more seconds. Authentication failure falls back to sign-out and re-sign-in after three consecutive failed attempts; the user is not locked out of the device, only out of the application until they re-authenticate through the standard sign-in flow. The lock is iOS-only at V1; web relies on the operating system lock screen as the equivalent layer. The toggle is a single switch with a one-line description ("Require Face ID to open Vesper") and no further configuration; the sixty-second background threshold is not user-configurable at V1.
 
 ## Voice and Tone Specification
 
@@ -596,7 +598,7 @@ Full library of butler-voice copy for every major state across the application. 
 | Payment failed | "Your payment didn't go through. I'll keep things running while you sort it out." |
 | Trial: 3 days left | "Three days left in your trial. Anything you'd like to ask before then?" |
 | Trial: 1 day left | "Your trial ends tomorrow. Shall I keep things running?" |
-| Trial ended, decision needed | "Your two weeks are up." (then buttons: Continue / End) |
+| Trial ended, decision needed | "Your week is up." (then buttons: Continue / End) |
 | Trial canceled by user | "Of course. Your data will be here for thirty days if you'd like to come back." |
 | Account delete confirm | "Your account will close in thirty days. You can change your mind anytime before then." |
 | Account delete tomorrow | "Your account closes tomorrow. Last chance to reconsider." |
@@ -631,10 +633,7 @@ Full library of butler-voice copy for every major state across the application. 
 | Workout suggested | "I've picked a [duration] [type] for you today." |
 | Workout swapped | "Of course. Here's another." |
 | Meal swapped | "Changed. The new one fits your time today." |
-| Grocery list generated | "Your list is ready. Nearest stocked store is [name]." |
-| Errand batch suggested | "Three stops, best done in this order." |
-| Traffic buffer added | "Added ten minutes for traffic." |
-| Location permission denied | "Understood. Local features will wait." |
+| Grocery list generated | "Your list is ready." |
 | Bedtime approaching | "Wind-down begins in fifteen minutes." |
 | Medication reminder | "Time for your [medication name]." |
 | Bill due tomorrow | "[Bill name] is due tomorrow." |
@@ -648,8 +647,13 @@ Full library of butler-voice copy for every major state across the application. 
 | Resubscribe from archive (iOS) | "Welcome back. Everything is as you left it." |
 | Resubscribe from archive (web) | "Welcome back. Everything is as you left it." |
 | Trial extension granted | "Your trial has been extended. Thank you for your patience." |
+| Degraded mode (synthesizePlan circuit breaker open) | "Working slower than usual. Plans will resume shortly." |
 
 The library will expand during the build phase as additional states emerge. New copy is added to this library, not invented inline.
+
+### Degraded Mode Banner
+
+When the plan-synthesis circuit breaker opens (three or more synthesis failures within a five-minute window across all users, as specified in Layer 3's AI Architecture section), the application surfaces a banner above the plan view carrying the degraded-mode copy above. The application remains read-functional: the user can view their last-generated plan, mark blocks complete, and read historical surfaces. New plan-generation requests serve the last-known plan with a "Refresh" call to action that retries through the fallback chain rather than the primary synthesis path. The banner clears automatically when the breaker closes (five minutes without new failures). No error code, model name, or technical language is exposed at any point.
 
 ## Live Activity SwiftUI Widget Visual Design
 
@@ -701,13 +705,13 @@ Single scroll-driven cinematic page in the Igloo Inc plus direction described in
 
 1. **Hero.** 3D rendered manor study scene, camera enters the room. Single butler line in Fraunces Display 1 overlaid: "Good evening. Let's see to your day." or time-of-day-aware variant.
 
-2. **What Vesper does.** Camera pans to desk. Plan view animates on the screen sitting on the desk. Butler-voice description scrolls alongside in Fraunces Display 3: "I read your calendar before you wake. I know your nearest grocery, your preferred gym, the cafes with quiet wifi. I prepare your day before you ask."
+2. **What Vesper does.** Camera pans to desk. Plan view animates on the screen sitting on the desk. Butler-voice description scrolls alongside in Fraunces Display 3: "I read your calendar before you wake. I know your fitness goals, your meals, your medications, your schedule. I prepare your day before you ask."
 
 3. **Modules.** Camera continues through the scene. Each module icon appears as a small artifact in the room: gym appears as a kettlebell on the floor, nutrition as a plate on the desk, sleep as a clock on the bedside, errands as a key on the table, medication as a small bottle on a shelf, finance as a sealed envelope on the desk. Butler-voice description for each as the camera lingers.
 
 4. **How it works.** A phone resting beside the desk lamp lights up with a Dynamic Island animation. Butler-voice copy: "I keep you informed without intruding. Your next block. Your countdown. Always at a glance."
 
-5. **Pricing and signup.** Camera pulls back to a full room view. Copy resolves to: "Two weeks free. After that, $19.99 per month. iOS launching shortly. Web works everywhere in the meantime." Single email input field, single iOS/Android segmented control, single "Begin" button.
+5. **Pricing and signup.** Camera pulls back to a full room view. Copy resolves to: "One week free. After that, $19.99 per month. iOS launching shortly. Web works everywhere in the meantime." Single email input field, single iOS/Android segmented control, single "Begin" button.
 
 Total scroll length approximately 5 to 6 viewport heights. Generous breathing room between sections. Page weight under 4MB total via low-poly Three.js, compressed textures, deferred loading.
 
@@ -747,7 +751,9 @@ WCAG 2.1 Level AA compliance target across web and mobile.
 
 ### Reduced Motion
 
-All animations swap for instant transitions when the user has reduced motion enabled. Applies to time-of-day shifts, weather animations, page-turn transitions, idle dimming, click ripples, breath animations, all Lottie sequences, and the cinematic onboarding moments. Detected via `prefers-reduced-motion` media query on web and `AccessibilityInfo.isReduceMotionEnabled` in React Native.
+All animations swap for instant transitions when the user has reduced motion enabled. Applies to time-of-day shifts, page-turn transitions, idle dimming, click ripples, breath animations, all Lottie sequences, and the cinematic onboarding moments. Detected via `prefers-reduced-motion` media query on web and `AccessibilityInfo.isReduceMotionEnabled` in React Native.
+
+The marketing landing page's Three.js cinematic hero falls back specifically to a static cream-to-espresso vertical gradient with the Vesper wordmark centered on the screen when `prefers-reduced-motion: reduce` is set. The 3D manor scene, camera pan, parallax depth, and the typography breath effect are all suppressed; the static gradient hero satisfies WCAG 2.3.3 (Animation from Interactions) and avoids the autoplay-motion exposure the cinematic scroll would otherwise present.
 
 ### Screen Reader Support
 
@@ -842,7 +848,7 @@ The following alternatives were considered during Layer 4 and rejected, recorded
 
 **Layer 5: Business and Monetization.** This layer locks the pricing model decision (freemium with limits, paid trial converting to subscription, pure paid), the specific dollar amounts at each tier, the exact feature split between free trial and post-trial paid tier, the optimizer-power-user tier that justifies premium pricing, payment infrastructure decisions (Stripe configuration, supported payment methods, subscription versus one-time billing, monthly versus annual with discount structure, dunning handling, family or team plan considerations), free trial length and trial-end behavior, legal foundation (privacy policy generation approach, terms of service, data deletion policy with timelines, GDPR and CCPA compliance), refund policy, and cancellation flow specifics.
 
-Per Layer 1 and Layer 2 direction, the working assumption is a two-week free trial including all features, converting to a paid subscription. The specific dollar amount, annual versus monthly billing structure, and any paid-tier feature gating (the quantified-self dashboards, deeper AI customization) are the open decisions for Layer 5.
+Per Layer 1 and Layer 2 direction, the working assumption is a one-week free trial including all features, converting to a paid subscription. The specific dollar amount, annual versus monthly billing structure, and any paid-tier feature gating (the quantified-self dashboards, deeper AI customization) are the open decisions for Layer 5.
 
 Layer 5 mixes Opus for the pricing model and tier structure decisions with Sonnet for tactical execution on payment infrastructure, legal templates, and flow design.
 
