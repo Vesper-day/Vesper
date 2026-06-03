@@ -9,7 +9,7 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio",
     "lint": "eslint src",
