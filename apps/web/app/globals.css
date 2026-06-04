@@ -1,3 +1,6 @@
+/* Palette lives in the @vesper/ui Tailwind preset as static Layer 4 values.
+   Time-aware atmosphere (Tailwind colors → var(--…) references that mutate by
+   time of day) is deferred to the dedicated time-aware chat — not added here. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
