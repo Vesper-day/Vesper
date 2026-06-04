@@ -11,3 +11,9 @@ export type { AuthenticatedUser } from './api/auth';
 export { checkAppVersion, getMinAppVersion } from './api/minAppVersion';
 export { createRoute } from './api/route';
 export type { AuthenticatedHandler } from './api/route';
+export {
+  withRateLimit,
+  captureRateLimitTripped,
+  RateLimitError,
+} from './api/rateLimit';
+export type { LimiterName } from './api/rateLimit';
