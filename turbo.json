@@ -7,6 +7,14 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
+    "@vesper/shared#build": {
+      "dependsOn": [],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"]
+    },
+    "@vesper/shared#lint": {
+      "dependsOn": []
+    },
     "dev": {
       "cache": false,
       "persistent": true
