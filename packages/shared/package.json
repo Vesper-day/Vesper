@@ -15,6 +15,9 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@sentry/nextjs": "^8.0.0",
+    "@supabase/supabase-js": "^2.0.0",
+    "@vesper/db": "workspace:*",
     "date-fns": "^3.0.0",
     "zod": "^3.0.0"
   },
