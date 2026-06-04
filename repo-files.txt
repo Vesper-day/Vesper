@@ -798,6 +798,7 @@
 .github/workflows/pr-check.yml
 .github/workflows/sentry-release.yml
 .gitignore
+.mcp.json
 CLAUDE.md
 CONTRIBUTING.md
 README.md
