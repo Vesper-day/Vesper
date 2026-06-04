@@ -836,6 +836,7 @@ apps/web/app/layout.tsx
 apps/web/components.json
 apps/web/lib/api.ts
 apps/web/lib/supabase.ts
+apps/web/middleware.ts
 apps/web/next-env.d.ts
 apps/web/next.config.ts
 apps/web/package.json
@@ -949,13 +950,16 @@ packages/db/src/withUserFilter.ts
 packages/db/tsconfig.build.json
 packages/db/tsconfig.json
 packages/db/vitest.config.ts
+packages/shared/RATE_LIMITING.md
 packages/shared/package.json
 packages/shared/src/api/__tests__/auth.test.ts
 packages/shared/src/api/__tests__/errors.test.ts
 packages/shared/src/api/__tests__/minAppVersion.test.ts
+packages/shared/src/api/__tests__/rateLimit.test.ts
 packages/shared/src/api/__tests__/response.test.ts
 packages/shared/src/api/auth.ts
 packages/shared/src/api/minAppVersion.ts
+packages/shared/src/api/rateLimit.ts
 packages/shared/src/api/response.ts
 packages/shared/src/api/route.ts
 packages/shared/src/constants/index.ts
