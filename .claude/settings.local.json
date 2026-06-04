@@ -18,6 +18,8 @@
   "enabledMcpjsonServers": [
     "ruflo",
     "ruv-swarm",
-    "flow-nexus"
-  ]
+    "flow-nexus",
+    "supabase"
+  ],
+  "enableAllProjectMcpServers": true
 }

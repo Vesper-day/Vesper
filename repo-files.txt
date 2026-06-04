@@ -1,3 +1,4 @@
+({
 .claude/memory.md
 .claude/settings.local.json
 .claude/skills/context-engineering-kit/.claude-plugin/marketplace.json
@@ -828,6 +829,7 @@ apps/web/app/(app)/week/page.tsx
 apps/web/app/(auth)/sign-in/page.tsx
 apps/web/app/(marketing)/page.tsx
 apps/web/app/api/v1/plans/generate/route.ts
+apps/web/app/api/v1/test/route.ts
 apps/web/app/globals.css
 apps/web/app/layout.tsx
 apps/web/components.json
@@ -947,7 +949,16 @@ packages/db/tsconfig.build.json
 packages/db/tsconfig.json
 packages/db/vitest.config.ts
 packages/shared/package.json
+packages/shared/src/api/__tests__/auth.test.ts
+packages/shared/src/api/__tests__/errors.test.ts
+packages/shared/src/api/__tests__/minAppVersion.test.ts
+packages/shared/src/api/__tests__/response.test.ts
+packages/shared/src/api/auth.ts
+packages/shared/src/api/minAppVersion.ts
+packages/shared/src/api/response.ts
+packages/shared/src/api/route.ts
 packages/shared/src/constants/index.ts
+packages/shared/src/errors.ts
 packages/shared/src/index.ts
 packages/shared/src/schemas/block.ts
 packages/shared/src/schemas/index.ts
