@@ -8,11 +8,10 @@ import { signInWithApple } from '@/lib/auth/apple-sign-in';
  * Sign-in page. Three stacked, equal-weight options: Google, Apple, email magic
  * link (App Store guideline 4.8 — Apple shown equal-weight to Google).
  *
- * Layer 4 palette (canonical hexes from docs/LAYER_4_EXPERIENCE_IDENTITY.md):
- * espresso #1E1815 background, cream #E8DDC9 foreground, bronze #B8884A accent.
- * These design tokens are not yet registered in the tailwind preset (only
- * `vesper`/`surface` are), so they are applied as Tailwind arbitrary values
- * rather than invented token names.
+ * Layer 4 palette (docs/LAYER_4_EXPERIENCE_IDENTITY.md): espresso background,
+ * cream foreground, bronze accent. Registered as named tokens in the shared
+ * @vesper/ui Tailwind preset, consumed here as bg-espresso / text-cream /
+ * bronze utility classes (no arbitrary hex values).
  */
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? '';
 
@@ -52,7 +51,7 @@ export default function SignInPage(): React.JSX.Element {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#1E1815] px-6 text-[#E8DDC9]">
+    <main className="flex min-h-screen items-center justify-center bg-espresso px-6 text-cream">
       <div className="w-full max-w-sm space-y-8">
         <h1 className="text-center text-2xl font-medium">Sign in to Vesper</h1>
 
@@ -60,7 +59,7 @@ export default function SignInPage(): React.JSX.Element {
           <button
             type="button"
             onClick={handleGoogle}
-            className="w-full rounded-md border border-[#B8884A] px-4 py-3 text-sm font-medium text-[#E8DDC9] transition-colors hover:bg-[#B8884A]/10"
+            className="w-full rounded-md border border-bronze px-4 py-3 text-sm font-medium text-cream transition-colors hover:bg-bronze/10"
           >
             Continue with Google
           </button>
@@ -68,7 +67,7 @@ export default function SignInPage(): React.JSX.Element {
           <button
             type="button"
             onClick={handleApple}
-            className="w-full rounded-md border border-[#B8884A] px-4 py-3 text-sm font-medium text-[#E8DDC9] transition-colors hover:bg-[#B8884A]/10"
+            className="w-full rounded-md border border-bronze px-4 py-3 text-sm font-medium text-cream transition-colors hover:bg-bronze/10"
           >
             Continue with Apple
           </button>
@@ -87,23 +86,23 @@ export default function SignInPage(): React.JSX.Element {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full rounded-md border border-[#B8884A]/40 bg-transparent px-4 py-3 text-sm text-[#E8DDC9] placeholder:text-[#E8DDC9]/40 focus:border-[#B8884A] focus:outline-none"
+            className="w-full rounded-md border border-bronze/40 bg-transparent px-4 py-3 text-sm text-cream placeholder:text-cream/40 focus:border-bronze focus:outline-none"
           />
           <button
             type="submit"
             disabled={status === 'sending'}
-            className="w-full rounded-md bg-[#B8884A] px-4 py-3 text-sm font-medium text-[#1E1815] transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="w-full rounded-md bg-bronze px-4 py-3 text-sm font-medium text-espresso transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             {status === 'sending' ? 'Sending…' : 'Email me a sign-in link'}
           </button>
 
           {status === 'sent' && (
-            <p className="text-center text-sm text-[#E8DDC9]/80">
+            <p className="text-center text-sm text-cream/80">
               Check your inbox for a sign-in link.
             </p>
           )}
           {status === 'error' && (
-            <p className="text-center text-sm text-[#B8884A]">
+            <p className="text-center text-sm text-bronze">
               Something went wrong. Please try again.
             </p>
           )}
