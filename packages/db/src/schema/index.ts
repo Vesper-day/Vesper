@@ -6,3 +6,4 @@ export * from './integrations';
 export * from './subscriptions';
 export * from './waitlist';
 export * from './analytics';
+export * from './jsonb';
