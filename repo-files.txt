@@ -979,6 +979,9 @@ packages/db/src/schema/analytics.ts
 packages/db/src/schema/daily-planning.ts
 packages/db/src/schema/index.ts
 packages/db/src/schema/integrations.ts
+packages/db/src/schema/jsonb/base-profile.ts
+packages/db/src/schema/jsonb/index.ts
+packages/db/src/schema/jsonb/modules-enabled.ts
 packages/db/src/schema/modules.ts
 packages/db/src/schema/subscriptions.ts
 packages/db/src/schema/templates.ts
@@ -1008,10 +1011,8 @@ packages/shared/src/errors.ts
 packages/shared/src/index.ts
 packages/shared/src/schemas/block.ts
 packages/shared/src/schemas/index.ts
-packages/shared/src/schemas/jsonb/base-profile.ts
 packages/shared/src/schemas/jsonb/block-details.ts
 packages/shared/src/schemas/jsonb/index.ts
-packages/shared/src/schemas/jsonb/modules-enabled.ts
 packages/shared/src/schemas/plan.ts
 packages/shared/src/schemas/task.ts
 packages/shared/src/schemas/user.ts

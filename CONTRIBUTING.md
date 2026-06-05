@@ -12,6 +12,8 @@ pnpm build && pnpm lint
 
 from the repository root. No session is considered complete until both commands pass without errors or warnings.
 
+As of **Chat 015 (Monorepo Build Verification Gate)**, this is a hard requirement: every chat from Chat 015 onward must end with `pnpm build` and `pnpm lint` passing clean — zero errors and zero warnings — from the repository root under a cold cache. This is enforced by the CI gate on every pull request; a branch that does not build and lint clean cannot merge.
+
 ## Migration Discipline
 
 Migrations are forward-only in production. The rules:
