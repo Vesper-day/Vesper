@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 import * as t from 'drizzle-orm/pg-core';
-import type { BaseProfile, ModulesEnabled } from '@vesper/shared';
+import type { BaseProfile, ModulesEnabled } from './jsonb';
 
 export const archetypeEnum = t.pgEnum('archetype_enum', [
   'nine_to_five',
