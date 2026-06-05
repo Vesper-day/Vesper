@@ -27,6 +27,15 @@ module.exports = {
       NSLocationWhenInUseUsageDescription:
         'Vesper uses your location to surface nearby errands and optimise your route.',
     },
+    // Shared App Group + Keychain access group, configured now so the future
+    // Live Activity widget extension and the app can share the Keychain session
+    // and a common container. Setting these at the shell stage avoids a
+    // disruptive prebuild rebuild when the widget extension is added later.
+    // `$(AppIdentifierPrefix)` resolves to the team prefix at build time.
+    entitlements: {
+      'com.apple.security.application-groups': ['group.com.vesper.app'],
+      'keychain-access-groups': ['$(AppIdentifierPrefix)com.vesper.app'],
+    },
   },
   plugins: [
     'expo-router',
