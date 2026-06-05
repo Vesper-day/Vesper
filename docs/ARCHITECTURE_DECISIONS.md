@@ -247,3 +247,17 @@ These items have multi-day approval windows or are not needed until a specific c
 | Apple Developer Program enrollment ($99/yr) | ~Chat 100 (pre-Cutover prep) | Required by Cutover step C-04. iOS Simulator is sufficient until enrollment activates. Individual enrollment (not organizational) — sole proprietorship DBA per LAYER_5. |
 
 > **Note on RapidAPI / ExerciseDB:** No account required. ExerciseDB is a public API with no authentication needed for the seed-data access pattern used in Chat 047 (confirmed in ENVIRONMENT_SETUP.md: "Public APIs, no account needed").
+
+---
+
+## Tooling Notes
+
+### `@vesper/ui` `main` field is required for mobile/Metro — do not remove
+
+`packages/ui/package.json` declares both an `exports` map and a legacy `"main": "./src/index.ts"` field. The `main` field is load-bearing for the mobile bundler: Metro does not read the `exports` map by default, so a runtime `import { ... } from '@vesper/ui'` from `apps/mobile` app code only resolves via `main`. Removing `main` breaks the mobile Metro bundle (the first symptom is a "could not be resolved" error on `@vesper/ui` from `app/(tabs)/_layout.tsx`).
+
+The `exports` map is unchanged and still takes precedence for `exports`-aware consumers (TypeScript, Next.js/web). Do **not** "clean up" the redundant-looking `main`. Enabling Metro's `unstable_enablePackageExports` instead is **not** an acceptable substitute — it breaks `@babel/runtime` helper resolution. The same `main`-field fix will be needed on `@vesper/shared` the first time mobile app code imports it at runtime. (Added Chat 013.)
+
+### `@babel/runtime` must be a direct dependency of `apps/mobile`
+
+The Babel preset injects `@babel/runtime/helpers/*` imports into every transpiled file. Under pnpm's strict `node_modules`, those helpers only resolve from `apps/mobile` if `@babel/runtime` is a declared dependency of `@vesper/mobile`; as a mere transitive it is not hoisted to a path Metro searches, and the bundle fails (first symptom: unresolved `@babel/runtime/helpers/interopRequireDefault` from `app/(auth)/sign-in.tsx`). Keep it in `apps/mobile` dependencies. (Added Chat 013.)
