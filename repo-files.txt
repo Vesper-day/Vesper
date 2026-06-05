@@ -865,6 +865,7 @@ apps/web/lib/api.ts
 apps/web/lib/auth/apple-sign-in.ts
 apps/web/lib/auth/safeRedirect.test.ts
 apps/web/lib/auth/safeRedirect.ts
+apps/web/lib/csp/nonce.ts
 apps/web/lib/sentry/scrub.ts
 apps/web/lib/supabase.ts
 apps/web/lib/supabase/client.ts
@@ -889,6 +890,7 @@ docs/ARCHITECTURE.md
 docs/ARCHITECTURE_DECISIONS.md
 docs/BRAINSTORM_MASTER.md
 docs/CI_SECRETS.md
+docs/CSP_NOTES.md
 docs/ENVIRONMENT_SETUP.md
 docs/ENV_VAR_DISCIPLINE.md
 docs/LAYER_1_FOUNDATION.md
