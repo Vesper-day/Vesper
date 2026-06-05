@@ -841,7 +841,9 @@ apps/web/app/(app)/plan/page.tsx
 apps/web/app/(app)/settings/page.tsx
 apps/web/app/(app)/tasks/page.tsx
 apps/web/app/(app)/week/page.tsx
+apps/web/app/(auth)/layout.tsx
 apps/web/app/(auth)/sign-in/page.tsx
+apps/web/app/(marketing)/layout.tsx
 apps/web/app/(marketing)/page.tsx
 apps/web/app/api/v1/auth/magic-link/route.ts
 apps/web/app/api/v1/plans/generate/route.ts
@@ -850,11 +852,14 @@ apps/web/app/auth/callback/route.ts
 apps/web/app/auth/confirm/route.ts
 apps/web/app/globals.css
 apps/web/app/layout.tsx
+apps/web/app/providers.tsx
 apps/web/components.json
+apps/web/instrumentation.ts
 apps/web/lib/api.ts
 apps/web/lib/auth/apple-sign-in.ts
 apps/web/lib/auth/safeRedirect.test.ts
 apps/web/lib/auth/safeRedirect.ts
+apps/web/lib/sentry/scrub.ts
 apps/web/lib/supabase.ts
 apps/web/lib/supabase/client.ts
 apps/web/lib/supabase/server.ts
@@ -865,6 +870,12 @@ apps/web/package.json
 apps/web/playwright.config.ts
 apps/web/postcss.config.mjs
 apps/web/public/.well-known/apple-app-site-association.template.json
+apps/web/sentry.client.config.ts
+apps/web/sentry.edge.config.ts
+apps/web/sentry.server.config.ts
+apps/web/store/auth.ts
+apps/web/store/plan.ts
+apps/web/store/ui.ts
 apps/web/tailwind.config.ts
 apps/web/tsconfig.json
 apps/web/vitest.config.ts
