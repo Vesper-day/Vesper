@@ -2,7 +2,7 @@ export { anthropicProvider, anthropicSdk, MODELS } from './client';
 export type { Model } from './client';
 export { buildPlanContext } from './context';
 export type { PlanContext } from './context';
-export { runVoiceGate } from './gate';
+export { voiceGate } from './voiceGate';
 
 // Chat 016 additions: SDK wrappers, cache config, cost tracker, prompt-versioning types.
 export * from './cacheConfig';
@@ -18,5 +18,4 @@ export * from './prompts/template-selection';
 export * from './prompts/nl-command';
 export * from './prompts/calendar-classify';
 export * from './prompts/checkin-question';
-export * from './prompts/voice-gate';
 export * from './prompts/empathy-regeneration';
