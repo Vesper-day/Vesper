@@ -915,11 +915,11 @@ eslint.config.mjs
 package.json
 packages/ai/README.md
 packages/ai/package.json
+packages/ai/src/__tests__/voiceGate.test.ts
 packages/ai/src/cacheConfig.ts
 packages/ai/src/client.ts
 packages/ai/src/context.ts
 packages/ai/src/cost/tracker.ts
-packages/ai/src/gate.ts
 packages/ai/src/generateObject.ts
 packages/ai/src/generateText.ts
 packages/ai/src/index.ts
@@ -930,9 +930,11 @@ packages/ai/src/prompts/empathy-regeneration.ts
 packages/ai/src/prompts/nl-command.ts
 packages/ai/src/prompts/template-selection.ts
 packages/ai/src/prompts/types.ts
-packages/ai/src/prompts/voice-gate.ts
+packages/ai/src/prompts/voiceGateReview.ts
 packages/ai/src/prompts/weekly-review.ts
 packages/ai/src/streamText.ts
+packages/ai/src/voiceGate.regex.ts
+packages/ai/src/voiceGate.ts
 packages/ai/tsconfig.json
 packages/ai/vitest.config.ts
 packages/db/CLIENT_PATTERN.md
