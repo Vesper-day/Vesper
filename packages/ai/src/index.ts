@@ -12,7 +12,7 @@ export * from './generateObject';
 export * from './cost/tracker';
 export * from './prompts/types';
 
-export * from './prompts/daily-plan';
+export * from './prompts/dailyPlanSynthesis';
 export * from './prompts/weekly-review';
 export * from './prompts/template-selection';
 export * from './prompts/nl-command';
