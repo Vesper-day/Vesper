@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const DailyPlanSchema = z.object({
+export const DailyPlanRecordSchema = z.object({
   id: z.string().uuid(),
   userId: z.string().uuid(),
   planDate: z.string(),
@@ -9,7 +9,7 @@ export const DailyPlanSchema = z.object({
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
-export type DailyPlan = z.infer<typeof DailyPlanSchema>;
+export type DailyPlanRecord = z.infer<typeof DailyPlanRecordSchema>;
 
 const WeeklyPriorityItemSchema = z.object({
   text: z.string(),
