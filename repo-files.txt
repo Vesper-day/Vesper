@@ -925,7 +925,8 @@ packages/ai/src/generateText.ts
 packages/ai/src/index.ts
 packages/ai/src/prompts/calendar-classify.ts
 packages/ai/src/prompts/checkin-question.ts
-packages/ai/src/prompts/daily-plan.ts
+packages/ai/src/prompts/dailyPlanSynthesis.reference.ts
+packages/ai/src/prompts/dailyPlanSynthesis.ts
 packages/ai/src/prompts/empathy-regeneration.ts
 packages/ai/src/prompts/nl-command.ts
 packages/ai/src/prompts/template-selection.ts
@@ -1020,7 +1021,9 @@ packages/shared/src/api/route.ts
 packages/shared/src/constants/index.ts
 packages/shared/src/errors.ts
 packages/shared/src/index.ts
+packages/shared/src/schemas/__tests__/dailyPlan.test.ts
 packages/shared/src/schemas/block.ts
+packages/shared/src/schemas/dailyPlan.ts
 packages/shared/src/schemas/index.ts
 packages/shared/src/schemas/jsonb/block-details.ts
 packages/shared/src/schemas/jsonb/index.ts
