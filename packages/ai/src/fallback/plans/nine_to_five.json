@@ -1,0 +1,123 @@
+{
+  "blocks": [
+    {
+      "startTime": "06:30",
+      "endTime": "07:00",
+      "blockType": "custom",
+      "title": "Morning routine",
+      "details": { "blockType": "custom", "notes": "Wake, dress, brief stretch" },
+      "source": "ai_generated",
+      "displayOrder": 0
+    },
+    {
+      "startTime": "07:00",
+      "endTime": "07:30",
+      "blockType": "nutrition",
+      "title": "Breakfast",
+      "details": {
+        "blockType": "nutrition",
+        "mealName": "Breakfast",
+        "ingredients": ["Oats", "Banana", "Coffee"],
+        "instructions": ["Prepare oats with milk", "Slice banana on top", "Brew coffee"]
+      },
+      "source": "ai_generated",
+      "displayOrder": 1
+    },
+    {
+      "startTime": "07:30",
+      "endTime": "08:15",
+      "blockType": "commute",
+      "title": "Morning commute",
+      "details": { "blockType": "commute", "notes": "Train to the office" },
+      "source": "ai_generated",
+      "displayOrder": 2
+    },
+    {
+      "startTime": "08:30",
+      "endTime": "12:00",
+      "blockType": "work",
+      "title": "Morning work block",
+      "details": {
+        "blockType": "work",
+        "tasks": ["Email triage", "Sprint planning", "Code review"],
+        "focusMode": true
+      },
+      "source": "ai_generated",
+      "displayOrder": 3
+    },
+    {
+      "startTime": "12:00",
+      "endTime": "13:00",
+      "blockType": "nutrition",
+      "title": "Lunch",
+      "details": {
+        "blockType": "nutrition",
+        "mealName": "Lunch",
+        "ingredients": ["Grilled chicken", "Mixed greens", "Brown rice"],
+        "instructions": ["Assemble salad bowl", "Reheat rice and chicken"]
+      },
+      "source": "ai_generated",
+      "displayOrder": 4
+    },
+    {
+      "startTime": "13:00",
+      "endTime": "17:00",
+      "blockType": "work",
+      "title": "Afternoon work block",
+      "details": {
+        "blockType": "work",
+        "tasks": ["Client calls", "Documentation", "Backlog grooming"]
+      },
+      "source": "ai_generated",
+      "displayOrder": 5
+    },
+    {
+      "startTime": "17:15",
+      "endTime": "18:15",
+      "blockType": "fitness",
+      "title": "Strength training",
+      "details": {
+        "blockType": "fitness",
+        "exercises": [
+          { "name": "Squat", "sets": 4, "reps": 8 },
+          { "name": "Bench press", "sets": 4, "reps": 8 },
+          { "name": "Plank", "sets": 3, "reps": "45 seconds" }
+        ]
+      },
+      "source": "ai_generated",
+      "displayOrder": 6
+    },
+    {
+      "startTime": "18:30",
+      "endTime": "19:15",
+      "blockType": "nutrition",
+      "title": "Dinner",
+      "details": {
+        "blockType": "nutrition",
+        "mealName": "Dinner",
+        "ingredients": ["Salmon", "Steamed broccoli", "Quinoa"],
+        "instructions": ["Bake salmon", "Steam broccoli", "Cook quinoa"]
+      },
+      "source": "ai_generated",
+      "displayOrder": 7
+    },
+    {
+      "startTime": "21:30",
+      "endTime": "22:30",
+      "blockType": "custom",
+      "title": "Wind-down",
+      "details": { "blockType": "custom", "notes": "Lights dimmed, reading, phone away" },
+      "source": "ai_generated",
+      "displayOrder": 8
+    },
+    {
+      "startTime": "22:30",
+      "endTime": "06:30",
+      "blockType": "sleep",
+      "title": "Sleep",
+      "details": { "blockType": "sleep" },
+      "source": "ai_generated",
+      "displayOrder": 9
+    }
+  ]
+}
