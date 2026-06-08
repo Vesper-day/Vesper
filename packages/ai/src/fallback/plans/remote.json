@@ -1,0 +1,139 @@
+{
+  "blocks": [
+    {
+      "startTime": "07:00",
+      "endTime": "07:30",
+      "blockType": "custom",
+      "title": "Morning routine",
+      "details": { "blockType": "custom", "notes": "Wake, dress, brief stretch" },
+      "source": "ai_generated",
+      "displayOrder": 0
+    },
+    {
+      "startTime": "07:30",
+      "endTime": "08:00",
+      "blockType": "nutrition",
+      "title": "Breakfast",
+      "details": {
+        "blockType": "nutrition",
+        "mealName": "Breakfast",
+        "ingredients": ["Eggs", "Toast", "Orange juice"],
+        "instructions": ["Scramble eggs", "Toast bread", "Pour juice"]
+      },
+      "source": "ai_generated",
+      "displayOrder": 1
+    },
+    {
+      "startTime": "08:00",
+      "endTime": "11:00",
+      "blockType": "focus",
+      "title": "Deep work",
+      "details": { "blockType": "focus", "notes": "Quiet block, notifications off" },
+      "source": "ai_generated",
+      "displayOrder": 2
+    },
+    {
+      "startTime": "11:00",
+      "endTime": "11:30",
+      "blockType": "fitness",
+      "title": "Midday walk",
+      "details": {
+        "blockType": "fitness",
+        "exercises": [{ "name": "Walk", "sets": 1, "reps": "30 minutes" }]
+      },
+      "source": "ai_generated",
+      "displayOrder": 3
+    },
+    {
+      "startTime": "12:00",
+      "endTime": "13:00",
+      "blockType": "nutrition",
+      "title": "Lunch",
+      "details": {
+        "blockType": "nutrition",
+        "mealName": "Lunch",
+        "ingredients": ["Soup", "Whole grain bread", "Salad"],
+        "instructions": ["Heat soup", "Slice bread", "Toss salad"]
+      },
+      "source": "ai_generated",
+      "displayOrder": 4
+    },
+    {
+      "startTime": "13:00",
+      "endTime": "16:30",
+      "blockType": "work",
+      "title": "Afternoon work block",
+      "details": {
+        "blockType": "work",
+        "tasks": ["Project tasks", "Team video calls", "Documentation"],
+        "focusMode": true
+      },
+      "source": "ai_generated",
+      "displayOrder": 5
+    },
+    {
+      "startTime": "16:30",
+      "endTime": "17:15",
+      "blockType": "fitness",
+      "title": "Strength training",
+      "details": {
+        "blockType": "fitness",
+        "exercises": [
+          { "name": "Push-ups", "sets": 4, "reps": 15 },
+          { "name": "Rows", "sets": 4, "reps": 12 },
+          { "name": "Plank", "sets": 3, "reps": "40 seconds" }
+        ]
+      },
+      "source": "ai_generated",
+      "displayOrder": 6
+    },
+    {
+      "startTime": "18:00",
+      "endTime": "18:45",
+      "blockType": "nutrition",
+      "title": "Dinner",
+      "details": {
+        "blockType": "nutrition",
+        "mealName": "Dinner",
+        "ingredients": ["Stir-fried vegetables", "Tofu", "Rice"],
+        "instructions": ["Stir-fry vegetables and tofu", "Steam rice"]
+      },
+      "source": "ai_generated",
+      "displayOrder": 7
+    },
+    {
+      "startTime": "19:00",
+      "endTime": "20:00",
+      "blockType": "errands",
+      "title": "Errands",
+      "details": {
+        "blockType": "errands",
+        "stops": [
+          { "title": "Pick up package", "location": "Local pickup point", "estimatedMinutes": 20 },
+          { "title": "Grocery run", "location": "Neighborhood market", "estimatedMinutes": 30 }
+        ],
+        "routeOptimized": true
+      },
+      "source": "ai_generated",
+      "displayOrder": 8
+    },
+    {
+      "startTime": "21:30",
+      "endTime": "22:15",
+      "blockType": "custom",
+      "title": "Wind-down",
+      "details": { "blockType": "custom", "notes": "Lights dimmed, reading, phone away" },
+      "source": "ai_generated",
+      "displayOrder": 9
+    },
+    {
+      "startTime": "22:15",
+      "endTime": "06:30",
+      "blockType": "sleep",
+      "title": "Sleep",
+      "details": { "blockType": "sleep" },
+      "source": "ai_generated",
+      "displayOrder": 10
+    }
+  ]
+}

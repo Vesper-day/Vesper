@@ -3,6 +3,7 @@ export type { Model } from './client';
 export { buildPlanContext } from './context';
 export type { PlanContext } from './context';
 export { voiceGate } from './voiceGate';
+export { getFallbackPlan } from './fallback';
 
 // Chat 016 additions: SDK wrappers, cache config, cost tracker, prompt-versioning types.
 export * from './cacheConfig';
