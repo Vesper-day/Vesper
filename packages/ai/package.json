@@ -12,7 +12,8 @@
     "build": "tsc",
     "lint": "eslint src",
     "test": "vitest run",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "eval:plan": "tsx eval/runPlanEval.ts"
   },
   "dependencies": {
     "@vesper/shared": "workspace:*",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.0.0",
     "vitest": "^2.0.0"
   }

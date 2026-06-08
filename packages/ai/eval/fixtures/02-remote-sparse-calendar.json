@@ -1,0 +1,36 @@
+{
+  "name": "remote_sparse_calendar",
+  "exercises": "fully open calendar (0 fixed events); moderate energy; tests synthesis of a day from goals and modules alone",
+  "profile": {
+    "archetype": "remote",
+    "timezone": "America/Los_Angeles",
+    "honorific": "madam",
+    "base_profile": {
+      "work_schedule_pattern": { "days": ["mon", "tue", "wed", "thu", "fri"], "start": "10:00", "end": "18:00" },
+      "recurring_commitments": [
+        { "title": "Weekly team sync", "frequency": "weekly", "time": "11:00", "day_of_week": "tue" }
+      ],
+      "location_bound_events": [],
+      "goals": [
+        { "category": "learning", "description": "Finish the Rust course by end of quarter" },
+        { "category": "wellbeing", "description": "Take a walk outside every day" }
+      ],
+      "preferences": { "wake_target": "07:30", "bedtime_target": "23:00" }
+    },
+    "modules_enabled": {
+      "work": { "enabled": true },
+      "fitness": { "enabled": true, "goal": "maintenance", "equipment": ["yoga_mat", "resistance_bands"], "level": "beginner" },
+      "nutrition": { "enabled": true, "diet_tags": ["pescatarian"], "cooking_time_max_minutes": 45, "dislikes": ["shellfish"] },
+      "sleep": { "enabled": true, "bedtime_target": "23:00", "wake_target": "07:30" },
+      "errands": { "enabled": true },
+      "medication": { "enabled": false },
+      "finance": { "enabled": false }
+    }
+  },
+  "runtimeInputs": {
+    "planDate": "2026-06-09",
+    "energyScore": 6,
+    "calendarEvents": [],
+    "pendingTasks": ["Renew passport", "Reply to landlord email"]
+  }
+}
