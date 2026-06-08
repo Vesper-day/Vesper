@@ -1,0 +1,44 @@
+{
+  "name": "athlete_recovery_low_energy",
+  "exercises": "second energy extreme (1, near-bottom) on a remaining archetype; sparse calendar; tests recovery-day synthesis for someone whose baseline is high-output",
+  "profile": {
+    "archetype": "athlete",
+    "timezone": "America/Denver",
+    "honorific": "madam",
+    "base_profile": {
+      "work_schedule_pattern": { "days": ["mon", "tue", "wed", "thu", "fri"], "start": "09:00", "end": "17:00" },
+      "recurring_commitments": [
+        { "title": "Recovery massage", "frequency": "weekly", "time": "15:00", "day_of_week": "sun" }
+      ],
+      "location_bound_events": [],
+      "goals": [
+        { "category": "fitness", "description": "Avoid overtraining ahead of the qualifier" },
+        { "category": "wellbeing", "description": "Sleep at least 8 hours nightly" }
+      ],
+      "preferences": { "wake_target": "07:00", "bedtime_target": "22:00" }
+    },
+    "modules_enabled": {
+      "work": { "enabled": true },
+      "fitness": { "enabled": true, "goal": "mobility", "equipment": ["foam_roller", "yoga_mat"], "level": "advanced" },
+      "nutrition": {
+        "enabled": true,
+        "diet_tags": ["high_protein"],
+        "cooking_time_max_minutes": 35,
+        "dislikes": ["eggs"],
+        "macro_targets": { "calories": 2600, "protein_g": 180, "carbs_g": 260, "fat_g": 75 }
+      },
+      "sleep": { "enabled": true, "bedtime_target": "22:00", "wake_target": "07:00" },
+      "errands": { "enabled": false },
+      "medication": { "enabled": false },
+      "finance": { "enabled": false }
+    }
+  },
+  "runtimeInputs": {
+    "planDate": "2026-06-14",
+    "energyScore": 1,
+    "calendarEvents": [
+      { "title": "Recovery massage", "start": "15:00", "end": "16:00" }
+    ],
+    "pendingTasks": ["Log this week's training metrics"]
+  }
+}
