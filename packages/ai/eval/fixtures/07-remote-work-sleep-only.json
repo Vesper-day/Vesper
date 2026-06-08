@@ -1,0 +1,37 @@
+{
+  "name": "remote_work_sleep_only",
+  "exercises": "only work and sleep modules enabled, every other module disabled; tests a minimal-scope plan",
+  "profile": {
+    "archetype": "remote",
+    "timezone": "Europe/Berlin",
+    "honorific": "sir",
+    "base_profile": {
+      "work_schedule_pattern": { "days": ["mon", "tue", "wed", "thu", "fri"], "start": "09:00", "end": "17:30" },
+      "recurring_commitments": [
+        { "title": "Standup", "frequency": "daily", "time": "09:30" }
+      ],
+      "location_bound_events": [],
+      "goals": [
+        { "category": "career", "description": "Ship the Q3 roadmap on schedule" }
+      ],
+      "preferences": { "wake_target": "07:00", "bedtime_target": "23:00" }
+    },
+    "modules_enabled": {
+      "work": { "enabled": true },
+      "fitness": { "enabled": false, "goal": "maintenance", "equipment": [], "level": "beginner" },
+      "nutrition": { "enabled": false, "diet_tags": [], "cooking_time_max_minutes": 30, "dislikes": [] },
+      "sleep": { "enabled": true, "bedtime_target": "23:00", "wake_target": "07:00" },
+      "errands": { "enabled": false },
+      "medication": { "enabled": false },
+      "finance": { "enabled": false }
+    }
+  },
+  "runtimeInputs": {
+    "planDate": "2026-06-11",
+    "energyScore": 5,
+    "calendarEvents": [
+      { "title": "Standup", "start": "09:30", "end": "09:45" }
+    ],
+    "pendingTasks": ["Update sprint board"]
+  }
+}

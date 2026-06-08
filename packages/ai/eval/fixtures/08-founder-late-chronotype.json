@@ -1,0 +1,37 @@
+{
+  "name": "founder_late_chronotype",
+  "exercises": "late chronotype: wake_target ~11:00 and bedtime_target ~03:00 in both base_profile.preferences and modules_enabled.sleep; verifies synthesis tracks unusual sleep/wake times rather than snapping to round defaults",
+  "profile": {
+    "archetype": "founder",
+    "timezone": "America/Sao_Paulo",
+    "honorific": "none",
+    "base_profile": {
+      "work_schedule_pattern": { "days": ["mon", "tue", "wed", "thu", "fri"], "start": "13:00", "end": "22:00" },
+      "recurring_commitments": [
+        { "title": "Late-night standup with overseas team", "frequency": "daily", "time": "23:00" }
+      ],
+      "location_bound_events": [],
+      "goals": [
+        { "category": "business", "description": "Launch the new pricing page this month" }
+      ],
+      "preferences": { "wake_target": "11:00", "bedtime_target": "03:00" }
+    },
+    "modules_enabled": {
+      "work": { "enabled": true },
+      "fitness": { "enabled": true, "goal": "maintenance", "equipment": ["bodyweight"], "level": "beginner" },
+      "nutrition": { "enabled": true, "diet_tags": ["balanced"], "cooking_time_max_minutes": 25, "dislikes": ["olives"] },
+      "sleep": { "enabled": true, "bedtime_target": "03:00", "wake_target": "11:00" },
+      "errands": { "enabled": true },
+      "medication": { "enabled": false },
+      "finance": { "enabled": true }
+    }
+  },
+  "runtimeInputs": {
+    "planDate": "2026-06-11",
+    "energyScore": 5,
+    "calendarEvents": [
+      { "title": "Late-night standup with overseas team", "start": "23:00", "end": "23:30" }
+    ],
+    "pendingTasks": ["Approve landing page copy"]
+  }
+}

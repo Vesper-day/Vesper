@@ -1,0 +1,45 @@
+{
+  "name": "nine_to_five_dietary_restrictions",
+  "exercises": "nutrition module with multiple diet tags and dislikes; tests synthesis honoring dietary constraints alongside a standard workday",
+  "profile": {
+    "archetype": "nine_to_five",
+    "timezone": "Asia/Tokyo",
+    "honorific": "sir",
+    "base_profile": {
+      "work_schedule_pattern": { "days": ["mon", "tue", "wed", "thu", "fri"], "start": "09:00", "end": "18:00" },
+      "recurring_commitments": [
+        { "title": "Language exchange meetup", "frequency": "weekly", "time": "19:30", "day_of_week": "thu" }
+      ],
+      "location_bound_events": [
+        { "title": "Annual eye exam", "location": "Shinjuku Vision Clinic", "time": "11:00", "day_of_week": "wed" }
+      ],
+      "goals": [
+        { "category": "nutrition", "description": "Stick to the elimination diet for 30 days" }
+      ],
+      "preferences": { "wake_target": "06:30", "bedtime_target": "23:00" }
+    },
+    "modules_enabled": {
+      "work": { "enabled": true },
+      "fitness": { "enabled": false, "goal": "maintenance", "equipment": [], "level": "beginner" },
+      "nutrition": {
+        "enabled": true,
+        "diet_tags": ["gluten_free", "dairy_free", "low_fodmap"],
+        "cooking_time_max_minutes": 25,
+        "dislikes": ["mushrooms", "cilantro", "blue_cheese"]
+      },
+      "sleep": { "enabled": true, "bedtime_target": "23:00", "wake_target": "06:30" },
+      "errands": { "enabled": true },
+      "medication": { "enabled": false },
+      "finance": { "enabled": false }
+    }
+  },
+  "runtimeInputs": {
+    "planDate": "2026-06-10",
+    "energyScore": 6,
+    "calendarEvents": [
+      { "title": "Annual eye exam", "start": "11:00", "end": "12:00" },
+      { "title": "Language exchange meetup", "start": "19:30", "end": "21:00" }
+    ],
+    "pendingTasks": ["Order gluten-free groceries for the week"]
+  }
+}
