@@ -1,0 +1,149 @@
+{
+  "blocks": [
+    {
+      "startTime": "05:30",
+      "endTime": "06:00",
+      "blockType": "custom",
+      "title": "Morning routine",
+      "details": { "blockType": "custom", "notes": "Wake, hydrate, light mobility" },
+      "source": "ai_generated",
+      "displayOrder": 0
+    },
+    {
+      "startTime": "06:00",
+      "endTime": "06:30",
+      "blockType": "nutrition",
+      "title": "Early breakfast",
+      "details": {
+        "blockType": "nutrition",
+        "mealName": "Early breakfast",
+        "ingredients": ["Oatmeal", "Banana", "Almond butter"],
+        "instructions": ["Cook oatmeal", "Slice banana", "Stir in almond butter"]
+      },
+      "source": "ai_generated",
+      "displayOrder": 1
+    },
+    {
+      "startTime": "06:45",
+      "endTime": "08:45",
+      "blockType": "fitness",
+      "title": "Morning training session",
+      "details": {
+        "blockType": "fitness",
+        "exercises": [
+          { "name": "Interval sprints", "sets": 6, "reps": "400 meters" },
+          { "name": "Mobility drills", "sets": 1, "reps": "15 minutes" }
+        ]
+      },
+      "source": "ai_generated",
+      "displayOrder": 2
+    },
+    {
+      "startTime": "09:00",
+      "endTime": "09:45",
+      "blockType": "nutrition",
+      "title": "Recovery meal",
+      "details": {
+        "blockType": "nutrition",
+        "mealName": "Recovery meal",
+        "ingredients": ["Eggs", "Sweet potato", "Spinach"],
+        "instructions": ["Scramble eggs", "Roast sweet potato", "Saute spinach"]
+      },
+      "source": "ai_generated",
+      "displayOrder": 3
+    },
+    {
+      "startTime": "10:00",
+      "endTime": "11:30",
+      "blockType": "focus",
+      "title": "Film review",
+      "details": { "blockType": "focus", "notes": "Review training footage and adjust plan" },
+      "source": "ai_generated",
+      "displayOrder": 4
+    },
+    {
+      "startTime": "12:00",
+      "endTime": "12:45",
+      "blockType": "nutrition",
+      "title": "Lunch",
+      "details": {
+        "blockType": "nutrition",
+        "mealName": "Lunch",
+        "ingredients": ["Grilled chicken", "Rice", "Steamed vegetables"],
+        "instructions": ["Grill chicken", "Cook rice", "Steam vegetables"]
+      },
+      "source": "ai_generated",
+      "displayOrder": 5
+    },
+    {
+      "startTime": "13:00",
+      "endTime": "14:00",
+      "blockType": "custom",
+      "title": "Midday rest",
+      "details": { "blockType": "custom", "notes": "Nap and light stretching" },
+      "source": "ai_generated",
+      "displayOrder": 6
+    },
+    {
+      "startTime": "15:00",
+      "endTime": "17:00",
+      "blockType": "fitness",
+      "title": "Afternoon strength session",
+      "details": {
+        "blockType": "fitness",
+        "exercises": [
+          { "name": "Deadlift", "sets": 5, "reps": 5 },
+          { "name": "Pull-ups", "sets": 4, "reps": 8 }
+        ]
+      },
+      "source": "ai_generated",
+      "displayOrder": 7
+    },
+    {
+      "startTime": "17:15",
+      "endTime": "18:00",
+      "blockType": "nutrition",
+      "title": "Post-training meal",
+      "details": {
+        "blockType": "nutrition",
+        "mealName": "Post-training meal",
+        "ingredients": ["Protein shake", "Rice cakes", "Berries"],
+        "instructions": ["Blend shake", "Plate rice cakes and berries"]
+      },
+      "source": "ai_generated",
+      "displayOrder": 8
+    },
+    {
+      "startTime": "19:00",
+      "endTime": "19:45",
+      "blockType": "nutrition",
+      "title": "Dinner",
+      "details": {
+        "blockType": "nutrition",
+        "mealName": "Dinner",
+        "ingredients": ["Salmon", "Quinoa", "Roasted vegetables"],
+        "instructions": ["Bake salmon", "Cook quinoa", "Roast vegetables"]
+      },
+      "source": "ai_generated",
+      "displayOrder": 9
+    },
+    {
+      "startTime": "20:30",
+      "endTime": "21:15",
+      "blockType": "custom",
+      "title": "Wind-down",
+      "details": { "blockType": "custom", "notes": "Stretching, lights dimmed" },
+      "source": "ai_generated",
+      "displayOrder": 10
+    },
+    {
+      "startTime": "21:15",
+      "endTime": "05:30",
+      "blockType": "sleep",
+      "title": "Sleep",
+      "details": { "blockType": "sleep" },
+      "source": "ai_generated",
+      "displayOrder": 11
+    }
+  ]
+}
