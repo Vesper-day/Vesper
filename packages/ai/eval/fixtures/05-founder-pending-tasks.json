@@ -1,0 +1,40 @@
+{
+  "name": "founder_pending_tasks",
+  "exercises": "no fixed calendar events; heavy pending-task load (3); above-average energy; tests self-directed day synthesis",
+  "profile": {
+    "archetype": "founder",
+    "timezone": "America/Chicago",
+    "honorific": "none",
+    "base_profile": {
+      "work_schedule_pattern": { "days": ["mon", "tue", "wed", "thu", "fri", "sat"], "start": "08:00", "end": "20:00" },
+      "recurring_commitments": [
+        { "title": "Investor update call", "frequency": "weekly", "time": "16:00", "day_of_week": "fri" }
+      ],
+      "location_bound_events": [],
+      "goals": [
+        { "category": "business", "description": "Close the seed round by end of quarter" },
+        { "category": "wellbeing", "description": "Protect at least one offline hour daily" }
+      ],
+      "preferences": { "wake_target": "06:00", "bedtime_target": "23:30" }
+    },
+    "modules_enabled": {
+      "work": { "enabled": true },
+      "fitness": { "enabled": true, "goal": "fat_loss", "equipment": ["bodyweight"], "level": "beginner" },
+      "nutrition": { "enabled": true, "diet_tags": ["low_carb"], "cooking_time_max_minutes": 15, "dislikes": ["cilantro"] },
+      "sleep": { "enabled": true, "bedtime_target": "23:30", "wake_target": "06:00" },
+      "errands": { "enabled": true },
+      "medication": { "enabled": false },
+      "finance": { "enabled": true }
+    }
+  },
+  "runtimeInputs": {
+    "planDate": "2026-06-10",
+    "energyScore": 7,
+    "calendarEvents": [],
+    "pendingTasks": [
+      "Finalize Series A pitch deck",
+      "Review term sheet redlines with counsel",
+      "Onboard new backend hire"
+    ]
+  }
+}

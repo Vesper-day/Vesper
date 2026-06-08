@@ -1,0 +1,48 @@
+{
+  "name": "mixed_all_modules",
+  "exercises": "all seven modules enabled with realistic preferences, including macro_targets, medication, finance, and errands",
+  "profile": {
+    "archetype": "mixed",
+    "timezone": "Asia/Kolkata",
+    "honorific": "madam",
+    "base_profile": {
+      "work_schedule_pattern": { "days": ["mon", "tue", "wed", "thu", "fri"], "start": "09:30", "end": "18:00" },
+      "recurring_commitments": [
+        { "title": "Pilates class", "frequency": "weekly", "time": "07:00", "day_of_week": "tue" },
+        { "title": "Family video call", "frequency": "weekly", "time": "20:00", "day_of_week": "sun" }
+      ],
+      "location_bound_events": [
+        { "title": "Pharmacy pickup", "location": "Apollo Pharmacy, Koramangala", "time": "13:00", "day_of_week": "wed" }
+      ],
+      "goals": [
+        { "category": "health", "description": "Keep blood pressure within target range" },
+        { "category": "finance", "description": "Build a 6-month emergency fund" }
+      ],
+      "preferences": { "wake_target": "06:45", "bedtime_target": "22:45" }
+    },
+    "modules_enabled": {
+      "work": { "enabled": true },
+      "fitness": { "enabled": true, "goal": "mobility", "equipment": ["yoga_mat", "resistance_bands"], "level": "intermediate" },
+      "nutrition": {
+        "enabled": true,
+        "diet_tags": ["low_sodium", "vegetarian"],
+        "cooking_time_max_minutes": 40,
+        "dislikes": ["bitter_gourd"],
+        "macro_targets": { "calories": 1900, "protein_g": 95, "carbs_g": 220, "fat_g": 60 }
+      },
+      "sleep": { "enabled": true, "bedtime_target": "22:45", "wake_target": "06:45" },
+      "errands": { "enabled": true },
+      "medication": { "enabled": true },
+      "finance": { "enabled": true }
+    }
+  },
+  "runtimeInputs": {
+    "planDate": "2026-06-10",
+    "energyScore": 6,
+    "calendarEvents": [
+      { "title": "Pilates class", "start": "07:00", "end": "08:00" },
+      { "title": "Pharmacy pickup", "start": "13:00", "end": "13:30" }
+    ],
+    "pendingTasks": ["Pay quarterly tax installment", "Schedule annual health checkup"]
+  }
+}

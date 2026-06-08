@@ -1,0 +1,47 @@
+{
+  "name": "athlete_high_energy",
+  "exercises": "high energy (9); advanced fitness level; tests synthesis of an intense training day with macro targets",
+  "profile": {
+    "archetype": "athlete",
+    "timezone": "Australia/Sydney",
+    "honorific": "sir",
+    "base_profile": {
+      "work_schedule_pattern": { "days": ["mon", "tue", "wed", "thu", "fri"], "start": "08:00", "end": "16:00" },
+      "recurring_commitments": [
+        { "title": "Team training session", "frequency": "daily", "time": "17:30" }
+      ],
+      "location_bound_events": [
+        { "title": "Physio appointment", "location": "Sydney Sports Clinic", "time": "12:00", "day_of_week": "tue" }
+      ],
+      "goals": [
+        { "category": "fitness", "description": "Peak for the regional championship in 8 weeks" },
+        { "category": "nutrition", "description": "Hit protein targets every day" }
+      ],
+      "preferences": { "wake_target": "05:30", "bedtime_target": "21:30" }
+    },
+    "modules_enabled": {
+      "work": { "enabled": true },
+      "fitness": { "enabled": true, "goal": "strength", "equipment": ["barbell", "squat_rack", "plyo_box"], "level": "advanced" },
+      "nutrition": {
+        "enabled": true,
+        "diet_tags": ["high_protein"],
+        "cooking_time_max_minutes": 30,
+        "dislikes": ["dairy"],
+        "macro_targets": { "calories": 3200, "protein_g": 220, "carbs_g": 350, "fat_g": 90 }
+      },
+      "sleep": { "enabled": true, "bedtime_target": "21:30", "wake_target": "05:30" },
+      "errands": { "enabled": true },
+      "medication": { "enabled": false },
+      "finance": { "enabled": false }
+    }
+  },
+  "runtimeInputs": {
+    "planDate": "2026-06-09",
+    "energyScore": 9,
+    "calendarEvents": [
+      { "title": "Physio appointment", "start": "12:00", "end": "13:00" },
+      { "title": "Team training session", "start": "17:30", "end": "19:30" }
+    ],
+    "pendingTasks": ["Pack gym bag for tomorrow's away match"]
+  }
+}

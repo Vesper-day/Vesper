@@ -1,0 +1,42 @@
+{
+  "name": "student_low_energy",
+  "exercises": "very low energy (2); classes scheduled as location-bound events; fitness goal set despite low energy",
+  "profile": {
+    "archetype": "student",
+    "timezone": "Europe/London",
+    "honorific": "none",
+    "base_profile": {
+      "work_schedule_pattern": { "days": ["mon", "wed", "fri"], "start": "09:00", "end": "13:00" },
+      "recurring_commitments": [
+        { "title": "Study group", "frequency": "weekly", "time": "16:00", "day_of_week": "thu" }
+      ],
+      "location_bound_events": [
+        { "title": "Organic Chemistry lecture", "location": "Chem Building Room 204", "time": "09:00", "day_of_week": "mon" },
+        { "title": "Lab session", "location": "Science Wing Lab 3", "time": "14:00", "day_of_week": "mon" }
+      ],
+      "goals": [
+        { "category": "academic", "description": "Raise GPA to 3.7 this semester" },
+        { "category": "fitness", "description": "Build a consistent strength routine" }
+      ],
+      "preferences": { "wake_target": "08:00", "bedtime_target": "00:30" }
+    },
+    "modules_enabled": {
+      "work": { "enabled": false },
+      "fitness": { "enabled": true, "goal": "strength", "equipment": ["dumbbells"], "level": "beginner" },
+      "nutrition": { "enabled": true, "diet_tags": ["vegetarian"], "cooking_time_max_minutes": 20, "dislikes": ["tofu"] },
+      "sleep": { "enabled": true, "bedtime_target": "00:30", "wake_target": "08:00" },
+      "errands": { "enabled": false },
+      "medication": { "enabled": false },
+      "finance": { "enabled": false }
+    }
+  },
+  "runtimeInputs": {
+    "planDate": "2026-06-08",
+    "energyScore": 2,
+    "calendarEvents": [
+      { "title": "Organic Chemistry lecture", "start": "09:00", "end": "10:30" },
+      { "title": "Lab session", "start": "14:00", "end": "16:00" }
+    ],
+    "pendingTasks": ["Finish problem set 4", "Email professor about extension"]
+  }
+}

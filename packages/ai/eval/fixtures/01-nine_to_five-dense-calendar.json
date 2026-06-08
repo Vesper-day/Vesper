@@ -1,0 +1,46 @@
+{
+  "name": "nine_to_five_dense_calendar",
+  "exercises": "dense fixed calendar (6 events) on a standard workday; mid-range energy; all standard modules enabled",
+  "profile": {
+    "archetype": "nine_to_five",
+    "timezone": "America/New_York",
+    "honorific": "sir",
+    "base_profile": {
+      "work_schedule_pattern": { "days": ["mon", "tue", "wed", "thu", "fri"], "start": "09:00", "end": "17:00" },
+      "recurring_commitments": [
+        { "title": "Team standup", "frequency": "daily", "time": "09:15" },
+        { "title": "Therapy session", "frequency": "weekly", "time": "18:00", "day_of_week": "wed" }
+      ],
+      "location_bound_events": [
+        { "title": "Dentist appointment", "location": "Midtown Dental", "time": "12:30", "day_of_week": "mon" }
+      ],
+      "goals": [
+        { "category": "career", "description": "Get promoted to senior role this year" },
+        { "category": "fitness", "description": "Run a 10k by autumn" }
+      ],
+      "preferences": { "wake_target": "06:30", "bedtime_target": "22:30" }
+    },
+    "modules_enabled": {
+      "work": { "enabled": true },
+      "fitness": { "enabled": true, "goal": "cardio", "equipment": ["running_shoes", "treadmill"], "level": "intermediate" },
+      "nutrition": { "enabled": true, "diet_tags": ["balanced"], "cooking_time_max_minutes": 30, "dislikes": ["liver"] },
+      "sleep": { "enabled": true, "bedtime_target": "22:30", "wake_target": "06:30" },
+      "errands": { "enabled": true },
+      "medication": { "enabled": true },
+      "finance": { "enabled": true }
+    }
+  },
+  "runtimeInputs": {
+    "planDate": "2026-06-08",
+    "energyScore": 5,
+    "calendarEvents": [
+      { "title": "Team standup", "start": "09:15", "end": "09:30" },
+      { "title": "Sprint planning", "start": "10:00", "end": "11:00" },
+      { "title": "1:1 with manager", "start": "11:30", "end": "12:00" },
+      { "title": "Dentist appointment", "start": "12:30", "end": "13:30" },
+      { "title": "Client demo", "start": "14:00", "end": "15:00" },
+      { "title": "Therapy session", "start": "18:00", "end": "19:00" }
+    ],
+    "pendingTasks": ["Submit expense report", "Review PR #482", "Order new monitor"]
+  }
+}
