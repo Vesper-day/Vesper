@@ -103,9 +103,9 @@ This calendar is the operational backbone of Layer 6. The remainder of this docu
 
 ### Landing Page
 
-The waitlist landing page is the cinematic Three.js scroll experience specified in Layer 4 (Marketing Visual Language section). It is built in Next.js, hosted on the chosen Vesper TLD, deployed via Vercel, and uses the existing design system from Layer 4 (espresso background, cream text, bronze accent, Fraunces and Inter typography). No third-party waitlist widget is embedded; the page is custom-built to preserve the cinematic experience without third-party visual artifacts.
+The waitlist landing page leads with the interactive sixty-second sample-day demo specified in Layer 4 (visitor enters wake time and archetype, watches a plan compose, no signup). The cinematic Three.js scroll, if retained, supports the demo atmospherically rather than serving as the primary surface. The page is built in Next.js, hosted on the chosen Vesper TLD, deployed via Vercel, and uses the existing design system from Layer 4 (espresso background, cream text, bronze accent, Fraunces and Inter typography). No third-party waitlist widget is embedded; the page is custom-built to preserve the experience without third-party visual artifacts.
 
-The five sections of the landing page are exactly as locked in Layer 4: Hero, What Vesper does, Modules, How it works, and Pricing and signup. The fifth section contains the only form on the page: a single email input field and a single iOS/Android segmented control, with a single "Begin" button. No additional capture fields are requested. The "Pricing and signup" copy already reads "One week free. After that, $19.99 per month." with an additional line below indicating "iOS launching shortly. Web works everywhere in the meantime."
+The five sections of the landing page are exactly as locked in Layer 4: Hero (the interactive sample day demo), What Vesper does, Modules, How it works, and Pricing and signup. The fifth section contains the only form on the page: a single email input field and a single iOS/Android segmented control, with a single "Begin" button. No additional capture fields are requested. The "Pricing and signup" copy already reads "One week free. After that, $19.99 per month." with an additional line below indicating "iOS launching shortly. Web works everywhere in the meantime."
 
 ### Capture Fields
 
@@ -139,7 +139,7 @@ The launch is multi-channel and all-fire on launch day, optimizing for maximum t
 
 ### Product Hunt
 
-Tuesday launch at 12:01 AM Pacific. Self-hunted under the Vesper brand account. The PH submission is fully prepared one week in advance: tagline ("A calm scheduler that plans your day around your life"), gallery (5 images showing plan view, modules, Dynamic Island, landing page hero, settings panel), 60-to-90-second product video with no talking head and no voiceover (slow ambient screen recordings, captioned with butler-voice text overlays), and maker comment drafted 48 hours in advance. The maker comment leads with the philosophy ("most productivity apps treat your day as a list. We tried something different.") rather than feature inventory.
+Tuesday launch at 12:01 AM Pacific. Self-hunted under the Vesper brand account. The PH submission is fully prepared one week in advance: tagline ("Wake up with your day already planned"), gallery (5 images showing plan view, modules, Dynamic Island, landing page hero, settings panel), 60-to-90-second product video with no talking head and no voiceover (slow ambient screen recordings, captioned with butler-voice text overlays), and maker comment drafted 48 hours in advance. The maker comment leads with the philosophy ("most productivity apps treat your day as a list. We tried something different.") rather than feature inventory.
 
 Engagement during the launch day is critical: respond to every comment within 30 minutes during the first six hours. Per Layer 4's voice library, all responses use butler voice. The brand account's responses set the tone for the comment thread, which affects the time-on-page signal that drives Product Hunt's algorithm in 2026.
 
@@ -315,7 +315,7 @@ These definitions are the precise specifications for PostHog funnel construction
 
 **Activation.** A user is activated when they complete the onboarding flow specified in Layer 4, generate their first daily plan, and mark at least one block on that plan complete, all within 24 hours of their initial signup. In PostHog event terms, activation is the funnel: `signed_up` → `onboarding_completed` → `first_plan_generated` → `block_completed`, with the `signed_up` event's timestamp and the `block_completed` event's timestamp separated by no more than 86,400 seconds.
 
-**Day-1 retention (D1).** A user is retained at day 1 when they log into the application within 24 hours of their initial signup, and at that login they view a generated plan (whether the first one or a regenerated one). In PostHog event terms, D1 retention is satisfied when a `plan_viewed` event fires within 24 hours of the `signed_up` event.
+**Day-1 retention (D1).** A user is retained at day 1 when they log into the application within 24 hours of their initial signup, and at that login they view a generated plan (whether the first one or a regenerated one). In PostHog event terms, D1 retention is satisfied when a `plan_viewed` event fires within 24 hours of the `signed_up` event. The morning knock (opt-in daily push) is the primary external cue intended to drive this re-entry; users who decline it rely on in-app and Dynamic Island surfaces.
 
 **Day-7 retention (D7).** A user is retained at day 7 when they log into the application on day 6 or day 7 post-signup (where day 0 is the signup day), have generated at least one plan in the prior 7 days, and have completed at least one block in the prior 7 days. In PostHog event terms, D7 retention is satisfied when a `plan_viewed` event fires on day 6 or 7, a `plan_generated` event has fired in the prior 7 days, and a `block_completed` event has fired in the prior 7 days.
 
@@ -368,7 +368,7 @@ A quiet referral program ships with V1, structured to be meaningfully different 
 
 ### Mechanics
 
-Each paying subscriber receives a unique referral link in their account settings panel. The link points to the Vesper landing page with a referral code attached as a URL parameter. When a new user signs up via that link and converts to a paying subscription (not just a trial start), the referrer receives a fifty percent discount on their next billing cycle. The referee receives no discount; the trial alone is the new-user incentive. Credits stack without cap, so a referrer who brings in three converters earns three consecutive months at half price. Credits are voided if the referrer is no longer in active subscription state at the moment of application. The credit cannot be redeemed for cash, and there is no leaderboard, no public referral count, no badge, no streak, and no in-app surface that promotes referrals beyond the settings panel.
+Each paying subscriber receives a unique referral link in their account settings panel. The link points to the Vesper landing page with a referral code attached as a URL parameter. When a new user signs up via that link and converts to a paying subscription (not just a trial start), the referrer receives a fifty percent discount on their next billing cycle. The referee receives a fifty percent discount on their first paid month, mirroring the referrer's credit; the trial remains the standard seven days for everyone. The program is two-sided in reward but introduces no trial-length exception. Credits stack without cap, so a referrer who brings in three converters earns three consecutive months at half price. Credits are voided if the referrer is no longer in active subscription state at the moment of application. The credit cannot be redeemed for cash, and there is no leaderboard, no public referral count, no badge, no streak, and no in-app surface that promotes referrals beyond the settings panel.
 
 ### Copy
 
@@ -376,7 +376,7 @@ The settings panel surface uses the Layer 4 butler voice. The exact copy:
 
 > Pass this along, if you like.
 >
-> Anyone who joins through your link starts with the free trial. When they begin paying, your next month is half off.
+> Anyone who joins through your link starts with the free trial, and their first month is half off when they begin paying. When they begin paying, your next month is half off too.
 >
 > [Your link: vesper.studio/r/abc123def]
 

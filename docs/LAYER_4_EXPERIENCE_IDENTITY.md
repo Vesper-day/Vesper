@@ -373,9 +373,15 @@ The library uses `[HONORIFIC]` as a placeholder that resolves to `, sir` or `, m
 
 The full library will be finalized during the build phase as additional contexts emerge.
 
+### Butler's Notebook
+
+A low-frequency surface where the product shows what it has learned about the user. Entries appear at most a few times per week, never as push, surfaced in-app on the plan view or the Vesper hour. Each entry states one inference in butler voice and offers confirm or correct. Visual: a single card in the espresso/cream/bronze system, no list accumulation, no "insights" dashboard framing. The purpose is to make invisible personalization visible and to create honest switching cost as the user sees the system has come to know them.
+
+Sample copy: "I've noticed you move workouts to the evening. I'll plan them there, unless you'd rather I didn't." Affordances: "That's right." / "Not quite."
+
 ## Onboarding Flow
 
-Designed screen by screen with copy, timing, and behavior. Two branches per Layer 2: calendar-connected (5 to 8 minutes) and no-existing-plan (10 to 15 minutes).
+Designed screen by screen with copy, timing, and behavior. Two branches per Layer 2: calendar-connected (first plan in under three minutes) and no-existing-plan (first plan in under five minutes). Form of address, goals, and per-module preferences for any modules added after launch are collected progressively after the first plan reveal.
 
 ### Screen 1: Welcome (4-second sequential reveal)
 
@@ -403,20 +409,7 @@ Above options: Fraunces Display 2 "Sign in to continue." Below options: small In
 
 Sign in with Apple is live equal-weight with Google and email magic link from V1 launch, not deferred. On iOS the system Sign in with Apple dialog handles the credential exchange with biometric confirmation; on web the same provider runs as a redirect-flow OAuth exchange. App Store Review guideline 4.8 requires Sign in with Apple to be offered whenever any other social login is offered on the iOS surface; absent it, App Store rejection on first submission is the near-certain outcome.
 
-### Screen 3: How would you like to be addressed?
-
-Headline (Fraunces Display 3): "How should I address you?"
-
-Three options stacked:
-- Sir
-- Madam
-- No honorific
-
-Small Inter footnote: "You can change this anytime in settings."
-
-This screen replaces the earlier consideration of capturing gender directly. The form-of-address question is more direct, more respectful of user agency, and produces the same downstream copy outcome.
-
-### Screen 4: Archetype selection
+### Screen 3: Archetype selection
 
 Headline: "What does your day usually look like?"
 
@@ -430,7 +423,7 @@ Six tabs displayed on a single screen, no detailed descriptions:
 
 Selecting an archetype routes the user into one of two branches per Layer 2.
 
-### Screen 5 (calendar-connected branch): Connect Google Calendar
+### Screen 4 (calendar-connected branch): Connect Google Calendar
 
 Headline: "Let's start with your calendar."
 
@@ -438,44 +431,85 @@ Button: "Connect Google Calendar"
 
 Below: "Skip for now" link, smaller and less prominent.
 
-### Screen 5 (no-existing-plan branch): Built-in calendar walkthrough
+### Screen 4 (no-existing-plan branch): Built-in calendar walkthrough
 
 Headline: "Let's set up your schedule."
 
 Three-screen tutorial sequence explaining how to enter fixed weekly events into the native calendar (work hours, classes, recurring appointments).
 
-### Screen 6: Sleep target
+### Screen 5: Wake time, bed time, and location
 
 Headline: "When does your day begin and end?"
 
 Two time pickers: Wake time, Bed time.
 
-Below: "These set your quiet hours."
+Below time pickers: location field (city or zip, used for weather and commute blocks).
 
-### Screen 7: Goals
+Footnote (Inter small): "These set your quiet hours and shape your plan's structure."
+
+Applies to all users in both branches regardless of module choice.
+
+### Screen 6: Starting module choice
+
+Headline (Fraunces Display 3): "Which part of your life should I start with?"
+
+Subheadline (Inter): "We can add more whenever you're ready."
+
+Six options (Work and Tasks and Calendar are always on and not listed as choices):
+- Fitness
+- Nutrition
+- Sleep
+- Errands
+- Medication
+- Finance
+
+Single-select. One tap required, no skip.
+
+### Screen 7: Chosen module quick preferences
+
+Brief preference capture for the one module chosen in Screen 6 only. Three to four fields maximum. Preferences for any later-added modules are collected progressively at enablement, not here.
+
+- **Fitness:** goal type (strength, cardio, fat loss, maintenance), equipment (gym, home, bodyweight), days per week.
+- **Nutrition:** dietary restrictions, cooking time tolerance, notable dislikes.
+- **Sleep:** target sleep duration hours (wake and bed times already set in Screen 5).
+- **Errands:** recurring chores to pre-populate.
+- **Medication:** medication entry flow (name, dose, time, frequency).
+- **Finance:** no preference capture at this stage; screen skips automatically.
+
+### Screen 8: First plan generation (cinematic loading state)
+
+Atmospheric: candle flame Lottie animation centered on espresso background, flickering gently. Butler line below: "Preparing your first day..."
+
+Duration: 4 to 6 seconds. Resolves to the first plan reveal.
+
+### Screen 9: First plan reveal (cinematic, 1.5s entrance)
+
+Plan blocks fade in sequentially over 1.5 seconds, top to bottom. Butler line: "Your first day is ready."
+
+After the 1.5s entrance, the butler line continues: "Anything I should move?" A single prompted adjustment surface lets the user reorder or shift one block before accepting. The accept control reads "Looks right." Choosing it advances; the prompt can be dismissed to accept as-is.
+
+[HONORIFIC] is not used in this screen — form of address is collected in Screen 10.
+
+### Screen 10: Form of address
+
+Headline (Fraunces Display 3): "How should I address you?"
+
+Three options stacked:
+- Sir
+- Madam
+- No honorific
+
+Small Inter footnote: "You can change this anytime in settings."
+
+This screen replaces the earlier consideration of capturing gender directly. The form-of-address question is more direct, more respectful of user agency, and produces the same downstream copy outcome.
+
+### Screen 11: Goals
 
 Headline: "What are your two or three priorities right now?"
 
 Three open text fields. Skip available.
 
-### Screen 8: Modules
-
-Headline: "Which of these matters to you?"
-
-Seven module toggles with brief one-line descriptions. All seven on by default per Layer 2.
-
-### Screens 9 through 15: Per-module quick preferences
-
-Only enabled modules show preference screens. Each screen captures the minimum data needed for the module to function:
-
-- Fitness: goal type, gym vs home, days per week
-- Nutrition: dietary restrictions, cooking time tolerance, dislikes
-- Sleep: confirmed from Screen 7
-- Errands: recurring items
-- Medication: entries (name, dose, time, frequency)
-- Bills: entries if Finance enabled
-
-### Screen 16: Trial confirmation
+### Screen 12: Trial confirmation
 
 Headline: "One week free. No card required."
 
@@ -483,19 +517,7 @@ Body: "After seven days, $19.99 per month. Cancel anytime."
 
 Button: "Begin"
 
-### Screen 17: First plan generation (cinematic loading state)
-
-Atmospheric: candle flame Lottie animation centered on espresso background, flickering gently. Butler line below: "Preparing your first day..."
-
-Duration: 4 to 6 seconds. Resolves to the first plan reveal.
-
-### Screen 18: First plan reveal (cinematic, 1.5s entrance)
-
-Plan blocks fade in sequentially over 1.5 seconds, top to bottom. Butler line: "Your first day is ready."
-
-After 1.5s, CTA "Show me" appears, or auto-advances after 3 seconds if no interaction.
-
-### Screen 19: Brief tour (4 screens, skippable)
+### Screen 13: Brief tour (4 screens, skippable)
 
 Four overlay screens with skip available:
 
@@ -506,7 +528,7 @@ Four overlay screens with skip available:
 
 Each screen has a relevant UI screenshot or illustration on the right or below the copy.
 
-### Screen 20: Done
+### Screen 14: Done
 
 Single screen: "All set. Welcome to Vesper."
 
@@ -520,10 +542,11 @@ Notifications are restrained per Layer 1 and Layer 2 direction. The default disp
 
 ### Push Notification Permitted Categories
 
-Only two categories of push notifications are sent at V1:
+Only three categories of push notifications are sent at V1:
 
-1. **Medication reminders.** Push permitted because health stakes warrant intrusion. Sent at user-specified medication times.
-2. **Payment failures.** Push permitted because financial state warrants attention. Sent once per payment failure event, no follow-up pushes from the same event.
+1. **Medication reminders.** Permitted because health stakes warrant intrusion. Fire at the user-specified time by default, including within quiet hours; shifting out of quiet hours is a per-medication opt-in.
+2. **Payment failures.** Permitted; one per failure event, no follow-up from the same event.
+3. **Morning knock.** A single optional daily push at the user's chosen wake time, signaling the day's plan is ready. Opt-in and user-scheduled; the only engagement push the product sends.
 
 ### Medication Permission Posture
 
@@ -540,7 +563,7 @@ Happen through:
 
 - Default to user's sleep target (bedtime to wake time as set during onboarding)
 - Fallback if sleep target not set: 10pm to 7am local time
-- Quiet hours apply to all push notifications including medication; medication delivery shifts to the next non-quiet window, with user warning at module setup
+- Quiet hours apply to all push notifications. Medication reminders fire at their specified time by default, including within quiet hours; shifting to the next non-quiet window is a per-medication opt-in.
 - User can override quiet hours per notification category in settings under an obscure subsection
 
 ### Notification Copy
@@ -598,7 +621,7 @@ Full library of butler-voice copy for every major state across the application. 
 | Payment failed | "Your payment didn't go through. I'll keep things running while you sort it out." |
 | Trial: 3 days left | "Three days left in your trial. Anything you'd like to ask before then?" |
 | Trial: 1 day left | "Your trial ends tomorrow. Shall I keep things running?" |
-| Trial ended, decision needed | "Your week is up." (then buttons: Continue / End) |
+| Trial end, decision screen | "This week I arranged [N] blocks, resolved [N] conflicts, planned [N] meals, and reshuffled your day [N] times." Then: "Your week is up." Buttons: Continue / End. No derived figures, no time-saved estimates. |
 | Trial canceled by user | "Of course. Your data will be here for thirty days if you'd like to come back." |
 | Account delete confirm | "Your account will close in thirty days. You can change your mind anytime before then." |
 | Account delete tomorrow | "Your account closes tomorrow. Last chance to reconsider." |
@@ -703,7 +726,7 @@ Per the marketing methodology established in Layer 6 discussions (Linear plus A2
 
 Single scroll-driven cinematic page in the Igloo Inc plus direction described in the Artistic Vision section above. Five sections:
 
-1. **Hero.** 3D rendered manor study scene, camera enters the room. Single butler line in Fraunces Display 1 overlaid: "Good evening. Let's see to your day." or time-of-day-aware variant.
+1. **Hero — interactive sample day.** The visitor enters a wake time and selects an archetype, and a day's plan composes itself on screen with butler-voice narration, demonstrating the product before any signup. This is the primary interaction and the first thing on the page. Runs on canned templates or a single short inference call; no account, no user data required. The 3D manor study scene is retained below the demo as atmospheric support (camera entering the room, the line "Good evening. Let's see to your day.") rather than as the opening surface.
 
 2. **What Vesper does.** Camera pans to desk. Plan view animates on the screen sitting on the desk. Butler-voice description scrolls alongside in Fraunces Display 3: "I read your calendar before you wake. I know your fitness goals, your meals, your medications, your schedule. I prepare your day before you ask."
 
