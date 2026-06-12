@@ -12,7 +12,7 @@ Because Layer 6 is tactical and reversible throughout, it is appropriate for Son
 
 ## Working Direction From Prior Layers
 
-The product is Vesper, a Life OS for young professionals ages 22 to 32, launching in the United States only at V1. The brand voice is butler-modeled, warm but calm and quietly competent, never referring to itself as AI and never using emojis or exclamation points. The aesthetic is warm darkness rather than cold darkness. The business model is a one-week (seven-day) free trial at $19.99 per month, with no permanent free tier, no card required to start the trial, and a deliberately frictionless cancellation flow with a single 48-hour win-back survey email after exit. Both web and iOS mobile ship at V1, with Android arriving shortly after launch through friend-assisted development rather than waiting for V1.5. The founder maintains media anonymity, meaning no face on camera and no voice in recordings, but is comfortable with text-based outreach, newsletter pitches, and brand-account engagement on social platforms. 
+The product is Vesper, a Life OS for young professionals ages 22 to 32, launching in the United States only at V1. The positioning is evening-anchored: the user wakes up with the day already planned, having reviewed and approved tomorrow's plan the evening before in a roughly five-minute Vesper hour, so the morning is pure delivery. The brand voice is butler-modeled, warm but calm and quietly competent, never referring to itself as AI and never using emojis or exclamation points. The aesthetic is warm darkness rather than cold darkness. The business model is a one-week (seven-day) free trial at $19.99 per month, with no permanent free tier, no card required to start the trial, and a deliberately frictionless cancellation flow with a single 48-hour win-back survey email after exit. Both web and iOS mobile ship at V1, with Android arriving shortly after launch through friend-assisted development rather than waiting for V1.5. The founder maintains media anonymity, meaning no face on camera and no voice in recordings, but is comfortable with text-based outreach, newsletter pitches, and brand-account engagement on social platforms. 
 
 Layer 6 builds entirely within those constraints.
 
@@ -76,7 +76,7 @@ By end of Build Month 3, the X account should have approximately 30 to 40 posts 
 2. **12:05 AM PT.** Maker comment posted on Product Hunt page. The comment tells the philosophy story, not the feature list.
 3. **12:10 AM PT.** Waitlist email blast sent via Resend. Subject line in butler tone, body links directly to the trial signup flow.
 4. **12:15 AM PT.** X thread published. Twelve to fifteen posts. Philosophy first, screen recordings interspersed.
-5. **12:20 AM PT.** Hacker News Show HN post published. Title format: "Show HN: Vesper — a calm scheduler that plans your day around your life." Body: 300 to 400 words, philosophy-first, link to landing page, link to a "how it works" page.
+5. **12:20 AM PT.** Hacker News Show HN post published. Title format: "Show HN: Vesper — a calm scheduler that plans your day around your life." Body: 300 to 400 words, philosophy-first, link to landing page, link to a "how it works" page. The "calm scheduler" framing in this title is a deliberate concession to the Hacker News audience, not the brand pitch; the evening-anchored "wake up with your day already planned" positioning remains the canonical brand line everywhere else.
 6. **12:30 AM PT.** Indie Hackers launch post published. Open metrics dashboard linked (a public Stripe and PostHog dashboard showing real-time signup and revenue, which is brand-authentic to the indie-hackers audience).
 7. **1:00 AM PT.** Designer News submission.
 8. **6:00 AM PT.** Reddit launch posts in r/SideProject, r/SaaS, r/productivity, r/apps, r/iosapps, r/iphone. The post in each subreddit is tailored to the subreddit's voice and posting rules. The brand account's prior comment karma in r/productivity, r/getdisciplined, r/zenhabits, r/decidingtobebetter, and r/selfimprovement enables comment-based engagement in those threads in the hours that follow.
@@ -313,7 +313,7 @@ Pillar 5 reactive content (standalone posts about industry events) is distinct f
 
 These definitions are the precise specifications for PostHog funnel construction. They are written verbosely so that Claude Code, when implementing the analytics layer in the build phase, has no ambiguity about which events combine to define each metric.
 
-**Activation.** A user is activated when they complete the onboarding flow specified in Layer 4, generate their first daily plan, and mark at least one block on that plan complete, all within 24 hours of their initial signup. In PostHog event terms, activation is the funnel: `signed_up` → `onboarding_completed` → `first_plan_generated` → `block_completed`, with the `signed_up` event's timestamp and the `block_completed` event's timestamp separated by no more than 86,400 seconds.
+**Activation.** A user is activated when they generate their first daily plan, complete the onboarding flow specified in Layer 4, and mark at least one block on that plan complete, all within 24 hours of their initial signup. Because onboarding is plan-first, the provisional plan is generated and revealed partway through the flow, before the remaining onboarding steps complete, so `first_plan_generated` precedes `onboarding_completed`. In PostHog event terms, activation is the funnel: `signed_up` → `first_plan_generated` → `onboarding_completed` → `block_completed`, with the `signed_up` event's timestamp and the `block_completed` event's timestamp separated by no more than 86,400 seconds.
 
 **Day-1 retention (D1).** A user is retained at day 1 when they log into the application within 24 hours of their initial signup, and at that login they view a generated plan (whether the first one or a regenerated one). In PostHog event terms, D1 retention is satisfied when a `plan_viewed` event fires within 24 hours of the `signed_up` event. The morning knock (opt-in daily push) is the primary external cue intended to drive this re-entry; users who decline it rely on in-app and Dynamic Island surfaces.
 
@@ -331,7 +331,7 @@ The analytics stack is locked in Layer 3 (PostHog free tier, Vercel Analytics in
 
 Three primary funnels are built in PostHog on or before launch day:
 
-**Funnel 1: Signup to activation.** Steps: `signed_up` → `onboarding_step_completed` (each step counted individually) → `onboarding_completed` → `first_plan_generated` → `block_completed`. Time window: 24 hours from `signed_up`. The drop-off at each step identifies which part of the onboarding flow is friction-causing.
+**Funnel 1: Signup to activation.** Steps: `signed_up` → `onboarding_step_completed` (each step counted individually) → `first_plan_generated` → `onboarding_completed` → `block_completed`. Time window: 24 hours from `signed_up`. Because onboarding is plan-first, `first_plan_generated` fires partway through the step sequence, before `onboarding_completed`. The drop-off at each step identifies which part of the onboarding flow is friction-causing.
 
 **Funnel 2: Activation to trial-to-paid conversion.** Steps: `signed_up` → `block_completed` (activation) → `trial_reminder_shown` (any of the three checkpoints) → `subscription_started`. Time window: 7 days from `signed_up`. This funnel measures the trial-to-paid conversion rate by stage of the trial.
 
@@ -449,7 +449,7 @@ This section documents specific text changes that must be applied to other layer
 | Waitlist midpoint nurture | "Building." | Approximately 150 words in butler voice with one screen-recording GIF showing recent build progress. Closes with "Begin will be ready shortly." |
 | Waitlist launch day (iOS user) | "It is ready." | Approximately 80 words. Direct link to trial signup. App Store link below. |
 | Waitlist launch day (Android user) | "It is ready." | Approximately 80 words. Direct link to web trial signup. Soft note: "The web app is ready now and works on any device. The Android app is in development; we'll let you know when it's ready." |
-| Referral settings panel | (no email) | "Pass this along, if you like. Anyone who joins through your link starts with the free trial as usual. When they begin paying, your next month is half off." |
+| Referral settings panel | (no email) | "Pass this along, if you like. Anyone who joins through your link starts with the free trial, and their first month is half off when they begin paying. When they begin paying, your next month is half off too." |
 
 ### LAYER_5_BUSINESS_MONETIZATION.md
 
