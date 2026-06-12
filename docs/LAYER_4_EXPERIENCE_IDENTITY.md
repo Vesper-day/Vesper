@@ -379,6 +379,28 @@ A low-frequency surface where the product shows what it has learned about the us
 
 Sample copy: "I've noticed you move workouts to the evening. I'll plan them there, unless you'd rather I didn't." Affordances: "That's right." / "Not quite."
 
+## The Vesper Hour
+
+The Vesper hour is the product's signature surface and the anchor of the daily loop. It is a roughly five-minute close-of-day ritual in which the butler reviews what it handled today and presents tomorrow's plan for the user to approve. Because tomorrow is drafted and approved the evening before, the morning becomes pure delivery with no planning work left to do. Where the morning brief is a glance, the Vesper hour is the one deliberate sit-down the product asks for, and it carries the emotional weight of the relationship.
+
+### Visual System
+
+The Vesper hour renders in the full espresso, cream, and bronze system used throughout the product. The surface opens against `bg-primary` espresso with the evening time-of-day atmosphere already in effect (deepened toward espresso, desk-lamp warmth). Content sits on `bg-surface` cards with vellum texture at the limit of perceptibility. Headlines use Fraunces Display 3 in cream; body and labels use Inter in `text-primary` and `text-secondary`; counts and times use JetBrains Mono in bronze. The bronze accent marks the single primary action (approval) and nothing competes with it. There are no grades, no scores rendered as headlines, no streak or gamification chrome. Motion is in the Considered band for the section entrance and Quick for the approval interaction, falling back to instant transitions under reduced motion.
+
+### Voice
+
+The butler voice is unchanged from the rest of the product: formal but human, brief, and confident, leading with service rendered rather than praise of the user. The opening line is "Here's what I handled today." The summary states literal events in plain counts and never derives time-saved or productivity figures, consistent with the scorekeeping discipline in the persuasion principles. Approval is offered as a soft, agency-respecting prompt rather than a demand.
+
+### Structure
+
+The Vesper hour proceeds top to bottom through three parts in a fixed order.
+
+First, the handled-today summary. The butler leads with what it did during the day: blocks arranged, conflicts resolved, items reshuffled, meals planned. These are literal counts of events the product handled, presented as a calm recap rather than a report card.
+
+Second, the demoted energy and completion detail. The day's energy reading and completion are shown as secondary context below the handled-today summary, never as a headline grade. Missed blocks are noted without shame copy; where a reason is determinable from available data, a brief annotation appears. This material is present for the user who wants it and easy to pass over for the user who does not.
+
+Third, tomorrow's-plan approval. The butler presents a draft of tomorrow's plan as a reviewable block list. The user can adjust a block before approving, and the single bronze primary action approves the plan for the night. Approving is the anchor of the loop; once approved, the morning simply delivers. If the user does not complete the Vesper hour, the product falls back to generating tomorrow from the prior template and calendar, so the ritual is encouraged but never mandatory. The butler's notebook entry, when one is due, may surface here rather than on the plan view, since the Vesper hour is the natural moment for the product to show what it has learned.
+
 ## Onboarding Flow
 
 Designed screen by screen with copy, timing, and behavior. Two branches per Layer 2: calendar-connected (first plan in under three minutes) and no-existing-plan (first plan in under five minutes). Form of address, goals, and per-module preferences for any modules added after launch are collected progressively after the first plan reveal.
@@ -619,7 +641,7 @@ Full library of butler-voice copy for every major state across the application. 
 | Connection lost | "We've gone offline. Your plan is still here." |
 | Integration broken (Google Calendar) | "Your calendar has disconnected. Reconnect when you're ready." |
 | Payment failed | "Your payment didn't go through. I'll keep things running while you sort it out." |
-| Trial: 3 days left | "Three days left in your trial. Anything you'd like to ask before then?" |
+| Trial: 2 days left | "Two days left in your trial. Anything you'd like to ask before then?" |
 | Trial: 1 day left | "Your trial ends tomorrow. Shall I keep things running?" |
 | Trial end, decision screen | "This week I arranged [N] blocks, resolved [N] conflicts, planned [N] meals, and reshuffled your day [N] times." Then: "Your week is up." Buttons: Continue / End. No derived figures, no time-saved estimates. |
 | Trial canceled by user | "Of course. Your data will be here for thirty days if you'd like to come back." |
@@ -671,6 +693,11 @@ Full library of butler-voice copy for every major state across the application. 
 | Resubscribe from archive (web) | "Welcome back. Everything is as you left it." |
 | Trial extension granted | "Your trial has been extended. Thank you for your patience." |
 | Degraded mode (synthesizePlan circuit breaker open) | "Working slower than usual. Plans will resume shortly." |
+| Morning knock push | "Your day is ready." |
+| Morning knock permission ask | "I can knock once each morning when your day is ready. Nothing else. May I?" |
+| Vesper hour open | "Here's what I handled today." |
+| Butler's notebook entry | "I've noticed you move workouts to the evening. I'll plan them there, unless you'd rather I didn't." |
+| Trial-end ledger lead-in | "This week I arranged [N] blocks, resolved [N] conflicts, planned [N] meals, and reshuffled your day [N] times." |
 
 The library will expand during the build phase as additional states emerge. New copy is added to this library, not invented inline.
 
@@ -804,9 +831,9 @@ This section documents specific text changes that must be applied to other layer
 
 ### LAYER_2_PRODUCT_SCOPE.md
 
-**Update 1:** In the "Edge Cases" subsection of the "User Flows" section, find the paragraph that begins "When the trial period ends..." and replace it with:
+**Update 1 (already applied — obsolete).** This update originally instructed replacing Layer 2's trial-end paragraph with reminders at "three days before" and a screen with no event ledger. That instruction is superseded and must not be executed, as it would regress the locked trial-end pivot. The canonical version, already present in Layer 2's "Edge Cases" subsection, is retained here for reference:
 
-> When the trial period ends, the product surfaces butler-voice reminders at three days before, one day before, and on the end date. The reminders mirror the user's state ("Three days left in your trial. Anything you'd like to ask before then?") rather than push urgency. The end-date screen offers two options without persuasion friction: continue or end. On end, the product enters a read-only continuation mode for seven days during which the user can still view their plan but cannot edit or generate new plans, framed in continuation language ("Your data stays here for seven days, then archives for another thirty.") rather than punitive lockout copy. After seven days the account archives (not deletes) for thirty days, with a resubscribe option available throughout. The specific copy library for all trial-end, cancellation, and re-engagement states lives in the Layer 4 deliverable and is the single source of truth.
+> When the trial period ends, the product surfaces butler-voice reminders at two days before, one day before, and on the end date. The reminders mirror the user's state ("Two days left in your trial. Anything you'd like to ask before then?") rather than push urgency. The end-date screen first presents a concrete week ledger of literal events the product handled (blocks placed, conflicts resolved, meals planned, reshuffles executed) as plain counts with no derived time-savings figures, then offers two options without persuasion friction: continue or end. On end, the product enters a read-only continuation mode for seven days during which the user can still view their plan but cannot edit or generate new plans, framed in continuation language ("Your data stays here for seven days, then archives for another thirty.") rather than punitive lockout copy. After seven days the account archives (not deletes) for thirty days, with a resubscribe option available throughout. The specific copy library for all trial-end, cancellation, and re-engagement states lives in the Layer 4 deliverable and is the single source of truth.
 
 **Update 2:** In the "Edge Cases" subsection, find the paragraph that begins "When a subscription payment fails..." and replace it with:
 
