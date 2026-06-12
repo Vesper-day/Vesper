@@ -16,11 +16,11 @@ Layer 1 locks the foundational decisions that every subsequent decision depends 
 
 ## One-Line Pitch
 
-"It's the app that schedules your whole day for young professionals."
+"Wake up with your day already planned."
 
 ## Positioning
 
-**Primary lens, dominant in marketing and design:** Life OS with adaptive planning. Two combined ideas: one unified app for every domain of daily life (work, food, fitness, errands), and a plan that reshapes itself in response to the user's energy, mood, and shifting calendar throughout the day. The user does a quick energy check-in and the plan adjusts intensity and density accordingly.
+**Primary lens, dominant in marketing and design:** the day handled before it starts. The user closes each evening by reviewing and approving a plan the product has already drafted for tomorrow, then wakes into a day that is simply ready. The breadth underneath — one unified app across work, food, fitness, and errands, reshaping itself to energy and calendar through the day — is what the user discovers after adoption, not the opening claim. "Life OS" remains the architecture; it is no longer the lead. The user does a quick energy check-in and the plan adjusts intensity and density accordingly.
 
 **Secondary lens, background support:** Anti-overwhelm. The product is the opposite of stimulating productivity tools. Calm, refined, and quietly competent rather than energetic and gamified. This reinforces the butler tone and warm-dark aesthetic.
 
