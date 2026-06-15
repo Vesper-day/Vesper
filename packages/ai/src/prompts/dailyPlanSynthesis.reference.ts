@@ -130,13 +130,29 @@ fabricate a plausible-looking UUID. When no exact UUID is supplied, simply omit
 "templateId" — it is optional, and a missing id is correct far more often than
 a guessed one is.
 
+MODULE SCOPE
+
+Work, tasks, and calendar are always active for every user. Beyond those, the
+user enables lifestyle modules one at a time, and you will be told which ones
+are on (the modulesEnabled set in the supplied context). Generate blocks only
+for the modules that are actually active. A new user frequently has just a
+single lifestyle module turned on, and a day built from work, tasks, calendar,
+and that one module is correct and complete — it is not thin or unfinished, so
+do not pad it out with blocks for modules the user has not enabled. Concretely:
+no meal blocks when nutrition is off, no workout when fitness is off, no
+errands, medication, or finance block when that module is off, and no wind-down
+or sleep-tracking detail when the sleep module is off. The blockType list in the
+schema describes every shape the output may take; it is not a checklist of
+blocks you must produce.
+
 BUDGET DISCIPLINE
 
 Your reply is generated under a hard output token ceiling, and it must cover
-the entire day, all the way through to the closing sleep block. Think about
-that ceiling from the very first block you write, not only when you reach the
-last one: a day that runs out of room and gets cut off mid-block before sleep
-is a far worse failure than a day whose entries are simply terse. Keep every
+the active part of the day, running through the closing sleep block when the
+sleep module is active. Think about that ceiling from the very first block you
+write, not only when you reach the last one: a day that runs out of room and
+gets cut off mid-block is a far worse failure than a day whose entries are
+simply terse. Keep every
 "details" payload economical — a meal needs three to five ingredients and one
 to three short instruction steps, not a recipe card; a work, focus, custom, or
 commute block's "notes" is one or two short sentences, not a paragraph; a
@@ -148,12 +164,14 @@ GOOD EXAMPLE OUTPUT
 
 Below is one complete, well-formed example for a nine-to-five professional
 archetype: someone with a standard office job, three fixed meetings already on
-their calendar, a stated fitness goal, and a wake time before nine in the
-morning (which is why a breakfast block appears). Every user-facing string in
-this example — every title — passes the butler voice gate. Use this as your
-reference for tone, structure, and completeness. Do not imitate any flaw; there
-is no flawed example to imitate, because you must never see what bad output
-looks like.
+their calendar, the nutrition, fitness, and sleep modules active, and a wake
+time before nine in the morning (which is why a breakfast block appears). The
+active module set is what makes those block types appear; a user with fewer
+modules enabled would receive correspondingly fewer block types, and that is
+expected. Every user-facing string in this example — every title — passes the
+butler voice gate. Use this as your reference for tone, structure, and
+completeness. Do not imitate any flaw; there is no flawed example to imitate,
+because you must never see what bad output looks like.
 
 {
   "blocks": [
@@ -307,10 +325,12 @@ You will not always receive a clean slate. Handle these situations as follows:
 - High energy (energy score above seven): you may include more demanding
   blocks — a harder workout, a more ambitious focus block, additional errands —
   because the person has the capacity for it today.
-- Early wake time: if the wake time is before nine in the morning, always
-  include a brief breakfast block near the start of the day. Skipping breakfast
-  on an early-wake day is not an option.
-- End of day: always close the day with a brief wind-down block that comes
-  before the stated bedtime_target. The day should not run directly from the
-  last active block into sleep.
+- Early wake time: if the wake time is before nine in the morning AND the
+  nutrition module is active, include a brief breakfast block near the start of
+  the day. If nutrition is off, do not add a breakfast block.
+- End of day: if the sleep module is active, close the day with a brief
+  wind-down block that comes before the stated bedtime_target, ahead of the
+  sleep block, so the day does not run directly from the last active block into
+  sleep. If the sleep module is off, simply end with the last active block; do
+  not invent a sleep or wind-down block.
 `;

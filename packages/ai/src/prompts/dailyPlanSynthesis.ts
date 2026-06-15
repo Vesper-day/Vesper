@@ -63,9 +63,11 @@ type BlockDetails =
 Emit exactly these fields, nothing more. Never emit: id, dailyPlanId, userId, status, clientMutationId, createdAt, updatedAt, per-block rationale, per-block notes outside details. Server assigns those; emitting them only inflates output.
 templateId rule: include it ONLY when the supplied context gives you the template's actual UUID for an exact match. Never invent, slugify, or guess an id from a template's name. No exact UUID match: omit templateId entirely (it is optional).
 
-BUDGET DISCIPLINE: your reply has a hard token ceiling and must cover the entire day, ending with sleep. Plan for that ceiling from the first block, not just the last. Keep every "details" payload economical: meals carry 3-5 ingredients and 1-3 short instruction steps, work/focus/custom/commute "notes" are one or two short sentences, fitness lists 3-5 exercises. Never let early-block detail crowd out later blocks: an incomplete day (one cut off before sleep) is a worse failure than a terser one.
+MODULE SCOPE: work, tasks, and calendar are always active. Beyond those, emit blocks ONLY for the lifestyle modules present in the supplied context (modulesEnabled). Modules activate progressively: a user often has just ONE lifestyle module on, so a single-lifestyle-module day is correct and complete, not thin. Never add a block for a module not in the supplied set: no meals when nutrition is off, no workout when fitness is off, no errands/medication/finance block when that module is off, no wind-down or sleep-tracking detail when sleep is off. The block-type enum lists every shape the schema permits; it is not a checklist of blocks to include.
 
-GOOD EXAMPLE OUTPUT — nine-to-five professional, wake before 09:00, fixed meetings on calendar. Every title here passes the voice gate; copy this tone, not any flaw (there is none to copy).
+BUDGET DISCIPLINE: your reply has a hard token ceiling and must cover the active part of the day, through the closing sleep block when the sleep module is active. Plan for that ceiling from the first block, not just the last. Keep every "details" payload economical: meals carry 3-5 ingredients and 1-3 short instruction steps, work/focus/custom/commute "notes" are one or two short sentences, fitness lists 3-5 exercises. Never let early-block detail crowd out later blocks: a day cut off mid-block is a worse failure than a terser one.
+
+GOOD EXAMPLE OUTPUT — nine-to-five professional with the nutrition, fitness, and sleep modules active, wake before 09:00, fixed meetings on calendar. Module set drives which blocks appear: a user with fewer modules on gets correspondingly fewer block types. Every title here passes the voice gate; copy this tone, not any flaw (there is none to copy).
 {
   "blocks": [
     { "startTime": "06:45", "endTime": "07:15", "blockType": "nutrition", "title": "Breakfast",
@@ -96,8 +98,8 @@ EDGE CASES
 - Day already fully fixed (no open time for new blocks): blocks = [], note = brief voice-clean reason why.
 - Energy below three: favor recovery-oriented blocks (lighter workout, simpler meals, more rest).
 - Energy above seven: more demanding blocks allowed (harder workout, ambitious focus block, more errands).
-- Wake time before 09:00: always include a brief breakfast block early in the day.
-- Always close the day with a brief wind-down block before bedtime_target, ahead of sleep.
+- Wake before 09:00 AND nutrition module active: include a brief breakfast block early in the day.
+- Sleep module active: close the day with a brief wind-down block before bedtime_target, ahead of the sleep block. If sleep is off, end with the last active block; do not invent a sleep or wind-down block.
 `;
 
-export const DAILY_PLAN_SYNTHESIS_VERSION = 'v3-20260607';
+export const DAILY_PLAN_SYNTHESIS_VERSION = 'v4-20260614';
