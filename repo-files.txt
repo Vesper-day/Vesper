@@ -1,4 +1,3 @@
-({
 .claude/memory.md
 .claude/settings.local.json
 .claude/skills/context-engineering-kit/.claude-plugin/marketplace.json
