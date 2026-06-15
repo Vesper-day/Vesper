@@ -24,25 +24,17 @@
       "displayOrder": 1
     },
     {
-      "startTime": "08:00",
-      "endTime": "11:00",
-      "blockType": "focus",
-      "title": "Deep work",
-      "details": { "blockType": "focus", "notes": "Quiet block, notifications off" },
-      "source": "ai_generated",
-      "displayOrder": 2
-    },
-    {
-      "startTime": "11:00",
-      "endTime": "11:30",
-      "blockType": "fitness",
-      "title": "Midday walk",
+      "startTime": "08:30",
+      "endTime": "12:00",
+      "blockType": "work",
+      "title": "Morning work block",
       "details": {
-        "blockType": "fitness",
-        "exercises": [{ "name": "Walk", "sets": 1, "reps": "30 minutes" }]
+        "blockType": "work",
+        "tasks": ["Project tasks", "Team video calls", "Documentation"],
+        "focusMode": true
       },
       "source": "ai_generated",
-      "displayOrder": 3
+      "displayOrder": 2
     },
     {
       "startTime": "12:00",
@@ -56,7 +48,7 @@
         "instructions": ["Heat soup", "Slice bread", "Toss salad"]
       },
       "source": "ai_generated",
-      "displayOrder": 4
+      "displayOrder": 3
     },
     {
       "startTime": "13:00",
@@ -65,27 +57,10 @@
       "title": "Afternoon work block",
       "details": {
         "blockType": "work",
-        "tasks": ["Project tasks", "Team video calls", "Documentation"],
-        "focusMode": true
+        "tasks": ["Project tasks", "Code review", "Planning"]
       },
       "source": "ai_generated",
-      "displayOrder": 5
-    },
-    {
-      "startTime": "16:30",
-      "endTime": "17:15",
-      "blockType": "fitness",
-      "title": "Strength training",
-      "details": {
-        "blockType": "fitness",
-        "exercises": [
-          { "name": "Push-ups", "sets": 4, "reps": 15 },
-          { "name": "Rows", "sets": 4, "reps": 12 },
-          { "name": "Plank", "sets": 3, "reps": "40 seconds" }
-        ]
-      },
-      "source": "ai_generated",
-      "displayOrder": 6
+      "displayOrder": 4
     },
     {
       "startTime": "18:00",
@@ -99,41 +74,16 @@
         "instructions": ["Stir-fry vegetables and tofu", "Steam rice"]
       },
       "source": "ai_generated",
-      "displayOrder": 7
+      "displayOrder": 5
     },
     {
-      "startTime": "19:00",
-      "endTime": "20:00",
-      "blockType": "errands",
-      "title": "Errands",
-      "details": {
-        "blockType": "errands",
-        "stops": [
-          { "title": "Pick up package", "location": "Local pickup point", "estimatedMinutes": 20 },
-          { "title": "Grocery run", "location": "Neighborhood market", "estimatedMinutes": 30 }
-        ],
-        "routeOptimized": true
-      },
-      "source": "ai_generated",
-      "displayOrder": 8
-    },
-    {
-      "startTime": "21:30",
-      "endTime": "22:15",
-      "blockType": "custom",
-      "title": "Wind-down",
-      "details": { "blockType": "custom", "notes": "Lights dimmed, reading, phone away" },
-      "source": "ai_generated",
-      "displayOrder": 9
-    },
-    {
-      "startTime": "22:15",
+      "startTime": "22:30",
       "endTime": "06:30",
       "blockType": "sleep",
       "title": "Sleep",
       "details": { "blockType": "sleep" },
       "source": "ai_generated",
-      "displayOrder": 10
+      "displayOrder": 6
     }
   ]
 }
