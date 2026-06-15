@@ -28,13 +28,11 @@ export const ModulesEnabledSchema = z.object({
         .optional(),
     })
     .default({ enabled: false }),
-  sleep: z
-    .object({
-      enabled: z.boolean(),
-      bedtimeTarget: z.string().optional(),
-      wakeTarget: z.string().optional(),
-    })
-    .default({ enabled: false }),
+  // Chat 111 §5.1 — wake/bed targets removed from the sleep module. They are now
+  // canonical, always-present top-level fields on BaseProfile (wakeTarget /
+  // bedtimeTarget). The sleep module keeps `enabled` only; read wake/bed from
+  // BaseProfile, never from here.
+  sleep: z.object({ enabled: z.boolean() }).default({ enabled: false }),
   errands: z.object({ enabled: z.boolean() }).default({ enabled: false }),
   medication: z.object({ enabled: z.boolean() }).default({ enabled: false }),
   finance: z.object({ enabled: z.boolean() }).default({ enabled: false }),
