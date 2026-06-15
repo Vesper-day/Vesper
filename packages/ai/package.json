@@ -16,10 +16,13 @@
     "eval:plan": "tsx eval/runPlanEval.ts"
   },
   "dependencies": {
+    "@vesper/db": "workspace:*",
     "@vesper/shared": "workspace:*",
     "@ai-sdk/anthropic": "^1.0.0",
     "@anthropic-ai/sdk": "^0.54.0",
+    "@sentry/nextjs": "^8.0.0",
     "ai": "^4.0.0",
+    "drizzle-orm": "^0.38.0",
     "zod": "^3.0.0"
   },
   "devDependencies": {

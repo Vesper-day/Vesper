@@ -888,6 +888,7 @@ apps/web/vitest.config.ts
 docs/ARCHITECTURE.md
 docs/ARCHITECTURE_DECISIONS.md
 docs/BRAINSTORM_MASTER.md
+docs/CHAT_021_RESOLUTION_RECORD.md
 docs/CHAT_111_RESOLUTION_RECORD.md
 docs/CHAT_112_RESOLUTION_RECORD.md
 docs/CI_SECRETS.md
@@ -936,7 +937,14 @@ packages/ai/src/__tests__/fallback.test.ts
 packages/ai/src/__tests__/voiceGate.test.ts
 packages/ai/src/cacheConfig.ts
 packages/ai/src/client.ts
-packages/ai/src/context.ts
+packages/ai/src/context/__tests__/cacheObservability.test.ts
+packages/ai/src/context/__tests__/planContext.test.ts
+packages/ai/src/context/__tests__/templateSubset.test.ts
+packages/ai/src/context/__tests__/userContext.test.ts
+packages/ai/src/context/cacheObservability.ts
+packages/ai/src/context/planContext.ts
+packages/ai/src/context/templateSubset.ts
+packages/ai/src/context/userContext.ts
 packages/ai/src/cost/tracker.ts
 packages/ai/src/fallback/index.ts
 packages/ai/src/fallback/plans/athlete.json
