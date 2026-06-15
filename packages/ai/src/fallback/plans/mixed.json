@@ -10,20 +10,6 @@
       "displayOrder": 0
     },
     {
-      "startTime": "07:30",
-      "endTime": "08:00",
-      "blockType": "nutrition",
-      "title": "Breakfast",
-      "details": {
-        "blockType": "nutrition",
-        "mealName": "Breakfast",
-        "ingredients": ["Eggs", "Toast", "Orange juice"],
-        "instructions": ["Scramble eggs", "Toast bread", "Pour juice"]
-      },
-      "source": "ai_generated",
-      "displayOrder": 1
-    },
-    {
       "startTime": "08:30",
       "endTime": "11:30",
       "blockType": "work",
@@ -33,33 +19,7 @@
         "tasks": ["Project tasks", "Email and messages"]
       },
       "source": "ai_generated",
-      "displayOrder": 2
-    },
-    {
-      "startTime": "11:45",
-      "endTime": "12:30",
-      "blockType": "fitness",
-      "title": "Midday workout",
-      "details": {
-        "blockType": "fitness",
-        "exercises": [{ "name": "Bodyweight circuit", "sets": 3, "reps": 15 }]
-      },
-      "source": "ai_generated",
-      "displayOrder": 3
-    },
-    {
-      "startTime": "12:45",
-      "endTime": "13:30",
-      "blockType": "nutrition",
-      "title": "Lunch",
-      "details": {
-        "blockType": "nutrition",
-        "mealName": "Lunch",
-        "ingredients": ["Soup", "Whole grain bread", "Salad"],
-        "instructions": ["Heat soup", "Slice bread", "Toss salad"]
-      },
-      "source": "ai_generated",
-      "displayOrder": 4
+      "displayOrder": 1
     },
     {
       "startTime": "14:00",
@@ -71,7 +31,7 @@
         "tasks": ["Client follow-ups", "Planning session"]
       },
       "source": "ai_generated",
-      "displayOrder": 5
+      "displayOrder": 2
     },
     {
       "startTime": "17:00",
@@ -87,48 +47,7 @@
         "routeOptimized": true
       },
       "source": "ai_generated",
-      "displayOrder": 6
-    },
-    {
-      "startTime": "18:30",
-      "endTime": "19:15",
-      "blockType": "nutrition",
-      "title": "Dinner",
-      "details": {
-        "blockType": "nutrition",
-        "mealName": "Dinner",
-        "ingredients": ["Roast chicken", "Potatoes", "Green beans"],
-        "instructions": ["Roast chicken", "Boil potatoes", "Steam green beans"]
-      },
-      "source": "ai_generated",
-      "displayOrder": 7
-    },
-    {
-      "startTime": "19:30",
-      "endTime": "20:00",
-      "blockType": "finance",
-      "title": "Bill review",
-      "details": { "blockType": "finance", "notes": "Review monthly bills and budget" },
-      "source": "ai_generated",
-      "displayOrder": 8
-    },
-    {
-      "startTime": "20:15",
-      "endTime": "21:00",
-      "blockType": "custom",
-      "title": "Evening downtime",
-      "details": { "blockType": "custom", "notes": "Personal time, light reading" },
-      "source": "ai_generated",
-      "displayOrder": 9
-    },
-    {
-      "startTime": "21:30",
-      "endTime": "22:15",
-      "blockType": "custom",
-      "title": "Wind-down",
-      "details": { "blockType": "custom", "notes": "Lights dimmed, phone away" },
-      "source": "ai_generated",
-      "displayOrder": 10
+      "displayOrder": 3
     },
     {
       "startTime": "22:15",
@@ -137,7 +56,7 @@
       "title": "Sleep",
       "details": { "blockType": "sleep" },
       "source": "ai_generated",
-      "displayOrder": 11
+      "displayOrder": 4
     }
   ]
 }
