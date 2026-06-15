@@ -45,15 +45,6 @@
       "displayOrder": 3
     },
     {
-      "startTime": "11:45",
-      "endTime": "13:00",
-      "blockType": "focus",
-      "title": "Library study session",
-      "details": { "blockType": "focus", "notes": "Reading and problem sets" },
-      "source": "ai_generated",
-      "displayOrder": 4
-    },
-    {
       "startTime": "13:00",
       "endTime": "13:45",
       "blockType": "nutrition",
@@ -65,7 +56,7 @@
         "instructions": ["Assemble sandwich", "Pack apple"]
       },
       "source": "ai_generated",
-      "displayOrder": 5
+      "displayOrder": 4
     },
     {
       "startTime": "14:00",
@@ -77,22 +68,7 @@
         "tasks": ["Group project meeting", "Lab session"]
       },
       "source": "ai_generated",
-      "displayOrder": 6
-    },
-    {
-      "startTime": "16:30",
-      "endTime": "17:30",
-      "blockType": "fitness",
-      "title": "Campus gym session",
-      "details": {
-        "blockType": "fitness",
-        "exercises": [
-          { "name": "Treadmill run", "sets": 1, "reps": "25 minutes" },
-          { "name": "Stretching", "sets": 1, "reps": "10 minutes" }
-        ]
-      },
-      "source": "ai_generated",
-      "displayOrder": 7
+      "displayOrder": 5
     },
     {
       "startTime": "18:00",
@@ -106,25 +82,7 @@
         "instructions": ["Boil pasta", "Warm sauce", "Toss salad"]
       },
       "source": "ai_generated",
-      "displayOrder": 8
-    },
-    {
-      "startTime": "19:00",
-      "endTime": "21:00",
-      "blockType": "focus",
-      "title": "Evening study block",
-      "details": { "blockType": "focus", "notes": "Review notes, prepare for tomorrow" },
-      "source": "ai_generated",
-      "displayOrder": 9
-    },
-    {
-      "startTime": "22:00",
-      "endTime": "22:45",
-      "blockType": "custom",
-      "title": "Wind-down",
-      "details": { "blockType": "custom", "notes": "Lights dimmed, phone away" },
-      "source": "ai_generated",
-      "displayOrder": 10
+      "displayOrder": 6
     },
     {
       "startTime": "22:45",
@@ -133,7 +91,7 @@
       "title": "Sleep",
       "details": { "blockType": "sleep" },
       "source": "ai_generated",
-      "displayOrder": 11
+      "displayOrder": 7
     }
   ]
 }
