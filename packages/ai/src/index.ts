@@ -19,6 +19,30 @@ export * from './prompts/calendar-classify';
 export * from './prompts/checkin-question';
 export * from './prompts/empathy-regeneration';
 
+// Chat 023: AI operation scaffolds (not yet invoked; called by later chats).
+export {
+  parsePlanEditCommand,
+  PlanEditCommandSchema,
+} from './parsePlanEditCommand';
+export type {
+  PlanEditCommand,
+  AddBlockInput,
+  ParseTelemetry,
+  ParsePlanEditCommandOptions,
+} from './parsePlanEditCommand';
+export { selectWorkoutTemplate } from './selectWorkoutTemplate';
+export type { WorkoutSelectionInput } from './selectWorkoutTemplate';
+export { selectRecipeTemplate } from './selectRecipeTemplate';
+export type { RecipeSelectionInput } from './selectRecipeTemplate';
+export { classifyCalendarEvent, CalendarClassificationSchema } from './classifyCalendarEvent';
+export { classifyCalendarEventsBatch } from './classifyCalendarEventsBatch';
+export { generateCheckInQuestion } from './generateCheckInQuestion';
+export type { CheckInContext } from './generateCheckInQuestion';
+export { suggestWeeklyPriorities } from './suggestWeeklyPriorities';
+export type { OutstandingTask, WeeklyPrioritiesInput } from './suggestWeeklyPriorities';
+export { generateRegenerationPrompt } from './generateRegenerationPrompt';
+export type { RegenerationContext } from './generateRegenerationPrompt';
+
 // Chat 021: context builders + cache wiring (supersedes the pre-111 context.ts stub).
 export { buildPlanContext } from './context/planContext';
 export type { PlanContext, CalendarEvent, PendingTask } from './context/planContext';

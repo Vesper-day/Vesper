@@ -13,7 +13,8 @@
     "lint": "eslint src",
     "test": "vitest run",
     "type-check": "tsc --noEmit",
-    "eval:plan": "tsx eval/runPlanEval.ts"
+    "eval:plan": "tsx eval/runPlanEval.ts",
+    "smoke:023": "tsx scripts/smoke-023.ts"
   },
   "dependencies": {
     "@vesper/db": "workspace:*",
