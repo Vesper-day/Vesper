@@ -889,6 +889,7 @@ apps/web/vitest.config.ts
 docs/ARCHITECTURE.md
 docs/ARCHITECTURE_DECISIONS.md
 docs/BRAINSTORM_MASTER.md
+docs/CHAT_111_RESOLUTION_RECORD.md
 docs/CI_SECRETS.md
 docs/CSP_NOTES.md
 docs/ENVIRONMENT_SETUP.md
@@ -1003,6 +1004,8 @@ packages/db/migrations/20260601000017_cancellation_events.down.sql
 packages/db/migrations/20260601000017_cancellation_events.sql
 packages/db/migrations/20260601000018_calendar_events.down.sql
 packages/db/migrations/20260601000018_calendar_events.sql
+packages/db/migrations/20260601000020_chat111_schema_checkpoint.down.sql
+packages/db/migrations/20260601000020_chat111_schema_checkpoint.sql
 packages/db/package.json
 packages/db/scripts/check-client.ts
 packages/db/scripts/setup-test-db.ts
@@ -1086,6 +1089,7 @@ supabase/migrations/20260601000016_delayed_jobs.sql
 supabase/migrations/20260601000017_cancellation_events.sql
 supabase/migrations/20260601000018_calendar_events.sql
 supabase/migrations/20260601000019_start_of_local_day.sql
+supabase/migrations/20260601000020_chat111_schema_checkpoint.sql
 tsconfig.json
 turbo.json
 vitest.config.ts
