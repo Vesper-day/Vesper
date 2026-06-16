@@ -14,7 +14,7 @@ import {
   eq,
   type Database,
 } from '@vesper/db';
-import { logEnergy } from './route';
+import { logEnergy } from './logEnergy';
 
 const TEST_DB_URL =
   process.env.TEST_DB_URL ??
