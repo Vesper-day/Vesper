@@ -798,7 +798,6 @@
 .github/workflows/sentry-release.yml
 .gitignore
 .mcp.json
-CHAT_031_RESOLUTION_RECORD.md
 CLAUDE.md
 CONTRIBUTING.md
 README.md
@@ -910,6 +909,7 @@ docs/ARCHITECTURE.md
 docs/ARCHITECTURE_DECISIONS.md
 docs/BRAINSTORM_MASTER.md
 docs/CHAT_021_RESOLUTION_RECORD.md
+docs/CHAT_031_RESOLUTION_RECORD.md
 docs/CHAT_111_RESOLUTION_RECORD.md
 docs/CHAT_112_RESOLUTION_RECORD.md
 docs/CI_SECRETS.md
@@ -1054,6 +1054,9 @@ packages/db/package.json
 packages/db/scripts/check-client.ts
 packages/db/scripts/setup-test-db.ts
 packages/db/seed/recipe_templates.json
+packages/db/seed/scripts/buildRecipeTemplates.ts
+packages/db/seed/scripts/buildWorkoutTemplates.ts
+packages/db/seed/scripts/templateRowSchemas.ts
 packages/db/seed/workout_templates.json
 packages/db/src/client.ts
 packages/db/src/index.ts
