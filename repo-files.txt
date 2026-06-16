@@ -798,6 +798,7 @@
 .github/workflows/sentry-release.yml
 .gitignore
 .mcp.json
+CHAT_031_RESOLUTION_RECORD.md
 CLAUDE.md
 CONTRIBUTING.md
 README.md
@@ -861,7 +862,18 @@ apps/web/app/api/v1/profile/operations.ts
 apps/web/app/api/v1/profile/profile.integration.test.ts
 apps/web/app/api/v1/profile/route.ts
 apps/web/app/api/v1/profile/schemas.ts
+apps/web/app/api/v1/referral/code/code.integration.test.ts
+apps/web/app/api/v1/referral/code/getReferralCode.ts
+apps/web/app/api/v1/referral/code/route.ts
+apps/web/app/api/v1/referral/schemas.ts
+apps/web/app/api/v1/referral/track/route.ts
+apps/web/app/api/v1/referral/track/track.integration.test.ts
+apps/web/app/api/v1/referral/track/trackReferral.ts
 apps/web/app/api/v1/test/route.ts
+apps/web/app/api/v1/waitlist/addToWaitlist.ts
+apps/web/app/api/v1/waitlist/route.ts
+apps/web/app/api/v1/waitlist/schemas.ts
+apps/web/app/api/v1/waitlist/waitlist.integration.test.ts
 apps/web/app/auth/callback/route.ts
 apps/web/app/auth/confirm/route.ts
 apps/web/app/globals.css
