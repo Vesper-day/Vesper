@@ -1081,6 +1081,16 @@ packages/db/tsconfig.json
 packages/db/vitest.config.ts
 packages/shared/RATE_LIMITING.md
 packages/shared/emails/MagicLinkEmail.tsx
+packages/shared/emails/Trial0DayEmail.tsx
+packages/shared/emails/Trial1DayEmail.tsx
+packages/shared/emails/Trial2DayEmail.tsx
+packages/shared/emails/WelcomeEmail.tsx
+packages/shared/emails/__tests__/renderAll.ts
+packages/shared/emails/output/MagicLinkEmail.html
+packages/shared/emails/output/Trial0DayEmail.html
+packages/shared/emails/output/Trial1DayEmail.html
+packages/shared/emails/output/Trial2DayEmail.html
+packages/shared/emails/output/WelcomeEmail.html
 packages/shared/package.json
 packages/shared/src/api/__tests__/auth.test.ts
 packages/shared/src/api/__tests__/errors.test.ts
