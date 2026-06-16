@@ -852,9 +852,12 @@ apps/web/app/(marketing)/layout.tsx
 apps/web/app/(marketing)/page.tsx
 apps/web/app/api/v1/auth/magic-link/route.ts
 apps/web/app/api/v1/energy/energy.integration.test.ts
+apps/web/app/api/v1/energy/logEnergy.ts
 apps/web/app/api/v1/energy/route.ts
 apps/web/app/api/v1/plans/generate/route.ts
 apps/web/app/api/v1/profile/modules/[moduleId]/route.ts
+apps/web/app/api/v1/profile/modules/[moduleId]/toggleModule.ts
+apps/web/app/api/v1/profile/operations.ts
 apps/web/app/api/v1/profile/profile.integration.test.ts
 apps/web/app/api/v1/profile/route.ts
 apps/web/app/api/v1/profile/schemas.ts

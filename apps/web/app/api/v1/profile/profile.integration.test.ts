@@ -21,8 +21,8 @@ import {
   type Database,
   type BaseProfile,
 } from '@vesper/db';
-import { getProfile, updateProfile } from './route';
-import { toggleModule } from './modules/[moduleId]/route';
+import { getProfile, updateProfile } from './operations';
+import { toggleModule } from './modules/[moduleId]/toggleModule';
 import { ModuleIdSchema, MODULE_KEYS } from './schemas';
 
 const TEST_DB_URL =
