@@ -854,6 +854,14 @@ apps/web/app/api/v1/auth/magic-link/route.ts
 apps/web/app/api/v1/energy/energy.integration.test.ts
 apps/web/app/api/v1/energy/logEnergy.ts
 apps/web/app/api/v1/energy/route.ts
+apps/web/app/api/v1/notebook/confirm/confirmInference.ts
+apps/web/app/api/v1/notebook/confirm/route.ts
+apps/web/app/api/v1/notebook/correct/correctInference.ts
+apps/web/app/api/v1/notebook/correct/route.ts
+apps/web/app/api/v1/notebook/getDueInference.ts
+apps/web/app/api/v1/notebook/mapInference.ts
+apps/web/app/api/v1/notebook/route.ts
+apps/web/app/api/v1/notebook/schemas.ts
 apps/web/app/api/v1/plans/generate/route.ts
 apps/web/app/api/v1/profile/modules/[moduleId]/route.ts
 apps/web/app/api/v1/profile/modules/[moduleId]/toggleModule.ts
@@ -910,6 +918,7 @@ docs/ARCHITECTURE_DECISIONS.md
 docs/BRAINSTORM_MASTER.md
 docs/CHAT_021_RESOLUTION_RECORD.md
 docs/CHAT_031_RESOLUTION_RECORD.md
+docs/CHAT_108_RESOLUTION_RECORD.md
 docs/CHAT_111_RESOLUTION_RECORD.md
 docs/CHAT_112_RESOLUTION_RECORD.md
 docs/CI_SECRETS.md
@@ -1050,6 +1059,8 @@ packages/db/migrations/20260601000018_calendar_events.down.sql
 packages/db/migrations/20260601000018_calendar_events.sql
 packages/db/migrations/20260601000020_chat111_schema_checkpoint.down.sql
 packages/db/migrations/20260601000020_chat111_schema_checkpoint.sql
+packages/db/migrations/20260601000021_notebook_inferences.down.sql
+packages/db/migrations/20260601000021_notebook_inferences.sql
 packages/db/package.json
 packages/db/scripts/check-client.ts
 packages/db/scripts/setup-test-db.ts
@@ -1069,6 +1080,7 @@ packages/db/src/schema/jsonb/base-profile.ts
 packages/db/src/schema/jsonb/index.ts
 packages/db/src/schema/jsonb/modules-enabled.ts
 packages/db/src/schema/modules.ts
+packages/db/src/schema/notebook.ts
 packages/db/src/schema/subscriptions.ts
 packages/db/src/schema/templates.ts
 packages/db/src/schema/users.ts
@@ -1111,6 +1123,7 @@ packages/shared/src/schemas/dailyPlan.ts
 packages/shared/src/schemas/index.ts
 packages/shared/src/schemas/jsonb/block-details.ts
 packages/shared/src/schemas/jsonb/index.ts
+packages/shared/src/schemas/notebook.ts
 packages/shared/src/schemas/plan.ts
 packages/shared/src/schemas/task.ts
 packages/shared/src/schemas/user.ts
@@ -1147,6 +1160,7 @@ supabase/migrations/20260601000017_cancellation_events.sql
 supabase/migrations/20260601000018_calendar_events.sql
 supabase/migrations/20260601000019_start_of_local_day.sql
 supabase/migrations/20260601000020_chat111_schema_checkpoint.sql
+supabase/migrations/20260601000021_notebook_inferences.sql
 tsconfig.json
 turbo.json
 vitest.config.ts
