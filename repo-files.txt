@@ -820,6 +820,14 @@ apps/mobile/components/UpdateGateModal.tsx
 apps/mobile/expo-env.d.ts
 apps/mobile/global.css
 apps/mobile/hooks/useAppLifecycle.ts
+apps/mobile/ios/VesperAlarmExtension/AlarmContentView.swift
+apps/mobile/ios/VesperAlarmExtension/Info.plist
+apps/mobile/ios/VesperAlarmExtension/NotificationViewController.swift
+apps/mobile/ios/VesperAlarmExtension/SharedAlarmStore.swift
+apps/mobile/ios/VesperAlarmExtension/VesperAlarmExtension.entitlements
+apps/mobile/lib/alarm.test.ts
+apps/mobile/lib/alarm.ts
+apps/mobile/lib/analytics.ts
 apps/mobile/lib/api/client.ts
 apps/mobile/lib/auth/__tests__/deepLink.test.ts
 apps/mobile/lib/auth/__tests__/secureStorage.test.ts
@@ -918,6 +926,7 @@ docs/ARCHITECTURE_DECISIONS.md
 docs/BRAINSTORM_MASTER.md
 docs/CHAT_021_RESOLUTION_RECORD.md
 docs/CHAT_031_RESOLUTION_RECORD.md
+docs/CHAT_059B_RESOLUTION_RECORD.md
 docs/CHAT_108_RESOLUTION_RECORD.md
 docs/CHAT_111_RESOLUTION_RECORD.md
 docs/CHAT_112_RESOLUTION_RECORD.md
@@ -940,6 +949,7 @@ docs/PROJECT_OVERVIEW.md
 docs/RETENTION_POLICY.md
 docs/RUNBOOKS/BACKUP_RESTORE_DRILL.md
 docs/RUNBOOKS/INCIDENT_RESPONSE.md
+docs/RUNBOOKS/IOS_ALARM_REBUILD.md
 docs/RUNBOOKS/README.md
 docs/SCALING_THRESHOLDS.md
 docs/TECHNICAL_SPEC.md
