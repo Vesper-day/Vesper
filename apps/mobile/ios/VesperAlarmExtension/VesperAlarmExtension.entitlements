@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Entitlements for the VesperAlarmExtension target.
+
+  - application-groups: the shared app group used for the fired_at hand-off from
+    the Content Extension to the RN runtime. MUST match the main app
+    (app.config.js ios.entitlements) and SharedAlarmStore.appGroupId.
+  - time-sensitive: lets the extension participate in time-sensitive delivery.
+    Time-sensitive (NOT critical — critical is reserved for emergency alerts and
+    needs a separate Apple-granted entitlement [PRD §3.2]).
+
+  On-device use of the time-sensitive entitlement is gated on Apple Developer
+  enrollment (C-04), which is incomplete. Authored as committed text only; set on
+  the target in the Mac session — see docs/RUNBOOKS/IOS_ALARM_REBUILD.md.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>com.apple.security.application-groups</key>
+  <array>
+    <string>group.com.vesper.app</string>
+  </array>
+  <key>com.apple.developer.usernotifications.time-sensitive</key>
+  <true/>
+</dict>
+</plist>

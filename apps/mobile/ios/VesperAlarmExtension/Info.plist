@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Info.plist for the VesperAlarmExtension UNNotificationContentExtension.
+
+  UNNotificationExtensionCategory MUST equal the category identifier registered
+  from RN (apps/mobile/lib/alarm.ts ALARM_CATEGORY_ID = "vesperalarm"). Apple
+  forbids ':' and '-' in category ids, hence the flat slug.
+
+  - UNNotificationExtensionDefaultContentHidden = true: hide the system default
+    notification body so our custom edge-to-edge SwiftUI surface owns the space.
+  - UNNotificationExtensionInitialContentSizeRatio = 1.0: request a full-height
+    content area for the lock-screen alarm.
+  - UNNotificationExtensionUserInteractionEnabled = true: allow the custom view
+    to be interactive.
+
+  NOTE: Authored as committed text only; the target is created/wired in a Mac
+  session — see docs/RUNBOOKS/IOS_ALARM_REBUILD.md.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key>
+  <string>VesperAlarmExtension</string>
+  <key>CFBundleDisplayName</key>
+  <string>Vesper Alarm</string>
+  <key>CFBundleIdentifier</key>
+  <string>com.vesper.app.VesperAlarmExtension</string>
+  <key>CFBundlePackageType</key>
+  <string>XPC!</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0.0</string>
+  <key>CFBundleVersion</key>
+  <string>1</string>
+  <key>NSExtension</key>
+  <dict>
+    <key>NSExtensionPointIdentifier</key>
+    <string>com.apple.usernotifications.content-extension</string>
+    <!-- Programmatic UI: principal class drives the view, no .storyboard shipped.
+         The Mac session must set the target's principal class accordingly
+         (see IOS_ALARM_REBUILD.md), not wire a MainInterface storyboard. -->
+    <key>NSExtensionPrincipalClass</key>
+    <string>NotificationViewController</string>
+    <key>NSExtensionAttributes</key>
+    <dict>
+      <key>UNNotificationExtensionCategory</key>
+      <string>vesperalarm</string>
+      <key>UNNotificationExtensionDefaultContentHidden</key>
+      <true/>
+      <key>UNNotificationExtensionInitialContentSizeRatio</key>
+      <real>1.0</real>
+      <key>UNNotificationExtensionUserInteractionEnabled</key>
+      <true/>
+    </dict>
+  </dict>
+</dict>
+</plist>
