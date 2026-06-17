@@ -20,4 +20,4 @@ export * from './schema';
 // OTHER instance than the one our schema tables are built with, producing spurious
 // cross-instance Column/SQL type errors under exactOptionalPropertyTypes. Importing
 // these from @vesper/db guarantees the same instance as the tables.
-export { eq, and, sql } from 'drizzle-orm';
+export { eq, and, sql, desc } from 'drizzle-orm';
