@@ -8,6 +8,7 @@
     "test": "turbo test",
     "playwright": "playwright test --config apps/web/playwright.config.ts --pass-with-no-tests",
     "type-check": "turbo type-check",
+    "gen:live-activity-types": "tsx packages/shared/scripts/genLiveActivityTypes.ts",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md,json}\" --ignore-path .gitignore"
   },
   "devDependencies": {
@@ -17,6 +18,7 @@
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.0.0",
     "prettier": "^3.0.0",
+    "tsx": "^4.19.0",
     "turbo": "^2.0.0",
     "typescript": "^5.0.0",
     "vitest": "^2.0.0"
