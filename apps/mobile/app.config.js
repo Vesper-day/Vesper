@@ -35,6 +35,11 @@ module.exports = {
     entitlements: {
       'com.apple.security.application-groups': ['group.com.vesper.app'],
       'keychain-access-groups': ['$(AppIdentifierPrefix)com.vesper.app'],
+      // Required for local alarm notifications scheduled with
+      // interruptionLevel:'timeSensitive' (apps/mobile/lib/alarm.ts). NOT
+      // 'critical' — critical is reserved for emergency alerts [PRD §3.2].
+      // On-device effect is gated on Apple Developer enrollment (C-04).
+      'com.apple.developer.usernotifications.time-sensitive': true,
     },
   },
   plugins: [
