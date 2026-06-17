@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vesper.day/schemas/live-activity.json",
+  "title": "VesperLiveActivity",
+  "description": "Single source of truth for the Live Activity wire model (TECHNICAL_SPEC.md §7 \"Live Activity and Dynamic Island\"). definitions.attributes is the static ActivityAttributes payload; definitions.contentState maps 1:1 to the APNs \"content-state\" object. Field order here is the canonical key order — the codegen (packages/shared/scripts/genLiveActivityTypes.ts) emits Swift and TS in this exact order. Do NOT hand-edit the generated outputs; edit this file and re-run `pnpm gen:live-activity-types`.",
+  "definitions": {
+    "attributes": {
+      "title": "VesperBlockAttributes",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blockId"],
+      "properties": {
+        "blockId": {
+          "type": "string",
+          "x-swift-comment": "Static attribute — the block UUID this activity tracks.",
+          "x-ts-comment": "Static attribute — the block UUID this activity tracks."
+        }
+      }
+    },
+    "contentState": {
+      "title": "VesperLiveActivityContentState",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blockId",
+        "blockType",
+        "title",
+        "abbreviation",
+        "endTime",
+        "minutesRemaining"
+      ],
+      "properties": {
+        "blockId": {
+          "type": "string",
+          "x-swift-comment": "Block UUID (matches the static attribute).",
+          "x-ts-comment": "Block UUID (matches the static attribute)."
+        },
+        "blockType": {
+          "type": "string",
+          "x-swift-comment": "Module slug, e.g. \"fitness\". Plain string — NOT coupled to BlockTypeSchema.",
+          "x-ts-comment": "Module slug, e.g. \"fitness\". Plain string — NOT coupled to BlockTypeSchema."
+        },
+        "title": {
+          "type": "string",
+          "x-swift-comment": "Block title shown in the expanded view.",
+          "x-ts-comment": "Block title shown in the expanded view."
+        },
+        "abbreviation": {
+          "type": "string",
+          "x-swift-comment": "2-char module abbreviation, e.g. \"GY\".",
+          "x-ts-comment": "2-char module abbreviation, e.g. \"GY\"."
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-swift-comment": "ISO8601 block end; parsed on-device to render the countdown.",
+          "x-ts-comment": "ISO8601 block end; parsed on-device to render the countdown."
+        },
+        "minutesRemaining": {
+          "type": "integer",
+          "x-swift-comment": "Server hint; the device recomputes from endTime each minute.",
+          "x-ts-comment": "Server hint; the device recomputes from endTime each minute."
+        },
+        "nextBlockTitle": {
+          "type": ["string", "null"],
+          "x-swift-comment": "Nullable — title of the next block, when pre-armed.",
+          "x-ts-comment": "Nullable — title of the next block, when pre-armed."
+        },
+        "nextBlockStart": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "x-swift-comment": "Nullable — ISO8601 start of the next block, when pre-armed.",
+          "x-ts-comment": "Nullable — ISO8601 start of the next block, when pre-armed."
+        }
+      }
+    }
+  }
+}

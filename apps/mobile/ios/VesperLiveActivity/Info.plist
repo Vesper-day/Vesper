@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Info.plist for the VesperLiveActivity WidgetKit extension.
+
+  NSExtensionPointIdentifier = com.apple.widgetkit-extension declares this as a
+  WidgetKit extension. Unlike the alarm content extension, there is NO principal
+  class: WidgetKit discovers the @main WidgetBundle (VesperLiveActivityBundle)
+  automatically, so NSExtensionPrincipalClass / NSExtensionMainStoryboard are
+  intentionally omitted.
+
+  The two NSSupportsLiveActivities* keys live on the MAIN APP target (declared in
+  apps/mobile/app.config.js ios.infoPlist), not here — they gate whether the app
+  may start activities at all (TECHNICAL_SPEC §7).
+
+  NOTE: Authored as committed text only; the target is created/wired in a Mac
+  session — see docs/RUNBOOKS/IOS_WIDGET_REBUILD.md.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key>
+  <string>VesperLiveActivity</string>
+  <key>CFBundleDisplayName</key>
+  <string>Vesper Live Activity</string>
+  <key>CFBundleIdentifier</key>
+  <string>com.vesper.app.liveactivity</string>
+  <key>CFBundlePackageType</key>
+  <string>XPC!</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0.0</string>
+  <key>CFBundleVersion</key>
+  <string>1</string>
+  <key>NSExtension</key>
+  <dict>
+    <key>NSExtensionPointIdentifier</key>
+    <string>com.apple.widgetkit-extension</string>
+  </dict>
+</dict>
+</plist>

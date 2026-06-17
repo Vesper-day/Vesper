@@ -26,6 +26,13 @@ module.exports = {
     infoPlist: {
       NSLocationWhenInUseUsageDescription:
         'Vesper uses your location to surface nearby errands and optimise your route.',
+      // Live Activity support (TECHNICAL_SPEC §7). Without these the widget
+      // extension builds but activities silently fail at runtime.
+      // - NSSupportsLiveActivities: declares the app supports Live Activities.
+      // - NSSupportsLiveActivitiesFrequentUpdates: enables sub-hourly cadence,
+      //   required for the per-minute countdown and staleDate-driven transitions.
+      NSSupportsLiveActivities: true,
+      NSSupportsLiveActivitiesFrequentUpdates: true,
     },
     // Shared App Group + Keychain access group, configured now so the future
     // Live Activity widget extension and the app can share the Keychain session
