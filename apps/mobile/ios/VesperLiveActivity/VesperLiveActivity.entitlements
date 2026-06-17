@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Entitlements for the VesperLiveActivity widget extension target.
+
+  - application-groups: the shared app group, MUST match the main app
+    (app.config.js ios.entitlements) so the widget and the app share a container.
+  - keychain-access-groups: MUST match the main app so the extension can read the
+    shared Keychain session. `$(AppIdentifierPrefix)` resolves to the team prefix
+    at build time.
+
+  Live Activities themselves need no extra entitlement — the capability is the
+  NSSupportsLiveActivities* Info.plist keys on the main app. On-device build is
+  gated on Apple Developer enrollment (C-04). Authored as committed text only; set
+  on the target in the Mac session — see docs/RUNBOOKS/IOS_WIDGET_REBUILD.md.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>com.apple.security.application-groups</key>
+  <array>
+    <string>group.com.vesper.app</string>
+  </array>
+  <key>keychain-access-groups</key>
+  <array>
+    <string>$(AppIdentifierPrefix)com.vesper.app</string>
+  </array>
+</dict>
+</plist>

@@ -825,6 +825,10 @@ apps/mobile/ios/VesperAlarmExtension/Info.plist
 apps/mobile/ios/VesperAlarmExtension/NotificationViewController.swift
 apps/mobile/ios/VesperAlarmExtension/SharedAlarmStore.swift
 apps/mobile/ios/VesperAlarmExtension/VesperAlarmExtension.entitlements
+apps/mobile/ios/VesperLiveActivity/ActivityModels.swift
+apps/mobile/ios/VesperLiveActivity/Info.plist
+apps/mobile/ios/VesperLiveActivity/VesperLiveActivity.entitlements
+apps/mobile/ios/VesperLiveActivity/VesperLiveActivityBundle.swift
 apps/mobile/lib/alarm.test.ts
 apps/mobile/lib/alarm.ts
 apps/mobile/lib/analytics.ts
@@ -927,6 +931,7 @@ docs/BRAINSTORM_MASTER.md
 docs/CHAT_021_RESOLUTION_RECORD.md
 docs/CHAT_031_RESOLUTION_RECORD.md
 docs/CHAT_059B_RESOLUTION_RECORD.md
+docs/CHAT_077_RESOLUTION_RECORD.md
 docs/CHAT_108_RESOLUTION_RECORD.md
 docs/CHAT_111_RESOLUTION_RECORD.md
 docs/CHAT_112_RESOLUTION_RECORD.md
@@ -950,6 +955,7 @@ docs/RETENTION_POLICY.md
 docs/RUNBOOKS/BACKUP_RESTORE_DRILL.md
 docs/RUNBOOKS/INCIDENT_RESPONSE.md
 docs/RUNBOOKS/IOS_ALARM_REBUILD.md
+docs/RUNBOOKS/IOS_WIDGET_REBUILD.md
 docs/RUNBOOKS/README.md
 docs/SCALING_THRESHOLDS.md
 docs/TECHNICAL_SPEC.md
@@ -1114,6 +1120,7 @@ packages/shared/emails/output/Trial1DayEmail.html
 packages/shared/emails/output/Trial2DayEmail.html
 packages/shared/emails/output/WelcomeEmail.html
 packages/shared/package.json
+packages/shared/scripts/genLiveActivityTypes.ts
 packages/shared/src/api/__tests__/auth.test.ts
 packages/shared/src/api/__tests__/errors.test.ts
 packages/shared/src/api/__tests__/minAppVersion.test.ts
@@ -1127,6 +1134,8 @@ packages/shared/src/api/route.ts
 packages/shared/src/constants/index.ts
 packages/shared/src/errors.ts
 packages/shared/src/index.ts
+packages/shared/src/liveActivity/schema.json
+packages/shared/src/liveActivity/types.ts
 packages/shared/src/schemas/__tests__/dailyPlan.test.ts
 packages/shared/src/schemas/block.ts
 packages/shared/src/schemas/dailyPlan.ts
