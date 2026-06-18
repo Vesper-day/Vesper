@@ -82,3 +82,13 @@ Suffixes 200001+. These are migrations authored after V1 ships to the App Store.
 6. Add a note in your chat's PR description citing this document and the suffix chosen.
 
 **Never reuse a suffix.** If a migration file is deleted or rolled back in development, its suffix is retired. The next migration uses a fresh suffix.
+
+---
+
+## Retired Suffixes
+
+These suffixes were allocated, then their migration files were removed in development. Per the never-reuse rule above, they are **retired** — do not pick them for a new migration.
+
+| Suffix | Retired | Reason |
+|---|---|---|
+| 22 | 2026-06-18 | `20260618000022_daily_plans_approved_at` was a **duplicate** add of `daily_plans.approved_at`. Migration **0020** (`20260601000020_chat111_schema_checkpoint`, F1) had already added that column (and `daily_plans.status`); 0020 sorts before 0022, so `setup-test-db` failed with `ERROR: column "approved_at" ... already exists (SQLSTATE 42701)`. The 0022 files (canonical `.sql` + `.down.sql` and the up-only supabase mirror) were deleted. **Ownership of `daily_plans.approved_at` is migration 0020.** See `docs/CHAT_025_HOTFIX_approved_at_dedup.md`. |
