@@ -1,0 +1,131 @@
+# PERSISTENT — Cross-Chat Open Flags
+
+Last updated: after Chat 025 landed (PR TBD — in progress).
+
+Read this file when writing any Claude Code prompt. Include only flags where
+the current chat appears in the Relevant-to column. Do not paste the full file
+into kickoffs — reference by flag name only.
+
+---
+
+## How to use
+
+**When writing a kickoff:** List only the flag names relevant to that chat.
+One line each. Full text is here; do not re-paste it.
+
+**After a chat lands:** Mark resolved flags RESOLVED + date. Add any new flags
+surfaced during the session. Upload updated file to project knowledge.
+
+---
+
+## Open Flags
+
+---
+
+### STALE analytics.ts ORM
+**Owner:** Dedicated cleanup chat (TBD — no current owner in build plan)
+**Relevant-to:** 027, any chat writing to or reading from completion_log
+**Status:** Open
+**Detail:** `packages/db/src/schema/analytics.ts` declares `event_name`/`occurred_at`
+but the applied migration `…0010_completion_log.sql` has `event_type` + `value jsonb`.
+Any chat querying or writing completion_log must use REAL applied columns, not the stale
+ORM. Do not absorb a full analytics.ts cleanup into a build chat — flag and defer to the
+cleanup owner. 025 noted this; confirm at 025 resolution whether a cleanup chat was filed.
+
+---
+
+### 027 FORWARD-REF — effectiveStatus.ts
+**Owner:** 027
+**Relevant-to:** 027 only
+**Status:** Open
+**Detail:** 026 computes `effective_status` INLINE in its serializer. Chat 027 owns
+extracting `apps/web/lib/blocks/effectiveStatus.ts` and refactoring 026's serializer
+to import it. Not a 025 or 026 concern.
+
+---
+
+### 096 PostHog TAXONOMY
+**Owner:** 096
+**Relevant-to:** 025 (records-only), 059b, 096
+**Status:** Open
+**Detail:** 025 emits `plan_generated`/`plan_regenerated` to completion_log. These
+await registration in chat 096 (with `plan_fallback_served` and 059b alarm events).
+025 records-only; do not build 096 in any earlier chat.
+
+---
+
+VITEST UPSTASH ENV — `apps/web/vitest.config.ts` does not load `.env.local`; integration tests need `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` set in-shell before running the integration suite. Out of scope to fix in any build chat — just set the vars manually before each integration run.
+
+---
+
+### @types/react 18-vs-19 BUILD SKEW
+**Owner:** Pre-existing / no owner — note only
+**Relevant-to:** All @vesper/web chats (🔵)
+**Status:** Open — pre-existing, do not fix
+**Detail:** `pnpm build` for @vesper/web compiles successfully then fails ONLY in
+Next's generated `.next/types/validator.ts` for untouched `layout.tsx`
+(`bigint→ReactNode`). Pre-existing @types/react version skew. If any chat's
+type-check/build trips this: note it, do not absorb.
+
+---
+
+### @vesper/shared TSC moduleResolution GOTCHA
+**Owner:** No owner — note only
+**Relevant-to:** Any chat importing @vesper/shared types in apps/web routes
+**Status:** Open — pre-existing, do not fix
+**Detail:** Imports of @vesper/shared types under node resolution may not resolve
+(surfaced in 059b/077). If it bites in a chat: flag, do not absorb a monorepo
+resolution cleanup.
+
+---
+
+### SUPABASE ADVISOR WARNINGS
+**Owner:** Future repo-wide forward migration chat (TBD)
+**Relevant-to:** Any chat running Supabase advisor / RLS work
+**Status:** Open — track only
+**Detail:** ~67 WARN-level `auth_rls_initplan` lints, pre-existing. Fixed by a future
+repo-wide forward migration; no chat currently owns it. Before relying on the set,
+confirm none is severity ERROR. Do NOT fix in any build chat.
+
+---
+
+### MIGRATION/DB-INFRA STANDING
+**Owner:** Dormant — surfaces only if a fix-migration branch is taken
+**Relevant-to:** Any chat taking a CD-flag fix-migration branch
+**Status:** Open — dormant
+**Detail:** drizzle-kit pull / gel-core skew; `audit-schema.ts` absent (chat 006);
+Supabase MCP misconfig; `config.toml` reads `supabase/migrations` with no override.
+Dormant unless a fix-migration branch is active. Flag only if it surfaces.
+
+---
+
+### RESOLUTION-RECORD LOCATION CONVENTION
+**Owner:** Convention — applies to all chats
+**Relevant-to:** All chats
+**Status:** Open — standing convention
+**Detail:** Resolution records live in `docs/` (CHAT_026 placed there; CHAT_048
+moved root→docs/ in PR #39). All future resolution records go in `docs/`.
+
+---
+
+## Standing Deferrals (carry for closure, do not action in build chats)
+
+These are not open flags — they are known deferrals with no action required
+in any current build chat. Listed here so they don't re-surface as questions.
+
+- **077 + 059b native iOS halves** — DEFERRED to a Mac session
+- **@vesper/ui gaps** — deferred
+- **Design-token Fable migration** — deferred (Fable access suspended)
+- **Local dev auth config** — deferred
+- **Stripe identity (C-20)** — Cutover step
+- **Sentry release placeholders** — Cutover step
+- **Founder mailing-address + marketing DNS (C-22a)** — Cutover step
+- **091 follow-ups (PR #31)** — deferred
+- **@vesper/ai dist-rebuild ordering** — deferred
+
+---
+
+## Resolved Flags (keep for audit trail)
+
+| Flag | Resolved in | How |
+|------|-------------|-----|

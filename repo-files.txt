@@ -863,6 +863,10 @@ apps/web/app/(auth)/sign-in/page.tsx
 apps/web/app/(marketing)/layout.tsx
 apps/web/app/(marketing)/page.tsx
 apps/web/app/api/v1/auth/magic-link/route.ts
+apps/web/app/api/v1/blocks/[blockId]/route.ts
+apps/web/app/api/v1/blocks/blocks.integration.test.ts
+apps/web/app/api/v1/blocks/operations.ts
+apps/web/app/api/v1/blocks/route.ts
 apps/web/app/api/v1/energy/energy.integration.test.ts
 apps/web/app/api/v1/energy/logEnergy.ts
 apps/web/app/api/v1/energy/route.ts
@@ -912,6 +916,8 @@ apps/web/lib/api.ts
 apps/web/lib/auth/apple-sign-in.ts
 apps/web/lib/auth/safeRedirect.test.ts
 apps/web/lib/auth/safeRedirect.ts
+apps/web/lib/blocks/effectiveStatus.test.ts
+apps/web/lib/blocks/effectiveStatus.ts
 apps/web/lib/csp/nonce.ts
 apps/web/lib/dates/localDate.test.ts
 apps/web/lib/dates/localDate.ts
@@ -944,6 +950,7 @@ docs/CHAT_021_RESOLUTION_RECORD.md
 docs/CHAT_022_RESOLUTION_RECORD.md
 docs/CHAT_025_RESOLUTION_RECORD.md
 docs/CHAT_026_RESOLUTION_RECORD.md
+docs/CHAT_027_RESOLUTION_RECORD.md
 docs/CHAT_031_RESOLUTION_RECORD.md
 docs/CHAT_048_RESOLUTION_RECORD.md
 docs/CHAT_059B_RESOLUTION_RECORD.md
@@ -967,6 +974,7 @@ docs/OPEN_SOURCE_INVENTORY.md
 docs/PHASE_4_BUILD_PLAN.md
 docs/PRD.md
 docs/PROJECT_OVERVIEW.md
+docs/Persistent.md
 docs/RETENTION_POLICY.md
 docs/RUNBOOKS/BACKUP_RESTORE_DRILL.md
 docs/RUNBOOKS/INCIDENT_RESPONSE.md
