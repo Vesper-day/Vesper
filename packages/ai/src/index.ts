@@ -56,3 +56,9 @@ export type {
 } from './context/templateSubset';
 export { recordCacheObservation, classifyCacheOutcome } from './context/cacheObservability';
 export type { CacheObservation, CacheOutcome } from './context/cacheObservability';
+
+// Chat 022: daily-plan synthesis + three-step fallback chain.
+export { synthesizePlan } from './synthesizePlan';
+export type { DailyPlanChunk } from './synthesizePlan';
+export { readBreakerState } from './synthesizePlan.circuitBreaker';
+export type { BreakerState } from './synthesizePlan.circuitBreaker';

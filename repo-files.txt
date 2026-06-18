@@ -866,6 +866,7 @@ apps/web/app/api/v1/auth/magic-link/route.ts
 apps/web/app/api/v1/energy/energy.integration.test.ts
 apps/web/app/api/v1/energy/logEnergy.ts
 apps/web/app/api/v1/energy/route.ts
+apps/web/app/api/v1/health/circuit-breaker/route.ts
 apps/web/app/api/v1/notebook/confirm/confirmInference.ts
 apps/web/app/api/v1/notebook/confirm/route.ts
 apps/web/app/api/v1/notebook/correct/correctInference.ts
@@ -929,6 +930,7 @@ docs/ARCHITECTURE.md
 docs/ARCHITECTURE_DECISIONS.md
 docs/BRAINSTORM_MASTER.md
 docs/CHAT_021_RESOLUTION_RECORD.md
+docs/CHAT_022_RESOLUTION_RECORD.md
 docs/CHAT_031_RESOLUTION_RECORD.md
 docs/CHAT_059B_RESOLUTION_RECORD.md
 docs/CHAT_077_RESOLUTION_RECORD.md
@@ -987,6 +989,7 @@ packages/ai/src/__tests__/generateRegenerationPrompt.test.ts
 packages/ai/src/__tests__/parsePlanEditCommand.test.ts
 packages/ai/src/__tests__/selectTemplate.test.ts
 packages/ai/src/__tests__/suggestWeeklyPriorities.test.ts
+packages/ai/src/__tests__/synthesizePlan.test.ts
 packages/ai/src/__tests__/voiceGate.test.ts
 packages/ai/src/cacheConfig.ts
 packages/ai/src/classifyCalendarEvent.ts
@@ -1028,6 +1031,11 @@ packages/ai/src/selectRecipeTemplate.ts
 packages/ai/src/selectWorkoutTemplate.ts
 packages/ai/src/streamText.ts
 packages/ai/src/suggestWeeklyPriorities.ts
+packages/ai/src/synthesizePlan.circuitBreaker.ts
+packages/ai/src/synthesizePlan.fallback.ts
+packages/ai/src/synthesizePlan.observability.ts
+packages/ai/src/synthesizePlan.simplifiedContext.ts
+packages/ai/src/synthesizePlan.ts
 packages/ai/src/voiceGate.regex.ts
 packages/ai/src/voiceGate.ts
 packages/ai/tsconfig.json
