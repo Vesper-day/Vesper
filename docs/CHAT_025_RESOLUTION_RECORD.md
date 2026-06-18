@@ -139,6 +139,19 @@ the draft→approve loop needs an approved-state column. `approved_at` is **ABSE
 **046-W inherits this:** the approve loop + completion wiring chat will set
 `approved_at` and may add the Drizzle column once pull regenerates it.
 
+> **Correction (2026-06-18) — migration 22 superseded and REMOVED.** The forward-fix
+> migration authored above was **redundant**. It read only
+> `20260601000004_daily_planning.sql` and missed that migration **0020**
+> (`20260601000020_chat111_schema_checkpoint`, the chat-111 F1 checkpoint) had
+> **already** added `daily_plans.approved_at` (and `daily_plans.status DEFAULT
+> 'draft'`). Because 0020 sorts before 0022 in filename order,
+> `pnpm --filter @vesper/db setup-test-db` failed on 0022 with
+> `ERROR: column "approved_at" of relation "daily_plans" already exists (SQLSTATE 42701)`.
+> The fix: migration **0020 is the legitimate owner** of `approved_at`; the 0022 files
+> were deleted (canonical `.sql` + `.down.sql` and the supabase up-only mirror).
+> Suffix 22 is retired (`docs/MIGRATION_NUMBER_ALLOCATION.md`). Full record:
+> `docs/CHAT_025_HOTFIX_approved_at_dedup.md`.
+
 ## 7. Files
 
 | File | Status |
@@ -149,8 +162,8 @@ the draft→approve loop needs an approved-state column. `approved_at` is **ABSE
 | `apps/web/lib/regenerationLimits.ts` | new |
 | `apps/web/app/api/v1/plans/generate/generate.unit.test.ts` | new (pure, ungated) |
 | `apps/web/app/api/v1/plans/generate/generate.integration.test.ts` | new (VESPER_DB_TESTS) |
-| `packages/db/migrations/20260618000022_daily_plans_approved_at.sql` (+ `.down.sql`) | new (F1) |
-| `supabase/migrations/20260618000022_daily_plans_approved_at.sql` | new (F1 mirror) |
+| `packages/db/migrations/20260618000022_daily_plans_approved_at.sql` (+ `.down.sql`) | ~~new (F1)~~ **REMOVED 2026-06-18** — redundant; 0020 already added `approved_at` (see §6 correction) |
+| `supabase/migrations/20260618000022_daily_plans_approved_at.sql` | ~~new (F1 mirror)~~ **REMOVED 2026-06-18** — redundant mirror (see §6 correction) |
 | `packages/ai/src/index.ts` | one-line: re-export `APOLOGY_LINE` |
 | `docs/CHAT_025_RESOLUTION_RECORD.md` | this file |
 
