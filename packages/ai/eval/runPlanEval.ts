@@ -6,8 +6,10 @@ import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import type { CoreMessage } from 'ai';
 import { DailyPlanSchema, type Archetype } from '@vesper/shared';
-import { synthesizePlan } from './stubSynthesizePlan';
+import { generatePlanFromContext } from '../src/synthesizePlan';
+import { DAILY_PLAN_SYNTHESIS_PROMPT } from '../src/prompts/dailyPlanSynthesis';
 
 const EVAL_DIR = dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = join(EVAL_DIR, 'fixtures');
@@ -51,9 +53,10 @@ async function main(): Promise<void> {
     const archetype = fixture.profile.archetype;
     const planDate = new Date(`${fixture.runtimeInputs.planDate}T00:00:00`);
 
-    // Minimal inline context standing in for Chat 021's buildPlanContext output;
-    // the stub ignores it entirely — included only so the harness's call shape
-    // mirrors what Chat 022's real synthesizePlan will eventually receive.
+    // Inline context standing in for Chat 021's buildPlanContext output. The eval
+    // has no live DB, so we build the message array directly from each fixture's
+    // profile + runtimeInputs (the _context seam is preserved) and feed it to the
+    // real single-attempt seam generatePlanFromContext (calls live Sonnet).
     const _context = {
       archetype,
       planDate,
@@ -61,7 +64,19 @@ async function main(): Promise<void> {
       runtimeInputs: fixture.runtimeInputs,
     };
 
-    const plan = await synthesizePlan({ archetype, planDate });
+    const messages: CoreMessage[] = [
+      { role: 'system', content: DAILY_PLAN_SYNTHESIS_PROMPT },
+      {
+        role: 'user',
+        content: `USER CONTEXT\n${JSON.stringify(fixture.profile, null, 2)}\n\nTODAY\n${JSON.stringify(
+          fixture.runtimeInputs,
+          null,
+          2,
+        )}`,
+      },
+    ];
+
+    const plan = await generatePlanFromContext(messages);
     const result = DailyPlanSchema.safeParse(plan);
 
     if (result.success) {
