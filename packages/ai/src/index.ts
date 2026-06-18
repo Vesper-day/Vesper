@@ -60,5 +60,11 @@ export type { CacheObservation, CacheOutcome } from './context/cacheObservabilit
 // Chat 022: daily-plan synthesis + three-step fallback chain.
 export { synthesizePlan } from './synthesizePlan';
 export type { DailyPlanChunk } from './synthesizePlan';
+// APOLOGY_LINE is the fixed note prefix serveFallback prepends to a served
+// fallback plan (LOCKED Decision 6). The chat-025 route is the orchestrating
+// consumer: it detects "this plan was served from the fallback chain" by the
+// note prefix and surfaces source:'fallback' + fallbackNotice. Re-exported here
+// so that detection has a single source of truth (no duplicated magic string).
+export { APOLOGY_LINE } from './synthesizePlan';
 export { readBreakerState } from './synthesizePlan.circuitBreaker';
 export type { BreakerState } from './synthesizePlan.circuitBreaker';
