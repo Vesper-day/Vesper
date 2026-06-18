@@ -876,6 +876,9 @@ apps/web/app/api/v1/notebook/mapInference.ts
 apps/web/app/api/v1/notebook/route.ts
 apps/web/app/api/v1/notebook/schemas.ts
 apps/web/app/api/v1/plans/date/[date]/route.ts
+apps/web/app/api/v1/plans/generate/generate.integration.test.ts
+apps/web/app/api/v1/plans/generate/generate.unit.test.ts
+apps/web/app/api/v1/plans/generate/generatePlan.ts
 apps/web/app/api/v1/plans/generate/route.ts
 apps/web/app/api/v1/plans/operations.ts
 apps/web/app/api/v1/plans/plans.integration.test.ts
@@ -912,6 +915,8 @@ apps/web/lib/auth/safeRedirect.ts
 apps/web/lib/csp/nonce.ts
 apps/web/lib/dates/localDate.test.ts
 apps/web/lib/dates/localDate.ts
+apps/web/lib/idempotency.ts
+apps/web/lib/regenerationLimits.ts
 apps/web/lib/sentry/scrub.ts
 apps/web/lib/supabase.ts
 apps/web/lib/supabase/client.ts
@@ -937,6 +942,7 @@ docs/ARCHITECTURE_DECISIONS.md
 docs/BRAINSTORM_MASTER.md
 docs/CHAT_021_RESOLUTION_RECORD.md
 docs/CHAT_022_RESOLUTION_RECORD.md
+docs/CHAT_025_RESOLUTION_RECORD.md
 docs/CHAT_026_RESOLUTION_RECORD.md
 docs/CHAT_031_RESOLUTION_RECORD.md
 docs/CHAT_048_RESOLUTION_RECORD.md
@@ -1097,6 +1103,8 @@ packages/db/migrations/20260601100001_seed_workout_templates.down.sql
 packages/db/migrations/20260601100001_seed_workout_templates.sql
 packages/db/migrations/20260601100002_seed_recipe_templates.down.sql
 packages/db/migrations/20260601100002_seed_recipe_templates.sql
+packages/db/migrations/20260618000022_daily_plans_approved_at.down.sql
+packages/db/migrations/20260618000022_daily_plans_approved_at.sql
 packages/db/package.json
 packages/db/scripts/check-client.ts
 packages/db/scripts/setup-test-db.ts
@@ -1203,6 +1211,7 @@ supabase/migrations/20260601000020_chat111_schema_checkpoint.sql
 supabase/migrations/20260601000021_notebook_inferences.sql
 supabase/migrations/20260601100001_seed_workout_templates.sql
 supabase/migrations/20260601100002_seed_recipe_templates.sql
+supabase/migrations/20260618000022_daily_plans_approved_at.sql
 tsconfig.json
 turbo.json
 vitest.config.ts
