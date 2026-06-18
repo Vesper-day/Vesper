@@ -18,6 +18,9 @@ import {
   type Database,
   type UserScopedQuery,
 } from '@vesper/db';
+// effective_status formula lives in one place (chat 027 extraction). Until that
+// file existed, chat 026 inlined the formula here; this import replaces it.
+import { computeEffectiveStatus } from '@/lib/blocks/effectiveStatus';
 
 // --- §9 GET-response contract (camelCase) -----------------------------------
 // NOTE: this is deliberately NOT @vesper/shared's DailyPlanSchema — that schema
@@ -86,34 +89,6 @@ interface BlockRow {
 }
 
 /**
- * effective_status (§9; computed at serializer time, NOT stored — TECHNICAL_SPEC
- * line 2551). A 'scheduled' block whose `now` falls in [startTime, endTime)
- * renders as 'in_progress'; every other case returns the stored status verbatim.
- *
- * Chat 027 will extract this into apps/web/lib/blocks/effectiveStatus.ts and
- * refactor this serializer to import it. Until that file exists, the formula is
- * inlined here — importing the not-yet-authored module would break the build.
- */
-export function computeEffectiveStatus(
-  status: BlockRow['status'],
-  startTime: Date | null,
-  endTime: Date | null,
-  now: Date,
-): EffectiveBlockStatus {
-  if (
-    status === 'scheduled' &&
-    startTime !== null &&
-    endTime !== null &&
-    endTime.getTime() > startTime.getTime() &&
-    now.getTime() >= startTime.getTime() &&
-    now.getTime() < endTime.getTime()
-  ) {
-    return 'in_progress';
-  }
-  return status;
-}
-
-/**
  * User-scoped read of the daily_plans row for (userId, planDate) and its blocks.
  * Both selects emit `eq(table.userId, userId)`, satisfying the
  * withUser/UserScopedQuery compile-time scoping contract. Blocks are ordered by
@@ -173,7 +148,12 @@ function toPlanResponse(planRow: PlanRow, blockRows: BlockRow[], now: Date): Pla
         endTime: b.endTime.toISOString(),
         blockType: b.blockType,
         title: b.title,
-        status: computeEffectiveStatus(b.status, b.startTime, b.endTime, now),
+        status: computeEffectiveStatus(
+          b.status,
+          b.startTime,
+          b.endTime,
+          now,
+        ) as EffectiveBlockStatus,
         source: b.source,
         displayOrder: b.displayOrder,
         details: (b.details ?? {}) as Record<string, unknown>,
