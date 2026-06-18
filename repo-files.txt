@@ -798,7 +798,6 @@
 .github/workflows/sentry-release.yml
 .gitignore
 .mcp.json
-CHAT_048_RESOLUTION_RECORD.md
 CLAUDE.md
 CONTRIBUTING.md
 README.md
@@ -876,7 +875,11 @@ apps/web/app/api/v1/notebook/getDueInference.ts
 apps/web/app/api/v1/notebook/mapInference.ts
 apps/web/app/api/v1/notebook/route.ts
 apps/web/app/api/v1/notebook/schemas.ts
+apps/web/app/api/v1/plans/date/[date]/route.ts
 apps/web/app/api/v1/plans/generate/route.ts
+apps/web/app/api/v1/plans/operations.ts
+apps/web/app/api/v1/plans/plans.integration.test.ts
+apps/web/app/api/v1/plans/today/route.ts
 apps/web/app/api/v1/profile/modules/[moduleId]/route.ts
 apps/web/app/api/v1/profile/modules/[moduleId]/toggleModule.ts
 apps/web/app/api/v1/profile/operations.ts
@@ -907,6 +910,8 @@ apps/web/lib/auth/apple-sign-in.ts
 apps/web/lib/auth/safeRedirect.test.ts
 apps/web/lib/auth/safeRedirect.ts
 apps/web/lib/csp/nonce.ts
+apps/web/lib/dates/localDate.test.ts
+apps/web/lib/dates/localDate.ts
 apps/web/lib/sentry/scrub.ts
 apps/web/lib/supabase.ts
 apps/web/lib/supabase/client.ts
@@ -932,7 +937,9 @@ docs/ARCHITECTURE_DECISIONS.md
 docs/BRAINSTORM_MASTER.md
 docs/CHAT_021_RESOLUTION_RECORD.md
 docs/CHAT_022_RESOLUTION_RECORD.md
+docs/CHAT_026_RESOLUTION_RECORD.md
 docs/CHAT_031_RESOLUTION_RECORD.md
+docs/CHAT_048_RESOLUTION_RECORD.md
 docs/CHAT_059B_RESOLUTION_RECORD.md
 docs/CHAT_077_RESOLUTION_RECORD.md
 docs/CHAT_108_RESOLUTION_RECORD.md
