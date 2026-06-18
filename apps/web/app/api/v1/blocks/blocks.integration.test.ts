@@ -85,12 +85,16 @@ describeDb('Blocks API (integration)', () => {
   }
 
   // The OCC token = daily_plans.updated_at AFTER the block seed (the seed insert
-  // fires the parent-touch trigger, so read it last).
+  // fires the parent-touch trigger, so read it last). Raw `execute` returns
+  // timestamptz as a STRING (drizzle's postgres-js raw path skips the Date
+  // parser), so project epoch-ms and rebuild the Date — same approach as the
+  // operations module under test.
   async function planToken(planId: string): Promise<string> {
     const rows = (await db.execute(
-      sql`SELECT updated_at FROM daily_plans WHERE id = ${planId}::uuid`,
-    )) as unknown as Array<{ updated_at: Date }>;
-    return rows[0]!.updated_at.toISOString();
+      sql`SELECT (extract(epoch from updated_at) * 1000)::bigint AS updated_ms
+          FROM daily_plans WHERE id = ${planId}::uuid`,
+    )) as unknown as Array<{ updated_ms: string }>;
+    return new Date(Number(rows[0]!.updated_ms)).toISOString();
   }
 
   // 1 — PATCH status update succeeds and logs a block_completed event.
