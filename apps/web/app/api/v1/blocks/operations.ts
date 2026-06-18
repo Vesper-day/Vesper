@@ -53,12 +53,21 @@ export interface BlockResponse {
   planUpdatedAt: string; // ISO 8601
 }
 
-// Raw row as read from Postgres via `tx.execute(sql...)` (snake_case columns).
+// Raw row as read from Postgres via `tx.execute(sql...)`.
+//
+// IMPORTANT: drizzle's postgres-js raw `execute` path does NOT run the Date
+// parser, so `timestamptz` columns come back as STRINGS (not Date) — calling
+// `.getTime()`/`.toISOString()` on them throws. We therefore never SELECT a
+// timestamptz directly; instead we project epoch MILLISECONDS as a bigint
+// (`(extract(epoch from col) * 1000)::bigint`). bigint is returned by
+// postgres-js as a string, so each `*_ms` field is a numeric string that we
+// `Number(...)` into a JS Date / comparison. (int4 columns like display_order
+// ARE parsed to number; only timestamps need this treatment.)
 interface RawBlockRow {
   id: string;
   daily_plan_id: string;
-  start_time: Date;
-  end_time: Date;
+  start_ms: string;
+  end_ms: string;
   block_type: string;
   title: string;
   status: string;
@@ -68,25 +77,35 @@ interface RawBlockRow {
   client_mutation_id: string | null;
 }
 
-// Columns every block read/RETURNING selects (keep in one place).
+// Columns every block read/RETURNING selects (keep in one place). Timestamps are
+// projected as epoch-ms bigints (see RawBlockRow).
 const BLOCK_COLUMNS = sql`
-  id, daily_plan_id, start_time, end_time, block_type, title, status,
-  source, display_order, details, client_mutation_id
+  id,
+  daily_plan_id,
+  (extract(epoch from start_time) * 1000)::bigint AS start_ms,
+  (extract(epoch from end_time) * 1000)::bigint AS end_ms,
+  block_type, title, status, source, display_order, details, client_mutation_id
 `;
 
 function serializeBlock(row: RawBlockRow, planUpdatedAt: Date, now: Date): BlockResponse {
+  const startTime = new Date(Number(row.start_ms));
+  const endTime = new Date(Number(row.end_ms));
+  const details =
+    typeof row.details === 'string'
+      ? (JSON.parse(row.details) as Record<string, unknown>)
+      : ((row.details ?? {}) as Record<string, unknown>);
   return {
     block: {
       id: row.id,
       dailyPlanId: row.daily_plan_id,
-      startTime: row.start_time.toISOString(),
-      endTime: row.end_time.toISOString(),
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
       blockType: row.block_type,
       title: row.title,
-      status: computeEffectiveStatus(row.status, row.start_time, row.end_time, now),
+      status: computeEffectiveStatus(row.status, startTime, endTime, now),
       source: row.source,
-      displayOrder: row.display_order,
-      details: (row.details ?? {}) as Record<string, unknown>,
+      displayOrder: Number(row.display_order),
+      details,
       clientMutationId: row.client_mutation_id,
     },
     planUpdatedAt: planUpdatedAt.toISOString(),
@@ -173,14 +192,15 @@ async function findByClientMutationId(
 ): Promise<BlockResponse | null> {
   const rows = (await db.execute(sql`
     SELECT ${BLOCK_COLUMNS},
-           (SELECT updated_at FROM daily_plans dp WHERE dp.id = b.daily_plan_id) AS plan_updated_at
+           (SELECT (extract(epoch from updated_at) * 1000)::bigint
+              FROM daily_plans dp WHERE dp.id = b.daily_plan_id) AS plan_updated_ms
     FROM blocks b
     WHERE b.user_id = ${userId}::uuid
       AND b.client_mutation_id = ${clientMutationId}::uuid
     LIMIT 1
-  `)) as unknown as Array<RawBlockRow & { plan_updated_at: Date }>;
+  `)) as unknown as Array<RawBlockRow & { plan_updated_ms: string }>;
   const row = rows[0];
-  return row ? serializeBlock(row, row.plan_updated_at, now) : null;
+  return row ? serializeBlock(row, new Date(Number(row.plan_updated_ms)), now) : null;
 }
 
 // completion_log event_type per status (only these three statuses log).
@@ -239,20 +259,21 @@ export async function patchBlock(
       throw new ApiError(ErrorCode.NOT_FOUND, 'Block not found.');
     }
 
-    // Lock the parent plan row and read its OCC timestamp + plan_date.
+    // Lock the parent plan row and read its OCC timestamp (epoch ms) + plan_date.
     const planRows = (await tx.execute(sql`
-      SELECT updated_at, plan_date
+      SELECT (extract(epoch from updated_at) * 1000)::bigint AS updated_ms,
+             plan_date::text AS plan_date
       FROM daily_plans
       WHERE id = ${block.daily_plan_id}::uuid AND user_id = ${userId}::uuid
       FOR UPDATE
-    `)) as unknown as Array<{ updated_at: Date; plan_date: string }>;
+    `)) as unknown as Array<{ updated_ms: string; plan_date: string }>;
     const plan = planRows[0];
     if (!plan) {
       throw new ApiError(ErrorCode.NOT_FOUND, 'Block not found.');
     }
 
     // OCC check (millisecond resolution).
-    if (plan.updated_at.getTime() !== tokenMs) {
+    if (Number(plan.updated_ms) !== tokenMs) {
       throw new ApiError(
         ErrorCode.OPTIMISTIC_LOCK_FAILURE,
         'Plan was modified by another device. Please refresh.',
@@ -295,8 +316,8 @@ export async function patchBlock(
       const valueJson = JSON.stringify({
         block_type: updated.block_type,
         title: updated.title,
-        start_time: updated.start_time.toISOString(),
-        end_time: updated.end_time.toISOString(),
+        start_time: new Date(Number(updated.start_ms)).toISOString(),
+        end_time: new Date(Number(updated.end_ms)).toISOString(),
         plan_date: plan.plan_date,
       });
       await tx.execute(sql`
@@ -312,11 +333,12 @@ export async function patchBlock(
 
     // Re-read the plan's (now trigger-bumped) updated_at -> fresh OCC token.
     const freshRows = (await tx.execute(sql`
-      SELECT updated_at FROM daily_plans WHERE id = ${block.daily_plan_id}::uuid
-    `)) as unknown as Array<{ updated_at: Date }>;
-    const planUpdatedAt = freshRows[0]?.updated_at ?? plan.updated_at;
+      SELECT (extract(epoch from updated_at) * 1000)::bigint AS updated_ms
+      FROM daily_plans WHERE id = ${block.daily_plan_id}::uuid
+    `)) as unknown as Array<{ updated_ms: string }>;
+    const planUpdatedMs = freshRows[0]?.updated_ms ?? plan.updated_ms;
 
-    return serializeBlock(updated, planUpdatedAt, now);
+    return serializeBlock(updated, new Date(Number(planUpdatedMs)), now);
   });
 }
 
@@ -359,11 +381,11 @@ export async function createUserBlock(
   return db.transaction(async (tx) => {
     // Find + lock the plan for (user, date). No plan -> 400 PLAN_NOT_FOUND.
     const planRows = (await tx.execute(sql`
-      SELECT id, updated_at
+      SELECT id, (extract(epoch from updated_at) * 1000)::bigint AS updated_ms
       FROM daily_plans
       WHERE user_id = ${userId}::uuid AND plan_date = ${input.planDate}::date
       FOR UPDATE
-    `)) as unknown as Array<{ id: string; updated_at: Date }>;
+    `)) as unknown as Array<{ id: string; updated_ms: string }>;
     const plan = planRows[0];
     if (!plan) {
       throw new ApiError(
@@ -374,7 +396,7 @@ export async function createUserBlock(
     }
 
     // OCC check (millisecond resolution).
-    if (plan.updated_at.getTime() !== tokenMs) {
+    if (Number(plan.updated_ms) !== tokenMs) {
       throw new ApiError(
         ErrorCode.OPTIMISTIC_LOCK_FAILURE,
         'Plan was modified by another device. Please refresh.',
@@ -411,10 +433,14 @@ export async function createUserBlock(
 
     // The INSERT fired the parent-touch trigger; re-read the fresh OCC token.
     const freshRows = (await tx.execute(sql`
-      SELECT updated_at FROM daily_plans WHERE id = ${plan.id}::uuid
-    `)) as unknown as Array<{ updated_at: Date }>;
-    const planUpdatedAt = freshRows[0]?.updated_at ?? plan.updated_at;
+      SELECT (extract(epoch from updated_at) * 1000)::bigint AS updated_ms
+      FROM daily_plans WHERE id = ${plan.id}::uuid
+    `)) as unknown as Array<{ updated_ms: string }>;
+    const planUpdatedMs = freshRows[0]?.updated_ms ?? plan.updated_ms;
 
-    return { response: serializeBlock(inserted, planUpdatedAt, now), created: true };
+    return {
+      response: serializeBlock(inserted, new Date(Number(planUpdatedMs)), now),
+      created: true,
+    };
   });
 }
