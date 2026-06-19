@@ -24,7 +24,6 @@
 import {
   dailyPlans,
   blocks,
-  sql,
   eq,
   and,
   type Database,
