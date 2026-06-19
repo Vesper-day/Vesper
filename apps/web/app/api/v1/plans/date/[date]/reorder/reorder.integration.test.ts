@@ -19,7 +19,6 @@ import {
   blocks,
   sql,
   eq,
-  and,
   type Database,
 } from '@vesper/db';
 import { ApiError } from '@vesper/shared';
