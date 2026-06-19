@@ -13,11 +13,12 @@ const SEEDED = [
   'READ_ONLY_MODE',
   'OPTIMISTIC_LOCK_FAILURE',
   'INTEGRATION_ERROR',
+  'NOT_IMPLEMENTED',
   'INTERNAL_ERROR',
 ];
 
 describe('ErrorCode', () => {
-  it('is a const object with exactly the 12 seeded keys, values === keys', () => {
+  it('is a const object with exactly the 13 seeded keys, values === keys', () => {
     expect(Object.keys(ErrorCode).sort()).toEqual([...SEEDED].sort());
     for (const key of SEEDED) {
       expect(ErrorCode[key as keyof typeof ErrorCode]).toBe(key);
