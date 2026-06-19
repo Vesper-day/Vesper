@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 030 landed (PR TBD — in progress).
+Last updated: after Chat 037 landed (PR in progress).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -84,6 +84,9 @@ stub from 030; Zod request shape already colocated. Full JWS verification lands 
 **Detail:** @vesper/shared serves TYPES from `dist/` but RUNTIME from `src/`. New
 exports are invisible to a consumer type-check until shared is rebuilt:
 `pnpm --filter @vesper/shared build` BEFORE type-checking the consumer.
+New 037 exports: `realtime/client.ts` (createRealtimeClient) and
+`realtime/selfMutationFilter.ts` (selfMutationFilter, SELF_MUTATION_WINDOW_MS),
+re-exported from `packages/shared/src/index.ts`.
 
 ---
 
@@ -106,6 +109,10 @@ cleanup owner. 025 noted this; confirm at 025 resolution whether a cleanup chat 
 **Detail:** 025 emits `plan_generated`/`plan_regenerated` to completion_log. These
 await registration in chat 096 (with `plan_fallback_served` and 059b alarm events).
 025 records-only; do not build 096 in any earlier chat.
+Pending taxonomy events also include: `realtime_connection_state_changed` (037 —
+states: subscribing, subscribed, error, closed, reconnecting; payload
+{state, reason, plan_date, retry_count}). Emitted via a guarded dev-log seam in
+both usePlanRealtime hooks; 096 registers + routes it through PostHog.
 
 ---
 
@@ -141,6 +148,10 @@ resolution cleanup.
 **Detail:** ~67 WARN-level `auth_rls_initplan` lints, pre-existing. Fixed by a future
 repo-wide forward migration; no chat currently owns it. Before relying on the set,
 confirm none is severity ERROR. Do NOT fix in any build chat.
+**037 publication-RLS / chat-006 gate:** live advisor check found no ERROR-severity
+security lints (the ~67 auth_rls_initplan WARNs are pre-existing and expected);
+`blocks` confirmed present in the `supabase_realtime` publication. The
+publication-RLS gate is satisfied for Realtime broadcasts.
 
 ---
 
@@ -154,12 +165,25 @@ Dormant unless a fix-migration branch is active. Flag only if it surfaces.
 
 ---
 
-### RESOLUTION-RECORD LOCATION CONVENTION
-**Owner:** Convention — applies to all chats
-**Relevant-to:** All chats
-**Status:** Open — standing convention
-**Detail:** Resolution records live in `docs/` (CHAT_026 placed there; CHAT_048
-moved root→docs/ in PR #39). All future resolution records go in `docs/`.
+### CHAT-029 REORDER client_mutation_id ECHO GAP
+**Owner:** 029 follow-up (unassigned)
+**Relevant-to:** 038; any chat wiring drag-reorder into the day view
+**Status:** Open
+**Detail:** The chat-029 reorder route writes displayOrder only — it does NOT accept
+a clientMutationId header or write blocks.client_mutation_id per row (verified in 037).
+Its Realtime broadcasts can't be self-filtered, so a device's own drag-reorder echoes
+back (brief flicker). PATCH/POST (chat 027) are unaffected. Fix = add clientMutationId
+pass-through + per-row write to the reorder route. NOT absorbed into 037.
+
+---
+
+### SELF-MUTATION WINDOW = 60s; §3 RECONCILE
+**Owner:** Spec edit (operator)
+**Relevant-to:** 038; spec maintenance
+**Status:** Open
+**Detail:** 037 set the self-mutation window to 60s (raised from 30s for mobile
+background/foreground stalls). TECHNICAL_SPEC.md §3 still reads "30-second sliding
+window" — reconcile §3 to 60s.
 
 ---
 
@@ -184,3 +208,4 @@ in any current build chat. Listed here so they don't re-surface as questions.
 
 | Flag | Resolved in | How |
 |------|-------------|-----|
+| @vesper/shared mobile→shared moduleResolution | 037 | Added top-level "main":"./src/index.ts" + "types":"./dist/index.d.ts" to packages/shared/package.json; exports map untouched; web/ai/db (bundler) unaffected & green |
