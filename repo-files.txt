@@ -866,6 +866,10 @@ apps/web/app/api/v1/account/account.integration.test.ts
 apps/web/app/api/v1/account/delete/route.ts
 apps/web/app/api/v1/account/operations.ts
 apps/web/app/api/v1/account/restore/route.ts
+apps/web/app/api/v1/ai/command/command.integration.test.ts
+apps/web/app/api/v1/ai/command/operations.ts
+apps/web/app/api/v1/ai/command/route.ts
+apps/web/app/api/v1/ai/command/schemas.ts
 apps/web/app/api/v1/auth/magic-link/route.ts
 apps/web/app/api/v1/blocks/[blockId]/route.ts
 apps/web/app/api/v1/blocks/blocks.integration.test.ts
@@ -887,6 +891,10 @@ apps/web/app/api/v1/notebook/getDueInference.ts
 apps/web/app/api/v1/notebook/mapInference.ts
 apps/web/app/api/v1/notebook/route.ts
 apps/web/app/api/v1/notebook/schemas.ts
+apps/web/app/api/v1/plans/date/[date]/reorder/operations.ts
+apps/web/app/api/v1/plans/date/[date]/reorder/reorder.integration.test.ts
+apps/web/app/api/v1/plans/date/[date]/reorder/route.ts
+apps/web/app/api/v1/plans/date/[date]/reorder/schemas.ts
 apps/web/app/api/v1/plans/date/[date]/route.ts
 apps/web/app/api/v1/plans/generate/generate.integration.test.ts
 apps/web/app/api/v1/plans/generate/generate.unit.test.ts
@@ -929,6 +937,10 @@ apps/web/app/api/v1/waitlist/addToWaitlist.ts
 apps/web/app/api/v1/waitlist/route.ts
 apps/web/app/api/v1/waitlist/schemas.ts
 apps/web/app/api/v1/waitlist/waitlist.integration.test.ts
+apps/web/app/api/v1/weekly-priorities/operations.ts
+apps/web/app/api/v1/weekly-priorities/route.ts
+apps/web/app/api/v1/weekly-priorities/schemas.ts
+apps/web/app/api/v1/weekly-priorities/weekly-priorities.integration.test.ts
 apps/web/app/auth/callback/route.ts
 apps/web/app/auth/confirm/route.ts
 apps/web/app/globals.css
@@ -979,6 +991,7 @@ docs/CHAT_025_RESOLUTION_RECORD.md
 docs/CHAT_026_RESOLUTION_RECORD.md
 docs/CHAT_027_RESOLUTION_RECORD.md
 docs/CHAT_028_RESOLUTION_RECORD.md
+docs/CHAT_029_RESOLUTION_RECORD.md
 docs/CHAT_030_RESOLUTION_RECORD.md
 docs/CHAT_031_RESOLUTION_RECORD.md
 docs/CHAT_048_RESOLUTION_RECORD.md
@@ -1046,6 +1059,7 @@ packages/ai/src/cacheConfig.ts
 packages/ai/src/classifyCalendarEvent.ts
 packages/ai/src/classifyCalendarEventsBatch.ts
 packages/ai/src/client.ts
+packages/ai/src/confirmation.ts
 packages/ai/src/context/__tests__/cacheObservability.test.ts
 packages/ai/src/context/__tests__/planContext.test.ts
 packages/ai/src/context/__tests__/templateSubset.test.ts

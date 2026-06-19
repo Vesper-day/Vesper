@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 025 landed (PR TBD — in progress).
+Last updated: after Chat 030 landed (PR TBD — in progress).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -28,6 +28,62 @@ surfaced during the session. Upload updated file to project knowledge.
 TECHNICAL_SPEC §3 column-for-column (verified in 028); 028 used the Drizzle
 model, NOT raw SQL. Stub drift is table-specific — still verify per-table, but
 the tasks model needs no raw-SQL fallback.
+
+---
+
+### STALE push_tokens + subscriptions DRIZZLE MODELS
+**Owner:** Informational — 030 finding (durable fix = chat-006 drizzle-kit pull)
+**Relevant-to:** 076, 035-W (push_tokens); 081, 089-W, 072 (subscriptions)
+**Status:** Open — informational
+**Detail:** In 030, `push_tokens` (missing live_activity_token, last_used_at;
+wrong uniqueness) and `subscriptions` (missing provider, status, +5 cols) Drizzle
+models were STALE vs TECHNICAL_SPEC §3 — used raw parameterized SQL against the
+migration columns. `security_audit_log` matched spec (untouched, out of scope).
+Stub drift is table-specific: still verify each table column-for-column, but treat
+these two as known-stale → raw SQL until 006 lands.
+
+---
+
+### AUTH-EVENT VAULT SECRETS (operational)
+**Owner:** Cutover / deploy
+**Relevant-to:** Cutover Block; any staging/prod deploy chat
+**Status:** Open — operational, not a code flag
+**Detail:** 030's auth.users UPDATE trigger uses pg_net (`net.http_post`) and reads
+two Supabase Vault secrets (`auth_event_secret`, `auth_event_base_url`). Both
+FAIL-OPEN to a no-op when unset (so `supabase db reset` never blocks). In any
+deployed env the secrets must be set manually or the orphan-push-token cleanup
+silently does nothing. Mechanism (pg_net + Vault) was chosen, not spec-specified —
+flagged for review.
+
+---
+
+### SUBSCRIPTION STATE-MACHINE STUBS
+**Owner:** 081
+**Relevant-to:** 081, 072 (dunning), 091
+**Status:** Open
+**Detail:** 030 exported throwing stubs `transitionToActive` / `transitionToReadOnly`
+so downstream imports compile. Authoritative names/signatures/module path are owned
+by 081 — reconcile there. 072's dunning-check calls `transitionToReadOnly` against
+the stub.
+
+---
+
+### APPLE-VERIFY 501 STUB
+**Owner:** 086
+**Relevant-to:** 086
+**Status:** Open
+**Detail:** `/api/v1/subscription/apple-verify` ships as a 501 (ErrorCode.NOT_IMPLEMENTED)
+stub from 030; Zod request shape already colocated. Full JWS verification lands 086.
+
+---
+
+### @vesper/shared DIST-VS-SRC REBUILD ORDERING
+**Owner:** No owner — note only (adjacent to the moduleResolution gotcha)
+**Relevant-to:** Any chat adding new exports to @vesper/shared
+**Status:** Open — standing build gotcha
+**Detail:** @vesper/shared serves TYPES from `dist/` but RUNTIME from `src/`. New
+exports are invisible to a consumer type-check until shared is rebuilt:
+`pnpm --filter @vesper/shared build` BEFORE type-checking the consumer.
 
 ---
 
