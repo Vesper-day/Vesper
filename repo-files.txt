@@ -900,6 +900,10 @@ apps/web/app/api/v1/referral/schemas.ts
 apps/web/app/api/v1/referral/track/route.ts
 apps/web/app/api/v1/referral/track/track.integration.test.ts
 apps/web/app/api/v1/referral/track/trackReferral.ts
+apps/web/app/api/v1/tasks/[taskId]/route.ts
+apps/web/app/api/v1/tasks/operations.ts
+apps/web/app/api/v1/tasks/route.ts
+apps/web/app/api/v1/tasks/tasks.integration.test.ts
 apps/web/app/api/v1/test/route.ts
 apps/web/app/api/v1/waitlist/addToWaitlist.ts
 apps/web/app/api/v1/waitlist/route.ts
@@ -952,6 +956,7 @@ docs/CHAT_025_HOTFIX_approved_at_dedup.md
 docs/CHAT_025_RESOLUTION_RECORD.md
 docs/CHAT_026_RESOLUTION_RECORD.md
 docs/CHAT_027_RESOLUTION_RECORD.md
+docs/CHAT_028_RESOLUTION_RECORD.md
 docs/CHAT_031_RESOLUTION_RECORD.md
 docs/CHAT_048_RESOLUTION_RECORD.md
 docs/CHAT_059B_RESOLUTION_RECORD.md
