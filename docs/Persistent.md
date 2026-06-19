@@ -20,6 +20,15 @@ surfaced during the session. Upload updated file to project knowledge.
 
 ## Open Flags
 
+### TASKS DRIZZLE MODEL CURRENT
+**Owner:** Informational — 028 finding
+**Relevant-to:** 054-W, 055, 056, any tasks-touching chat
+**Status:** Open — informational
+**Detail:** `packages/db/src/schema/daily-planning.ts` tasks table matches
+TECHNICAL_SPEC §3 column-for-column (verified in 028); 028 used the Drizzle
+model, NOT raw SQL. Stub drift is table-specific — still verify per-table, but
+the tasks model needs no raw-SQL fallback.
+
 ---
 
 ### STALE analytics.ts ORM
@@ -31,16 +40,6 @@ but the applied migration `…0010_completion_log.sql` has `event_type` + `value
 Any chat querying or writing completion_log must use REAL applied columns, not the stale
 ORM. Do not absorb a full analytics.ts cleanup into a build chat — flag and defer to the
 cleanup owner. 025 noted this; confirm at 025 resolution whether a cleanup chat was filed.
-
----
-
-### 027 FORWARD-REF — effectiveStatus.ts
-**Owner:** 027
-**Relevant-to:** 027 only
-**Status:** Open
-**Detail:** 026 computes `effective_status` INLINE in its serializer. Chat 027 owns
-extracting `apps/web/lib/blocks/effectiveStatus.ts` and refactoring 026's serializer
-to import it. Not a 025 or 026 concern.
 
 ---
 

@@ -862,6 +862,10 @@ apps/web/app/(auth)/layout.tsx
 apps/web/app/(auth)/sign-in/page.tsx
 apps/web/app/(marketing)/layout.tsx
 apps/web/app/(marketing)/page.tsx
+apps/web/app/api/v1/account/account.integration.test.ts
+apps/web/app/api/v1/account/delete/route.ts
+apps/web/app/api/v1/account/operations.ts
+apps/web/app/api/v1/account/restore/route.ts
 apps/web/app/api/v1/auth/magic-link/route.ts
 apps/web/app/api/v1/blocks/[blockId]/route.ts
 apps/web/app/api/v1/blocks/blocks.integration.test.ts
@@ -871,6 +875,10 @@ apps/web/app/api/v1/energy/energy.integration.test.ts
 apps/web/app/api/v1/energy/logEnergy.ts
 apps/web/app/api/v1/energy/route.ts
 apps/web/app/api/v1/health/circuit-breaker/route.ts
+apps/web/app/api/v1/internal/auth-event/auth-event.integration.test.ts
+apps/web/app/api/v1/internal/auth-event/operations.ts
+apps/web/app/api/v1/internal/auth-event/route.ts
+apps/web/app/api/v1/internal/auth-event/schemas.ts
 apps/web/app/api/v1/notebook/confirm/confirmInference.ts
 apps/web/app/api/v1/notebook/confirm/route.ts
 apps/web/app/api/v1/notebook/correct/correctInference.ts
@@ -893,6 +901,11 @@ apps/web/app/api/v1/profile/operations.ts
 apps/web/app/api/v1/profile/profile.integration.test.ts
 apps/web/app/api/v1/profile/route.ts
 apps/web/app/api/v1/profile/schemas.ts
+apps/web/app/api/v1/push-tokens/[deviceId]/route.ts
+apps/web/app/api/v1/push-tokens/operations.ts
+apps/web/app/api/v1/push-tokens/push-tokens.integration.test.ts
+apps/web/app/api/v1/push-tokens/route.ts
+apps/web/app/api/v1/push-tokens/schemas.ts
 apps/web/app/api/v1/referral/code/code.integration.test.ts
 apps/web/app/api/v1/referral/code/getReferralCode.ts
 apps/web/app/api/v1/referral/code/route.ts
@@ -900,6 +913,13 @@ apps/web/app/api/v1/referral/schemas.ts
 apps/web/app/api/v1/referral/track/route.ts
 apps/web/app/api/v1/referral/track/track.integration.test.ts
 apps/web/app/api/v1/referral/track/trackReferral.ts
+apps/web/app/api/v1/subscription/apple-verify/route.ts
+apps/web/app/api/v1/subscription/checkout/route.ts
+apps/web/app/api/v1/subscription/operations.ts
+apps/web/app/api/v1/subscription/portal/route.ts
+apps/web/app/api/v1/subscription/route.ts
+apps/web/app/api/v1/subscription/schemas.ts
+apps/web/app/api/v1/subscription/subscription.integration.test.ts
 apps/web/app/api/v1/tasks/[taskId]/route.ts
 apps/web/app/api/v1/tasks/operations.ts
 apps/web/app/api/v1/tasks/route.ts
@@ -918,6 +938,7 @@ apps/web/components.json
 apps/web/instrumentation.ts
 apps/web/lib/api.ts
 apps/web/lib/auth/apple-sign-in.ts
+apps/web/lib/auth/onAuthStateChange.ts
 apps/web/lib/auth/safeRedirect.test.ts
 apps/web/lib/auth/safeRedirect.ts
 apps/web/lib/blocks/effectiveStatus.test.ts
@@ -928,6 +949,7 @@ apps/web/lib/dates/localDate.ts
 apps/web/lib/idempotency.ts
 apps/web/lib/regenerationLimits.ts
 apps/web/lib/sentry/scrub.ts
+apps/web/lib/subscription/stateMachine.ts
 apps/web/lib/supabase.ts
 apps/web/lib/supabase/client.ts
 apps/web/lib/supabase/server.ts
@@ -957,6 +979,7 @@ docs/CHAT_025_RESOLUTION_RECORD.md
 docs/CHAT_026_RESOLUTION_RECORD.md
 docs/CHAT_027_RESOLUTION_RECORD.md
 docs/CHAT_028_RESOLUTION_RECORD.md
+docs/CHAT_030_RESOLUTION_RECORD.md
 docs/CHAT_031_RESOLUTION_RECORD.md
 docs/CHAT_048_RESOLUTION_RECORD.md
 docs/CHAT_059B_RESOLUTION_RECORD.md
@@ -1113,6 +1136,8 @@ packages/db/migrations/20260601000020_chat111_schema_checkpoint.down.sql
 packages/db/migrations/20260601000020_chat111_schema_checkpoint.sql
 packages/db/migrations/20260601000021_notebook_inferences.down.sql
 packages/db/migrations/20260601000021_notebook_inferences.sql
+packages/db/migrations/20260601000023_auth_event_trigger.down.sql
+packages/db/migrations/20260601000023_auth_event_trigger.sql
 packages/db/migrations/20260601100001_seed_workout_templates.down.sql
 packages/db/migrations/20260601100001_seed_workout_templates.sql
 packages/db/migrations/20260601100002_seed_recipe_templates.down.sql
@@ -1221,6 +1246,7 @@ supabase/migrations/20260601000018_calendar_events.sql
 supabase/migrations/20260601000019_start_of_local_day.sql
 supabase/migrations/20260601000020_chat111_schema_checkpoint.sql
 supabase/migrations/20260601000021_notebook_inferences.sql
+supabase/migrations/20260601000023_auth_event_trigger.sql
 supabase/migrations/20260601100001_seed_workout_templates.sql
 supabase/migrations/20260601100002_seed_recipe_templates.sql
 tsconfig.json
