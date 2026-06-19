@@ -17,3 +17,18 @@ export {
   RateLimitError,
 } from './api/rateLimit';
 export type { LimiterName } from './api/rateLimit';
+
+// Realtime client + self-mutation filter (Chat 037)
+export { createRealtimeClient } from './realtime/client';
+export type {
+  RealtimeClient,
+  RealtimeConnectionState,
+  RealtimeStateContext,
+  BlocksRealtimeRow,
+} from './realtime/client';
+export {
+  createSelfMutationFilter,
+  selfMutationFilter,
+  SELF_MUTATION_WINDOW_MS,
+} from './realtime/selfMutationFilter';
+export type { SelfMutationFilter } from './realtime/selfMutationFilter';
