@@ -820,6 +820,7 @@ apps/mobile/components/UpdateGateModal.tsx
 apps/mobile/expo-env.d.ts
 apps/mobile/global.css
 apps/mobile/hooks/useAppLifecycle.ts
+apps/mobile/hooks/usePlanRealtime.ts
 apps/mobile/ios/VesperAlarmExtension/AlarmContentView.swift
 apps/mobile/ios/VesperAlarmExtension/Info.plist
 apps/mobile/ios/VesperAlarmExtension/NotificationViewController.swift
@@ -947,6 +948,7 @@ apps/web/app/globals.css
 apps/web/app/layout.tsx
 apps/web/app/providers.tsx
 apps/web/components.json
+apps/web/hooks/usePlanRealtime.ts
 apps/web/instrumentation.ts
 apps/web/lib/api.ts
 apps/web/lib/auth/apple-sign-in.ts
@@ -1216,6 +1218,8 @@ packages/shared/src/errors.ts
 packages/shared/src/index.ts
 packages/shared/src/liveActivity/schema.json
 packages/shared/src/liveActivity/types.ts
+packages/shared/src/realtime/client.ts
+packages/shared/src/realtime/selfMutationFilter.ts
 packages/shared/src/schemas/__tests__/dailyPlan.test.ts
 packages/shared/src/schemas/block.ts
 packages/shared/src/schemas/dailyPlan.ts
@@ -1237,6 +1241,7 @@ packages/ui/tsconfig.json
 pnpm-lock.yaml
 pnpm-workspace.yaml
 repo-files.txt
+set
 supabase/.gitignore
 supabase/config.toml
 supabase/migrations/20260601000001_enums_and_extensions.sql
