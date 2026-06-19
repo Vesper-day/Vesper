@@ -30,6 +30,12 @@ export type {
   ParseTelemetry,
   ParsePlanEditCommandOptions,
 } from './parsePlanEditCommand';
+// Chat 029: butler-tone confirmation copy for the NL command endpoint. Constants
+// (not a runtime model call) so the unknown-branch clarification is deterministic.
+export {
+  confirmationLineFor,
+  UNKNOWN_COMMAND_CLARIFICATION,
+} from './confirmation';
 export { selectWorkoutTemplate } from './selectWorkoutTemplate';
 export type { WorkoutSelectionInput } from './selectWorkoutTemplate';
 export { selectRecipeTemplate } from './selectRecipeTemplate';
