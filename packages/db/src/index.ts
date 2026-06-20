@@ -14,6 +14,12 @@ export type { Db } from './client';
 export { schema } from './client';
 export * from './schema';
 
+// NOTE: OAuth token encryption (encryptToken/decryptToken) is intentionally NOT
+// re-exported here. It pulls in libsodium-wrappers; exporting it from the barrel
+// would drag that (and its WASM) into every route that imports @vesper/db. It
+// lives behind the '@vesper/db/encryption' subpath so only the integrations
+// routes that actually need it bundle it.
+
 // Re-export the drizzle-orm query operators consumers need. The monorepo resolves
 // two drizzle-orm instances (differing only by the @types/react peer hash); a
 // consumer that imports `eq`/`sql` straight from 'drizzle-orm' can land on the
