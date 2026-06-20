@@ -6,6 +6,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./src/index.ts"
+    },
+    "./encryption": {
+      "types": "./dist/encryption.d.ts",
+      "default": "./src/encryption.ts"
     }
   },
   "scripts": {
@@ -19,10 +23,12 @@
   },
   "dependencies": {
     "drizzle-orm": "^0.38.0",
+    "libsodium-wrappers": "^0.7.15",
     "postgres": "^3.0.0",
     "zod": "^3.0.0"
   },
   "devDependencies": {
+    "@types/libsodium-wrappers": "^0.7.14",
     "@types/node": "^20.0.0",
     "drizzle-kit": "^0.30.0",
     "tsx": "^4.0.0",
