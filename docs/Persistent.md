@@ -113,6 +113,8 @@ Pending taxonomy events also include: `realtime_connection_state_changed` (037 �
 states: subscribing, subscribed, error, closed, reconnecting; payload
 {state, reason, plan_date, retry_count}). Emitted via a guarded dev-log seam in
 both usePlanRealtime hooks; 096 registers + routes it through PostHog.
+037 adds realtime_connection_state_changed (states: subscribing, subscribed, error, closed,
+reconnecting; payload {state, reason, plan_date, retry_count}) to the pending 096 taxonomy.
 
 ---
 
@@ -184,6 +186,27 @@ pass-through + per-row write to the reorder route. NOT absorbed into 037.
 **Detail:** 037 set the self-mutation window to 60s (raised from 30s for mobile
 background/foreground stalls). TECHNICAL_SPEC.md §3 still reads "30-second sliding
 window" — reconcile §3 to 60s.
+
+---
+
+### CHAT-029 REORDER client_mutation_id ECHO GAP
+**Owner:** 029 follow-up (unassigned)
+**Relevant-to:** 038; any chat wiring drag-reorder into the day view
+**Status:** Open
+**Detail:** The chat-029 reorder route writes displayOrder only — it does NOT accept a
+clientMutationId header or write blocks.client_mutation_id per row (verified in 037). Its
+Realtime broadcasts can't be self-filtered, so a device's own drag-reorder echoes back (brief
+flicker). PATCH/POST (chat 027) are unaffected. Fix = add clientMutationId pass-through + per-row
+write to the reorder route. NOT absorbed into 037.
+
+---
+
+### SELF-MUTATION WINDOW = 60s; §3 RECONCILE
+**Owner:** Spec edit (operator)
+**Relevant-to:** 038; spec maintenance
+**Status:** Open
+**Detail:** 037 set the self-mutation window to 60s (raised from 30s for mobile background/
+foreground stalls). TECHNICAL_SPEC.md §3 still reads "30-second sliding window" — reconcile §3 to 60s.
 
 ---
 
