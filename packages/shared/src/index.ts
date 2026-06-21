@@ -32,3 +32,25 @@ export {
   SELF_MUTATION_WINDOW_MS,
 } from './realtime/selfMutationFilter';
 export type { SelfMutationFilter } from './realtime/selfMutationFilter';
+
+// Subscription state machine (Chat 081) — canonical §8 transitions.
+export {
+  transitionToActive,
+  transitionToPastDue,
+  transitionToReadOnly,
+  transitionToArchived,
+  transitionToDeletionScheduled,
+  requestDeletion,
+  IllegalSubscriptionTransitionError,
+  PERSISTED_SUBSCRIPTION_STATUS,
+  CANCELLATION_REASONS,
+  REFERRAL_CODE_LENGTH,
+  REFERRAL_MINT_MAX_ATTEMPTS,
+} from './subscriptionState';
+export type {
+  SubscriptionState,
+  PersistedSubscriptionStatus,
+  CancellationReason,
+  StripeCanceler,
+  DeletionSideEffectOptions,
+} from './subscriptionState';
