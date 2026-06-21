@@ -808,7 +808,9 @@ apps/mobile/app/(auth)/sign-in.tsx
 apps/mobile/app/(tabs)/_layout.tsx
 apps/mobile/app/(tabs)/calendar.tsx
 apps/mobile/app/(tabs)/plan.tsx
-apps/mobile/app/(tabs)/settings.tsx
+apps/mobile/app/(tabs)/settings/_layout.tsx
+apps/mobile/app/(tabs)/settings/index.tsx
+apps/mobile/app/(tabs)/settings/integrations.tsx
 apps/mobile/app/(tabs)/tasks.tsx
 apps/mobile/app/_layout.tsx
 apps/mobile/app/providers.tsx
@@ -856,6 +858,8 @@ apps/mobile/tsconfig.json
 apps/mobile/vitest.config.ts
 apps/web/app/(app)/layout.tsx
 apps/web/app/(app)/plan/page.tsx
+apps/web/app/(app)/settings/integrations/callback/page.tsx
+apps/web/app/(app)/settings/integrations/page.tsx
 apps/web/app/(app)/settings/page.tsx
 apps/web/app/(app)/tasks/page.tsx
 apps/web/app/(app)/week/page.tsx
@@ -880,6 +884,8 @@ apps/web/app/api/v1/energy/energy.integration.test.ts
 apps/web/app/api/v1/energy/logEnergy.ts
 apps/web/app/api/v1/energy/route.ts
 apps/web/app/api/v1/health/circuit-breaker/route.ts
+apps/web/app/api/v1/integrations/[provider]/route.ts
+apps/web/app/api/v1/integrations/google-calendar/connect/route.ts
 apps/web/app/api/v1/internal/auth-event/auth-event.integration.test.ts
 apps/web/app/api/v1/internal/auth-event/operations.ts
 apps/web/app/api/v1/internal/auth-event/route.ts
@@ -1024,8 +1030,10 @@ docs/RUNBOOKS/BACKUP_RESTORE_DRILL.md
 docs/RUNBOOKS/INCIDENT_RESPONSE.md
 docs/RUNBOOKS/IOS_ALARM_REBUILD.md
 docs/RUNBOOKS/IOS_WIDGET_REBUILD.md
+docs/RUNBOOKS/PGSODIUM_KEY_ROTATION.md
 docs/RUNBOOKS/README.md
 docs/SCALING_THRESHOLDS.md
+docs/SUBSCRIPTION_STATE_MACHINE.md
 docs/TECHNICAL_SPEC.md
 eslint.config.mjs
 package.json
@@ -1160,6 +1168,7 @@ packages/db/migrations/20260601100002_seed_recipe_templates.down.sql
 packages/db/migrations/20260601100002_seed_recipe_templates.sql
 packages/db/package.json
 packages/db/scripts/check-client.ts
+packages/db/scripts/inspect-integrations.ts
 packages/db/scripts/setup-test-db.ts
 packages/db/seed/recipe_templates.json
 packages/db/seed/scripts/buildRecipeTemplates.ts
@@ -1168,6 +1177,8 @@ packages/db/seed/scripts/emitSeedSql.ts
 packages/db/seed/scripts/templateRowSchemas.ts
 packages/db/seed/workout_templates.json
 packages/db/src/client.ts
+packages/db/src/encryption.test.ts
+packages/db/src/encryption.ts
 packages/db/src/index.ts
 packages/db/src/queries/index.ts
 packages/db/src/schema/analytics.ts
@@ -1203,6 +1214,7 @@ packages/shared/emails/output/Trial2DayEmail.html
 packages/shared/emails/output/WelcomeEmail.html
 packages/shared/package.json
 packages/shared/scripts/genLiveActivityTypes.ts
+packages/shared/src/__tests__/subscriptionState.test.ts
 packages/shared/src/api/__tests__/auth.test.ts
 packages/shared/src/api/__tests__/errors.test.ts
 packages/shared/src/api/__tests__/minAppVersion.test.ts
@@ -1230,6 +1242,7 @@ packages/shared/src/schemas/notebook.ts
 packages/shared/src/schemas/plan.ts
 packages/shared/src/schemas/task.ts
 packages/shared/src/schemas/user.ts
+packages/shared/src/subscriptionState.ts
 packages/shared/src/utils/index.ts
 packages/shared/tsconfig.json
 packages/shared/vitest.config.ts
@@ -1241,7 +1254,6 @@ packages/ui/tsconfig.json
 pnpm-lock.yaml
 pnpm-workspace.yaml
 repo-files.txt
-set
 supabase/.gitignore
 supabase/config.toml
 supabase/migrations/20260601000001_enums_and_extensions.sql

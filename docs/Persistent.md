@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 037 landed (PR in progress).
+Last updated: after Chat 063 landed (committed e786a69 on branch chat-063-gcal-oauth-pgsodium; PR pending).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -13,8 +13,8 @@ into kickoffs — reference by flag name only.
 **When writing a kickoff:** List only the flag names relevant to that chat.
 One line each. Full text is here; do not re-paste it.
 
-**After a chat lands:** Mark resolved flags RESOLVED + date. Add any new flags
-surfaced during the session. Upload updated file to project knowledge.
+**After a chat lands:** Add any new flags surfaced during the session. Upload
+updated file to project knowledge.
 
 ---
 
@@ -31,16 +31,67 @@ the tasks model needs no raw-SQL fallback.
 
 ---
 
-### STALE push_tokens + subscriptions DRIZZLE MODELS
-**Owner:** Informational — 030 finding (durable fix = chat-006 drizzle-kit pull)
-**Relevant-to:** 076, 035-W (push_tokens); 081, 089-W, 072 (subscriptions)
+### GCAL TOKEN ENCRYPTION MODEL (063 — decided)
+**Owner:** Decided in 063; operational for GCal/encryption chats + Cutover
+**Relevant-to:** 064, 034-W, any integrations/token chat; Cutover (prod key)
+**Status:** Closed-decision / operational
+**Detail:** App-side encryption. `packages/db/src/encryption.ts` uses a Node libsodium AEAD
+binding keyed from `process.env.PGSODIUM_KEY` (nonce-prepended bytea ciphertext in
+`integrations.access_token_encrypted` / `refresh_token_encrypted`). In-DB pgsodium key store
+REJECTED — Supabase has pgsodium pending deprecation and advises against its Server Key
+Management / Transparent Column Encryption. §14 #1 / LAYER_3 "pgsodium extension" + build-plan
+"Supabase secret" wording are loose, superseded by §13. OAuth: manual {code,redirectUri}
+exchange at oauth2.googleapis.com/token; dedicated callback page at
+`apps/web/app/(app)/settings/integrations/callback/page.tsx`. Verified end-to-end (293-byte
+ciphertext round-trips; connect→audit INSERT, disconnect→audit DELETE).
+
+---
+
+### PGSODIUM_KEY — PROD KEY REQUIRED, IRREVERSIBLE (operational)
+**Owner:** Cutover / deploy
+**Relevant-to:** Cutover Block; any prod deploy
+**Status:** Open — operational
+**Detail:** The 063 `PGSODIUM_KEY` lives only in local `.env.local`. Production (Vercel) needs
+its own unique `PGSODIUM_KEY`. If the prod key is lost, every stored OAuth token is permanently
+unrecoverable (users must re-auth — see `PGSODIUM_KEY_ROTATION.md`). Do NOT reuse the local key
+in prod; back up the prod key securely.
+
+---
+
+### PROD GOOGLE CALENDAR OAUTH CLIENT (063 — not prod-ready)
+**Owner:** Cutover / deploy
+**Relevant-to:** Cutover Block; 064; any GCal prod deploy
+**Status:** Open — operational
+**Detail:** 063 connect route currently FALLS BACK to `GOOGLE_CLIENT_ID/SECRET` (the
+Supabase-Auth sign-in client) because `GOOGLE_OAUTH_*` aren't set. For prod: (a) create a
+dedicated Calendar OAuth client with `calendar.readonly`, (b) register prod redirect
+`https://vesper.day/settings/integrations/callback`, (c) set `GOOGLE_OAUTH_CLIENT_ID/SECRET` +
+`NEXT_PUBLIC_GOOGLE_CLIENT_ID`, (d) submit the consent screen for Google verification
+(unverified-app warning blocks scale beyond test users).
+
+---
+
+### LOCAL SENTRY DSN MISCONFIG (063)
+**Owner:** Operator local env
+**Relevant-to:** Any chat relying on local Sentry error capture
+**Status:** Open — local-env hygiene
+**Detail:** Local `.env.local` `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` hold an `sntryu_…` auth
+token, not a DSN, so Sentry silently no-ops locally (no local error reporting). Not a code flag;
+fix the DSN values if local Sentry visibility is wanted.
+
+---
+
+### STALE push_tokens + subscriptions + integrations DRIZZLE MODELS
+**Owner:** Informational — 030 + 063 findings (durable fix = drizzle-kit pull, currently BROKEN)
+**Relevant-to:** 076, 035-W (push_tokens); 081, 089-W, 072 (subscriptions); 064, 034-W (integrations)
 **Status:** Open — informational
-**Detail:** In 030, `push_tokens` (missing live_activity_token, last_used_at;
-wrong uniqueness) and `subscriptions` (missing provider, status, +5 cols) Drizzle
-models were STALE vs TECHNICAL_SPEC §3 — used raw parameterized SQL against the
-migration columns. `security_audit_log` matched spec (untouched, out of scope).
-Stub drift is table-specific: still verify each table column-for-column, but treat
-these two as known-stale → raw SQL until 006 lands.
+**Detail:** STALE vs TECHNICAL_SPEC §3, confirmed: `push_tokens` (missing live_activity_token,
+last_used_at; wrong uniqueness), `subscriptions` (missing provider, status, +5 cols), and
+`integrations` (text vs bytea, phantom `scopes`, missing last_synced_at/last_error, 1-value enum,
+063 finding). Use raw parameterized SQL against the migration columns. `db:pull` resync is BROKEN
+(`./gel-core is not exported` — drizzle-kit↔drizzle-orm version mismatch); recipe to unbreak =
+pin drizzle-kit 0.29.1 + drizzle-orm 0.38.4 then `db:pull`, or hand-correct. Stub drift is
+table-specific: verify each table column-for-column; treat these three as known-stale → raw SQL.
 
 ---
 
@@ -129,7 +180,9 @@ VITEST UPSTASH ENV — `apps/web/vitest.config.ts` does not load `.env.local`; i
 **Detail:** `pnpm build` for @vesper/web compiles successfully then fails ONLY in
 Next's generated `.next/types/validator.ts` for untouched `layout.tsx`
 (`bigint→ReactNode`). Pre-existing @types/react version skew. If any chat's
-type-check/build trips this: note it, do not absorb.
+type-check/build trips this: note it, do not absorb. 063 pinned `@types/react` to 18.3.28
+(React runtime 19) to silence the mobile type-check skew — deliberately fragile; revisit on a
+React/Expo bump (a future `@types/react-dom` mismatch may resurface).
 
 ---
 
@@ -158,12 +211,14 @@ publication-RLS gate is satisfied for Realtime broadcasts.
 ---
 
 ### MIGRATION/DB-INFRA STANDING
-**Owner:** Dormant — surfaces only if a fix-migration branch is taken
-**Relevant-to:** Any chat taking a CD-flag fix-migration branch
-**Status:** Open — dormant
-**Detail:** drizzle-kit pull / gel-core skew; `audit-schema.ts` absent (chat 006);
-Supabase MCP misconfig; `config.toml` reads `supabase/migrations` with no override.
-Dormant unless a fix-migration branch is active. Flag only if it surfaces.
+**Owner:** Active — confirmed in 063
+**Relevant-to:** Any chat verifying triggers/schema or resyncing Drizzle (081, 064, 076, …)
+**Status:** Open — ACTIVE
+**Detail:** `db:pull` confirmed BROKEN in 063 (`./gel-core is not exported` — drizzle-kit↔
+drizzle-orm version mismatch); unbreak by pinning drizzle-kit 0.29.1 + drizzle-orm 0.38.4.
+`audit-schema.ts` is absent (chat 006) AND not runnable — verify ANY audit/trigger/schema
+expectation by DIRECT SQL on the live local DB, never the script. Supabase MCP misconfig;
+`config.toml` reads `supabase/migrations` with no override.
 
 ---
 
@@ -189,27 +244,6 @@ window" — reconcile §3 to 60s.
 
 ---
 
-### CHAT-029 REORDER client_mutation_id ECHO GAP
-**Owner:** 029 follow-up (unassigned)
-**Relevant-to:** 038; any chat wiring drag-reorder into the day view
-**Status:** Open
-**Detail:** The chat-029 reorder route writes displayOrder only — it does NOT accept a
-clientMutationId header or write blocks.client_mutation_id per row (verified in 037). Its
-Realtime broadcasts can't be self-filtered, so a device's own drag-reorder echoes back (brief
-flicker). PATCH/POST (chat 027) are unaffected. Fix = add clientMutationId pass-through + per-row
-write to the reorder route. NOT absorbed into 037.
-
----
-
-### SELF-MUTATION WINDOW = 60s; §3 RECONCILE
-**Owner:** Spec edit (operator)
-**Relevant-to:** 038; spec maintenance
-**Status:** Open
-**Detail:** 037 set the self-mutation window to 60s (raised from 30s for mobile background/
-foreground stalls). TECHNICAL_SPEC.md §3 still reads "30-second sliding window" — reconcile §3 to 60s.
-
----
-
 ## Standing Deferrals (carry for closure, do not action in build chats)
 
 These are not open flags — they are known deferrals with no action required
@@ -225,10 +259,3 @@ in any current build chat. Listed here so they don't re-surface as questions.
 - **091 follow-ups (PR #31)** — deferred
 - **@vesper/ai dist-rebuild ordering** — deferred
 
----
-
-## Resolved Flags (keep for audit trail)
-
-| Flag | Resolved in | How |
-|------|-------------|-----|
-| @vesper/shared mobile→shared moduleResolution | 037 | Added top-level "main":"./src/index.ts" + "types":"./dist/index.d.ts" to packages/shared/package.json; exports map untouched; web/ai/db (bundler) unaffected & green |
