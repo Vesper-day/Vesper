@@ -5,7 +5,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     passWithNoTests: true,
-    include: ['{src,lib,store,app}/**/*.{test,spec}.{ts,tsx}'],
+    include: ['{src,lib,store,app,hooks}/**/*.{test,spec}.{ts,tsx}'],
     // Mobile reads these at module load (lib/supabase.ts). Provide offline stubs
     // so importing the auth modules under test never touches a real backend.
     env: {

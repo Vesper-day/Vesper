@@ -811,6 +811,7 @@ apps/mobile/app/(tabs)/plan.tsx
 apps/mobile/app/(tabs)/settings/_layout.tsx
 apps/mobile/app/(tabs)/settings/index.tsx
 apps/mobile/app/(tabs)/settings/integrations.tsx
+apps/mobile/app/(tabs)/settings/privacy.tsx
 apps/mobile/app/(tabs)/tasks.tsx
 apps/mobile/app/_layout.tsx
 apps/mobile/app/providers.tsx
@@ -818,10 +819,13 @@ apps/mobile/assets/icon.png
 apps/mobile/assets/notification-icon.png
 apps/mobile/assets/splash.png
 apps/mobile/babel.config.js
+apps/mobile/components/BiometricGate.tsx
 apps/mobile/components/UpdateGateModal.tsx
 apps/mobile/expo-env.d.ts
 apps/mobile/global.css
 apps/mobile/hooks/useAppLifecycle.ts
+apps/mobile/hooks/useBiometricLock.test.ts
+apps/mobile/hooks/useBiometricLock.ts
 apps/mobile/hooks/usePlanRealtime.ts
 apps/mobile/ios/VesperAlarmExtension/AlarmContentView.swift
 apps/mobile/ios/VesperAlarmExtension/Info.plist
@@ -844,6 +848,8 @@ apps/mobile/lib/auth/google-oauth.ts
 apps/mobile/lib/auth/magic-link.ts
 apps/mobile/lib/auth/observability.ts
 apps/mobile/lib/auth/secureStorage.ts
+apps/mobile/lib/biometric.test.ts
+apps/mobile/lib/biometric.ts
 apps/mobile/lib/pushTokens.test.ts
 apps/mobile/lib/pushTokens.ts
 apps/mobile/lib/sentry.ts

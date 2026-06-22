@@ -148,6 +148,28 @@ describeDb('Profile API (integration)', () => {
     expect(res.profile.baseProfileVersion).toBe(1);
   });
 
+  it('PUT persists biometricLockEnabled to the users scalar without bumping version', async () => {
+    const id = await seedUser();
+
+    await updateProfile(db, id, { biometricLockEnabled: true });
+    const onRows = await db.execute(
+      sql`SELECT biometric_lock_enabled FROM users WHERE id = ${id}::uuid`,
+    );
+    expect(
+      (onRows[0] as { biometric_lock_enabled: boolean }).biometric_lock_enabled,
+    ).toBe(true);
+
+    // Explicit false turns it back off; still no version bump (not a base_profile field).
+    const res = await updateProfile(db, id, { biometricLockEnabled: false });
+    const offRows = await db.execute(
+      sql`SELECT biometric_lock_enabled FROM users WHERE id = ${id}::uuid`,
+    );
+    expect(
+      (offRows[0] as { biometric_lock_enabled: boolean }).biometric_lock_enabled,
+    ).toBe(false);
+    expect(res.profile.baseProfileVersion).toBe(1);
+  });
+
   it('PATCH-toggle flips exactly one module, bumps version, leaves others intact', async () => {
     const id = await seedUser();
     const res = await toggleModule(db, id, 'sleep', true);
