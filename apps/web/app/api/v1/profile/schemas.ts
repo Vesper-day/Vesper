@@ -56,6 +56,12 @@ export const UpdateProfileRequestSchema = z
     honorific: HonorificSchema.optional(),
     baseProfile: BaseProfileSchema.optional(),
     modulesEnabled: ModulesEnabledSchema.optional(),
+    // chat-090b: optional iOS biometric-lock toggle. Maps to the top-level
+    // users.biometric_lock_enabled scalar (NOT inside base_profile). Absent =
+    // leave unchanged (column is NOT NULL DEFAULT false); explicit true/false
+    // sets it. iOS-only at V1; web relies on the OS lock screen as the
+    // equivalent layer, so there is no web UI for this field.
+    biometricLockEnabled: z.boolean().optional(),
   })
   .strict();
 

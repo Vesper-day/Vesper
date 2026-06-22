@@ -6,6 +6,18 @@
 - stop-slop: apply to all butler-voice content generation
 - drizzle-best-practices: apply to all database layer work
 
+## Caveman scope (override of skill Auto-Clarity)
+
+- caveman is DEFAULT for code-writing and all replies — keep it on the whole session.
+- Drop to normal speech ONLY within the single message that:
+  (a) presents a security warning, OR
+  (b) asks me to confirm an irreversible / outward-facing action (force-push, delete, etc.).
+- Verification work is NOT a reason to drop: report test / lint / build / type-check
+  results, commands, and pass/fail IN caveman.
+- Code blocks, commit messages, and PR titles/bodies: always write normal (unchanged).
+- Resume caveman in the very next message — and within the same message right after the
+  warning / confirmation line.
+
 ## Project Identity
 
 - App: Vesper — AI daily planning assistant

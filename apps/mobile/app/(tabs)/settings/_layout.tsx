@@ -19,6 +19,7 @@ export default function SettingsStackLayout() {
     >
       <Stack.Screen name="index" />
       <Stack.Screen name="integrations" />
+      <Stack.Screen name="privacy" />
     </Stack>
   );
 }
