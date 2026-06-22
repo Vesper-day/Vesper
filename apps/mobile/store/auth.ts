@@ -20,6 +20,7 @@ import { clearStoredSession } from '../lib/auth/secureStorage';
 import { signInWithGoogle } from '../lib/auth/google-oauth';
 import { signInWithApple } from '../lib/auth/apple-sign-in';
 import { sendMagicLink } from '../lib/auth/magic-link';
+import { unregisterPushTokenForDevice } from '../lib/pushTokens';
 
 export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
@@ -81,6 +82,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   signOut: async () => {
+    // Remove this device's push token first — DELETE /api/v1/push-tokens needs the
+    // session bearer, which is gone once supabase.auth.signOut() runs. Best-effort:
+    // it captures its own failures and never throws, so sign-out always proceeds.
+    await unregisterPushTokenForDevice();
     await supabase.auth.signOut();
     await clearStoredSession();
     set({

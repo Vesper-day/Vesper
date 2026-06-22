@@ -111,6 +111,36 @@ describeDb('Push Tokens API (integration)', () => {
     expect(rows[0]!.token).toBe('tok-2'); // refreshed
   });
 
+  it('persists live_activity_token on insert and refreshes it on (user_id, device_id) conflict', async () => {
+    const userId = await seedUser();
+
+    // Insert with a Live Activity token present — it must round-trip to the column.
+    await upsertPushToken(db, userId, {
+      deviceId: 'dev-la',
+      platform: 'ios',
+      token: 'tok-1',
+      liveActivityToken: 'la-1',
+    });
+    const afterInsert = (await db.execute(sql`
+      SELECT live_activity_token FROM push_tokens
+      WHERE user_id = ${userId}::uuid AND device_id = 'dev-la'
+    `)) as unknown as Array<{ live_activity_token: string | null }>;
+    expect(afterInsert[0]!.live_activity_token).toBe('la-1');
+
+    // Conflict update refreshes live_activity_token (here: cleared to null).
+    await upsertPushToken(db, userId, {
+      deviceId: 'dev-la',
+      platform: 'ios',
+      token: 'tok-2',
+      liveActivityToken: null,
+    });
+    const afterUpdate = (await db.execute(sql`
+      SELECT live_activity_token FROM push_tokens
+      WHERE user_id = ${userId}::uuid AND device_id = 'dev-la'
+    `)) as unknown as Array<{ live_activity_token: string | null }>;
+    expect(afterUpdate[0]!.live_activity_token).toBeNull();
+  });
+
   it('delete removes the scoped row and returns true; missing row returns false', async () => {
     const userId = await seedUser();
     await upsertPushToken(db, userId, { deviceId: 'dev-1', platform: 'ios', token: 'tok-1' });

@@ -57,7 +57,6 @@ interface RealtimeConnectionStateChangedPayload {
  */
 function emitConnectionState(payload: RealtimeConnectionStateChangedPayload): void {
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    // eslint-disable-next-line no-console
     console.log('[analytics] realtime_connection_state_changed', payload);
   }
 }
