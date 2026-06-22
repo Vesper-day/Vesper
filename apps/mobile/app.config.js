@@ -54,6 +54,15 @@ module.exports = {
     'expo-secure-store',
     'expo-apple-authentication',
     [
+      // chat-090b biometric lock. Sets NSFaceIDUsageDescription so Face ID works
+      // in custom dev/TestFlight/production builds (Expo Go already carries its
+      // own description). Without it, authenticateAsync throws on a real device.
+      'expo-local-authentication',
+      {
+        faceIDPermission: 'Vesper uses Face ID to unlock the app when biometric lock is on.',
+      },
+    ],
+    [
       'expo-notifications',
       {
         icon: './assets/notification-icon.png',

@@ -129,6 +129,12 @@ export async function updateProfile(
     body.honorific !== undefined;
   const hasProfileFields =
     body.baseProfile !== undefined || body.modulesEnabled !== undefined;
+  // chat-090b: biometric_lock_enabled is a top-level users scalar that is NOT in
+  // the pull-generated Drizzle `users` table type (the column exists in the
+  // applied migration 20260601000002_users.sql but the TS schema is stale). We
+  // therefore write it with a scoped raw UPDATE rather than hand-editing the
+  // pulled schema. NOT NULL DEFAULT false ⇒ an absent value is a true no-op.
+  const hasBiometricField = body.biometricLockEnabled !== undefined;
 
   const updateQuery: UserScopedQuery<
     [],
@@ -145,6 +151,15 @@ export async function updateProfile(
             updatedAt: sql`now()`,
           })
           .where(eq(users.id, uid));
+      }
+
+      if (hasBiometricField) {
+        // Scoped to the authed user (WHERE id = uid) under the same withUser RLS
+        // context as the typed writes above. Does NOT bump base_profile_version
+        // (it is not a base_profile field).
+        await tx.execute(
+          sql`UPDATE users SET biometric_lock_enabled = ${body.biometricLockEnabled}, updated_at = now() WHERE id = ${uid}`,
+        );
       }
 
       if (hasProfileFields) {

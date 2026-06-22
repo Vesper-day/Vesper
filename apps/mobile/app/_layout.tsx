@@ -4,8 +4,9 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { Providers } from './providers';
 import { initSentry } from '../lib/sentry';
 import { initAuthStore, useAuthStore } from '../store/auth';
-import { useAppLifecycle } from '../hooks/useAppLifecycle';
+import { useBiometricLock } from '../hooks/useBiometricLock';
 import { usePushTokenRegistration } from '../lib/pushTokens';
+import { BiometricGate } from '../components/BiometricGate';
 
 // Sentry boots on import (no-op without a DSN — see lib/sentry.ts).
 initSentry();
@@ -21,6 +22,8 @@ export default function RootLayout() {
   return (
     <Providers>
       <RootNavigator />
+      {/* Lock overlay — renders null unless the biometric gate is engaged. */}
+      <BiometricGate />
     </Providers>
   );
 }
@@ -31,7 +34,11 @@ export default function RootLayout() {
  * is still hydrating ('loading') we hold position and let no redirect fire.
  */
 function RootNavigator() {
-  useAppLifecycle();
+  // useBiometricLock owns the chat-013 useAppLifecycle mount (it calls it
+  // internally), so there is no separate useAppLifecycle() call here — that would
+  // double-mount the lifecycle listener. It also enforces the optional biometric
+  // gate (chat-090b).
+  useBiometricLock();
   // Report this device's push tokens once the session is authenticated (§9).
   usePushTokenRegistration();
 
