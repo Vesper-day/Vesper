@@ -35,6 +35,22 @@ pnpm --filter @vesper/web dev
 pnpm --filter @vesper/mobile dev
 ```
 
+## Verification gate (run from repo root before any commit)
+
+```bash
+pnpm test         # all packages (turbo) — the only check that catches cross-file/cross-package breakage
+pnpm type-check   # all packages
+pnpm lint         # all packages
+pnpm build        # all packages — judged as "no NEW errors vs main"; the pre-existing @types/react
+                  # 18-vs-19 skew in apps/web is known and must not be chased
+```
+
+Run the test suite covering every file you TOUCH, not only files you create — a one-line edit to a
+shared module can break another package's tests. DB integration tests stay skipped unless
+`VESPER_DB_TESTS=1` and a local Supabase are set (intentional, not missing coverage). Mobile vitest:
+any module importing react-native (directly or transitively) must be mocked, or vite's SSR transform
+fails parsing React Native's Flow source.
+
 ## Architecture
 
 Turborepo monorepo, pnpm workspaces.
