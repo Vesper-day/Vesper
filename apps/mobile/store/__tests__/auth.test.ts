@@ -5,6 +5,7 @@ const {
   getSessionMock,
   onAuthStateChangeMock,
   clearStoredSessionMock,
+  unregisterPushTokenMock,
 } = vi.hoisted(() => ({
   signOutMock: vi.fn(async () => ({ error: null })),
   getSessionMock: vi.fn(async () => ({ data: { session: null } })),
@@ -12,6 +13,7 @@ const {
     data: { subscription: { unsubscribe: vi.fn() } },
   })),
   clearStoredSessionMock: vi.fn(async () => {}),
+  unregisterPushTokenMock: vi.fn(async () => {}),
 }));
 
 vi.mock('../../lib/supabase', () => ({
@@ -34,6 +36,12 @@ vi.mock('../../lib/auth/apple-sign-in', () => ({
 }));
 vi.mock('../../lib/auth/magic-link', () => ({
   sendMagicLink: vi.fn(async () => ({ ok: true })),
+}));
+// signOut now removes this device's push token (chat 076). Mock the collaborator
+// so importing the store does not pull lib/pushTokens' real react-native import
+// (Flow-typed source that the SSR transform cannot parse) into this unit test.
+vi.mock('../../lib/pushTokens', () => ({
+  unregisterPushTokenForDevice: unregisterPushTokenMock,
 }));
 
 import { useAuthStore, currentUser, type AuthState } from '../auth';
@@ -88,6 +96,7 @@ describe('auth store', () => {
 
     await useAuthStore.getState().signOut();
 
+    expect(unregisterPushTokenMock).toHaveBeenCalledOnce();
     expect(signOutMock).toHaveBeenCalledOnce();
     expect(clearStoredSessionMock).toHaveBeenCalledOnce();
     const s = useAuthStore.getState();

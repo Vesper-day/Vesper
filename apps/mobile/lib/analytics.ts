@@ -32,6 +32,14 @@ export interface AnalyticsEventMap {
     action: 'snooze' | 'stop';
     dismissed_at: string;
   };
+  // Emitted by lib/pushTokens.ts on a successful push-token registration. No PII:
+  // device_id is HASHED (device_id_hash) before emit — the raw stable id never
+  // leaves the device [Decision 08 / §11]. Full taxonomy registration lands in 096.
+  push_token_registered: {
+    platform: 'ios';
+    has_live_activity_token: boolean;
+    device_id_hash: string;
+  };
 }
 
 export type AnalyticsEvent = keyof AnalyticsEventMap;
