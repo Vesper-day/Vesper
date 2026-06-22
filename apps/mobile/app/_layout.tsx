@@ -5,6 +5,7 @@ import { Providers } from './providers';
 import { initSentry } from '../lib/sentry';
 import { initAuthStore, useAuthStore } from '../store/auth';
 import { useAppLifecycle } from '../hooks/useAppLifecycle';
+import { usePushTokenRegistration } from '../lib/pushTokens';
 
 // Sentry boots on import (no-op without a DSN — see lib/sentry.ts).
 initSentry();
@@ -31,6 +32,8 @@ export default function RootLayout() {
  */
 function RootNavigator() {
   useAppLifecycle();
+  // Report this device's push tokens once the session is authenticated (§9).
+  usePushTokenRegistration();
 
   const status = useAuthStore((s) => s.status);
   const segments = useSegments();

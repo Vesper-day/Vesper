@@ -108,14 +108,70 @@ flagged for review.
 
 ---
 
-### SUBSCRIPTION STATE-MACHINE STUBS
-**Owner:** 081
-**Relevant-to:** 081, 072 (dunning), 091
+### SUBSCRIPTION STATE MACHINE (081 — landed; consumers must re-point)
+**Owner:** Each consuming chat (072 dunning; 082/084/086/087/088/089-W/090)
+**Relevant-to:** 072, 082, 084, 086, 087, 088, 089-W, 090; account-delete owner
+**Status:** Open — re-pointing required (highest 081 hazard)
+**Detail:** Canonical state machine now lives at `packages/shared/src/subscriptionState.ts`
+(re-exported from the shared index). The OLD `apps/web/lib/subscription/stateMachine.ts` still
+holds 030's throwing stubs (`transitionToActive(_userId)` / `transitionToReadOnly(_userId)`) —
+left untouched by 081. Every consumer must (a) switch the import to @vesper/shared AND (b) adopt
+the new signature `fn(db, userId, reason?)` — breaking vs 030's `fn(userId)`; the caller must
+thread a Database handle (the dunning worker needs a db client in context). Miss it → runtime
+NOT_IMPLEMENTED throw. Other 081-created obligations:
+- `requestDeletion` is NOT wired into account-delete — that route still does its own direct
+  `users` UPDATE (operations.ts), so it does NOT fire provider side effects (Stripe cancel /
+  `deletion_requested_at`). Account-delete owner must adopt `requestDeletion` or replicate them.
+- Cancel transitions persist `cancellation_reason` but NOT `subscriptions.canceled_at`; future
+  cancel work must set `canceled_at` (the §8 webhook handlers do).
+- Referral mint: shared can't import apps/web, so 081 implemented the 6-char base62 generator
+  INLINE in subscriptionState.ts. If `apps/web/lib/referral/codeGenerator.ts` later lands, 095-W
+  must reuse shared's generator or keep both at 6-char base62 or formats drift.
+
+---
+
+### DELETION STRIPE-CANCEL DRIFT (081)
+**Owner:** Reconciliation / hard-delete worker owner (074 / hard-delete chat)
+**Relevant-to:** 074, hard-delete worker chat, dunning
 **Status:** Open
-**Detail:** 030 exported throwing stubs `transitionToActive` / `transitionToReadOnly`
-so downstream imports compile. Authoritative names/signatures/module path are owned
-by 081 — reconcile there. 072's dunning-check calls `transitionToReadOnly` against
-the stub.
+**Detail:** 081 commits `deletion_scheduled` BEFORE the Stripe cancel (moved after commit to
+avoid an un-rollbackable external call inside the txn). If the cancel fails, the row is
+`deletion_scheduled` but the Stripe sub stays live → user keeps getting billed, silently, unless
+a reconciliation sweep re-issues the cancel. No such sweep ships yet — the owning worker chat must
+re-issue failed Stripe cancels for deletion_scheduled rows. Documented in
+docs/SUBSCRIPTION_STATE_MACHINE.md.
+
+---
+
+### SUBSCRIPTIONS AUDIT TRIGGER GAP (081 finding #1 — to file)
+**Owner:** Owning migration chat (006 / 008 / 011)
+**Relevant-to:** 006, 008, 011; any subscriptions forensic/audit work
+**Status:** Open — recommendation to file
+**Detail:** No `subscriptions` AFTER UPDATE OF status trigger exists; §3 reasons
+`subscription_events` covers history, but that table is webhook-only (`UNIQUE(provider,event_id)`)
+so non-webhook transitions (trial-end→read_only, referral mint, account-delete→deletion_scheduled)
+are unaudited anywhere. Recommend the owning migration chat add `audit_subscriptions_changes()`
+AFTER UPDATE OF status → `security_audit_log`. 081 authored no trigger and verified by row update.
+
+---
+
+### referral_code LIVE TYPE = text, NOT varchar(6) (081 confirmed)
+**Owner:** Informational / schema-audit correction
+**Relevant-to:** Any users-schema or audit chat (006); 095-W
+**Status:** Open — informational
+**Detail:** Live `users.referral_code` is `text UNIQUE NULL` (migration …0002_users.sql), matching
+TECHNICAL_SPEC §3. PHASE_4_BUILD_PLAN.md (L457, L515) and the audit-schema.ts assertion say
+`varchar(6)` — WRONG. Encode/assert `text` (no length constraint); the mint is 6-char base62 regardless.
+
+---
+
+### PSQL NOT INSTALLED — USE THE IN-REPO POSTGRES NODE CLIENT
+**Owner:** Operator local env (standing)
+**Relevant-to:** Any chat verifying rows/triggers/schema by SQL
+**Status:** Open — standing env constraint
+**Detail:** `psql` is not installed on the Windows machine. Any DB/SQL verification (row inspection,
+trigger/schema checks) must run through the Postgres Node client already in the repo
+(`packages/db/src/client.ts`) via a tiny Node script, NOT `psql`. Kickoffs must state this.
 
 ---
 
