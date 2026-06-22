@@ -15,9 +15,15 @@ export default function SettingsScreen() {
           the Expo dev server runs, so a freshly-added route is not yet in it.
           The path is valid at runtime (groups are URL-transparent). */}
       <Link href={'/settings/integrations' as Href} asChild>
-        <Pressable className="rounded-lg border border-line-subtle p-4">
+        <Pressable className="mb-3 rounded-lg border border-line-subtle p-4">
           <Text className="text-cream">Integrations</Text>
           <Text className="text-sm text-cream-faint">Google Calendar and more</Text>
+        </Pressable>
+      </Link>
+      <Link href={'/settings/privacy' as Href} asChild>
+        <Pressable className="rounded-lg border border-line-subtle p-4">
+          <Text className="text-cream">Privacy</Text>
+          <Text className="text-sm text-cream-faint">Biometric lock</Text>
         </Pressable>
       </Link>
     </View>
