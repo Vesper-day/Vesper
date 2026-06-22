@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 063 landed (committed e786a69 on branch chat-063-gcal-oauth-pgsodium; PR pending).
+Last updated: after Chat 076 landed (push-token registration mobile + APNS_KEY_ROTATION runbook; branch chat-076-push-token-registration).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -83,7 +83,7 @@ fix the DSN values if local Sentry visibility is wanted.
 
 ### STALE push_tokens + subscriptions + integrations DRIZZLE MODELS
 **Owner:** Informational — 030 + 063 findings (durable fix = drizzle-kit pull, currently BROKEN)
-**Relevant-to:** 076, 035-W (push_tokens); 081, 089-W, 072 (subscriptions); 064, 034-W (integrations)
+**Relevant-to:** 035-W (push_tokens); 081, 089-W, 072 (subscriptions); 064, 034-W (integrations)
 **Status:** Open — informational
 **Detail:** STALE vs TECHNICAL_SPEC §3, confirmed: `push_tokens` (missing live_activity_token,
 last_used_at; wrong uniqueness), `subscriptions` (missing provider, status, +5 cols), and
@@ -108,14 +108,70 @@ flagged for review.
 
 ---
 
-### SUBSCRIPTION STATE-MACHINE STUBS
-**Owner:** 081
-**Relevant-to:** 081, 072 (dunning), 091
+### SUBSCRIPTION STATE MACHINE (081 — landed; consumers must re-point)
+**Owner:** Each consuming chat (072 dunning; 082/084/086/087/088/089-W/090)
+**Relevant-to:** 072, 082, 084, 086, 087, 088, 089-W, 090; account-delete owner
+**Status:** Open — re-pointing required (highest 081 hazard)
+**Detail:** Canonical state machine now lives at `packages/shared/src/subscriptionState.ts`
+(re-exported from the shared index). The OLD `apps/web/lib/subscription/stateMachine.ts` still
+holds 030's throwing stubs (`transitionToActive(_userId)` / `transitionToReadOnly(_userId)`) —
+left untouched by 081. Every consumer must (a) switch the import to @vesper/shared AND (b) adopt
+the new signature `fn(db, userId, reason?)` — breaking vs 030's `fn(userId)`; the caller must
+thread a Database handle (the dunning worker needs a db client in context). Miss it → runtime
+NOT_IMPLEMENTED throw. Other 081-created obligations:
+- `requestDeletion` is NOT wired into account-delete — that route still does its own direct
+  `users` UPDATE (operations.ts), so it does NOT fire provider side effects (Stripe cancel /
+  `deletion_requested_at`). Account-delete owner must adopt `requestDeletion` or replicate them.
+- Cancel transitions persist `cancellation_reason` but NOT `subscriptions.canceled_at`; future
+  cancel work must set `canceled_at` (the §8 webhook handlers do).
+- Referral mint: shared can't import apps/web, so 081 implemented the 6-char base62 generator
+  INLINE in subscriptionState.ts. If `apps/web/lib/referral/codeGenerator.ts` later lands, 095-W
+  must reuse shared's generator or keep both at 6-char base62 or formats drift.
+
+---
+
+### DELETION STRIPE-CANCEL DRIFT (081)
+**Owner:** Reconciliation / hard-delete worker owner (074 / hard-delete chat)
+**Relevant-to:** 074, hard-delete worker chat, dunning
 **Status:** Open
-**Detail:** 030 exported throwing stubs `transitionToActive` / `transitionToReadOnly`
-so downstream imports compile. Authoritative names/signatures/module path are owned
-by 081 — reconcile there. 072's dunning-check calls `transitionToReadOnly` against
-the stub.
+**Detail:** 081 commits `deletion_scheduled` BEFORE the Stripe cancel (moved after commit to
+avoid an un-rollbackable external call inside the txn). If the cancel fails, the row is
+`deletion_scheduled` but the Stripe sub stays live → user keeps getting billed, silently, unless
+a reconciliation sweep re-issues the cancel. No such sweep ships yet — the owning worker chat must
+re-issue failed Stripe cancels for deletion_scheduled rows. Documented in
+docs/SUBSCRIPTION_STATE_MACHINE.md.
+
+---
+
+### SUBSCRIPTIONS AUDIT TRIGGER GAP (081 finding #1 — to file)
+**Owner:** Owning migration chat (006 / 008 / 011)
+**Relevant-to:** 006, 008, 011; any subscriptions forensic/audit work
+**Status:** Open — recommendation to file
+**Detail:** No `subscriptions` AFTER UPDATE OF status trigger exists; §3 reasons
+`subscription_events` covers history, but that table is webhook-only (`UNIQUE(provider,event_id)`)
+so non-webhook transitions (trial-end→read_only, referral mint, account-delete→deletion_scheduled)
+are unaudited anywhere. Recommend the owning migration chat add `audit_subscriptions_changes()`
+AFTER UPDATE OF status → `security_audit_log`. 081 authored no trigger and verified by row update.
+
+---
+
+### referral_code LIVE TYPE = text, NOT varchar(6) (081 confirmed)
+**Owner:** Informational / schema-audit correction
+**Relevant-to:** Any users-schema or audit chat (006); 095-W
+**Status:** Open — informational
+**Detail:** Live `users.referral_code` is `text UNIQUE NULL` (migration …0002_users.sql), matching
+TECHNICAL_SPEC §3. PHASE_4_BUILD_PLAN.md (L457, L515) and the audit-schema.ts assertion say
+`varchar(6)` — WRONG. Encode/assert `text` (no length constraint); the mint is 6-char base62 regardless.
+
+---
+
+### PSQL NOT INSTALLED — USE THE IN-REPO POSTGRES NODE CLIENT
+**Owner:** Operator local env (standing)
+**Relevant-to:** Any chat verifying rows/triggers/schema by SQL
+**Status:** Open — standing env constraint
+**Detail:** `psql` is not installed on the Windows machine. Any DB/SQL verification (row inspection,
+trigger/schema checks) must run through the Postgres Node client already in the repo
+(`packages/db/src/client.ts`) via a tiny Node script, NOT `psql`. Kickoffs must state this.
 
 ---
 
@@ -166,6 +222,9 @@ states: subscribing, subscribed, error, closed, reconnecting; payload
 both usePlanRealtime hooks; 096 registers + routes it through PostHog.
 037 adds realtime_connection_state_changed (states: subscribing, subscribed, error, closed,
 reconnecting; payload {state, reason, plan_date, retry_count}) to the pending 096 taxonomy.
+076 adds `push_token_registered` {platform, has_live_activity_token, device_id_hash} (device_id
+hashed via FNV-1a) to the pending 096 taxonomy; emitted via a guarded seam in
+apps/mobile/lib/pushTokens.ts, awaits registration in 096.
 
 ---
 
@@ -244,6 +303,54 @@ window" — reconcile §3 to 60s.
 
 ---
 
+### LIVE ACTIVITY PUSH-TO-START TOKEN SOURCE (076 — resolved)
+**Owner:** Native-bridge / widget chat (077/078) + Cutover
+**Relevant-to:** 077, 078; any Live Activity push-to-start wiring; Cutover (APNs)
+**Status:** Open — finding resolved; bridge wiring deferred
+**Detail:** `expo-live-activities` is NOT a dependency. `expo-notifications@0.29.14` provides the regular
+APNs token (`getDevicePushTokenAsync`) but no Live Activity push-to-start API. The LA push-to-start
+token comes from the native `VesperLiveActivityBridge` (ActivityKit;
+`NativeModules.VesperLiveActivityBridge.getPushToStartTokenAsync()`), mirroring `lib/alarm.ts`'s
+`VesperAlarmBridge`. Returns null until that bridge is wired (deferred Mac/EAS session — see
+IOS_WIDGET_REBUILD.md). Supersedes TECHNICAL_SPEC §7 "Token Storage" wording naming
+expo-live-activities — loose spec wording, not the installed dep.
+
+---
+
+### RN CRYPTO ABSENT — Expo SDK 52 winter runtime (076)
+**Owner:** Informational — standing mobile constraint
+**Relevant-to:** Any mobile (🟢) chat generating IDs or hashing client-side
+**Status:** Open — standing
+**Detail:** Expo SDK 52 winter runtime polyfills only TextDecoder/URL/URLSearchParams/FormData — NO
+crypto (no `crypto.randomUUID`, no `crypto.subtle`), and `expo-crypto` is not a dep. 076 used a
+`Math.random` v4 UUID for `device_id` (generate-once, persisted in expo-secure-store) and FNV-1a
+one-way hex for `hashDeviceId` (not SHA-256); acceptable because device_id is opaque/non-PII. If a real
+cryptographic hash/UUID is ever required, add `expo-crypto` first.
+
+---
+
+### OPERATOR HARDWARE / TEST SURFACES (standing)
+**Owner:** Operator env (standing)
+**Relevant-to:** Any mobile (🟢) chat scoping on-device testing
+**Status:** Open — standing fact
+**Detail:** Operator has a physical iPhone for on-device mobile testing; NO Mac. Mac-gated work (native
+Swift, Xcode, Expo native dev builds requiring macOS) stays deferred. iPhone-runnable: Expo Go (standard
+Expo modules) and EAS cloud builds (no Mac needed). EAS install currently blocked on Apple Developer
+Program enrollment. "Needs a device" is not "needs a Mac" — distinguish when scoping device E2E.
+
+---
+
+### CI: react-native imports must be mocked in vitest (076)
+**Owner:** Informational — standing mobile-test constraint
+**Relevant-to:** Any mobile (🟢) chat with vitest unit tests importing react-native (directly or transitively)
+**Status:** Open — standing
+**Detail:** Any mobile module that imports react-native (directly or transitively) must be mocked in
+every vitest unit test that pulls it in, or vite's SSR transform fails parsing RN's Flow source
+(`Expected 'from', got 'typeOf'`). Single-file local runs can hide this — run full `pnpm test` before
+pushing. 076 hit this via store/auth.ts -> pushTokens.ts -> react-native.
+
+---
+
 ## Standing Deferrals (carry for closure, do not action in build chats)
 
 These are not open flags — they are known deferrals with no action required
@@ -258,4 +365,8 @@ in any current build chat. Listed here so they don't re-surface as questions.
 - **Founder mailing-address + marketing DNS (C-22a)** — Cutover step
 - **091 follow-ups (PR #31)** — deferred
 - **@vesper/ai dist-rebuild ordering** — deferred
+- **On-device APNs / Live Activity push-to-start test (076)** — blocked on Apple Developer Program
+  ($99) + APNs .p8 + the native VesperLiveActivityBridge being wired. EAS cloud build needs no Mac
+  but is blocked on the Apple-account work; Expo Go does NOT work on SDK 52 (no remote push token /
+  no native modules). Defer the real-token E2E.
 

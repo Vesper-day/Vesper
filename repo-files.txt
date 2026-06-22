@@ -844,6 +844,8 @@ apps/mobile/lib/auth/google-oauth.ts
 apps/mobile/lib/auth/magic-link.ts
 apps/mobile/lib/auth/observability.ts
 apps/mobile/lib/auth/secureStorage.ts
+apps/mobile/lib/pushTokens.test.ts
+apps/mobile/lib/pushTokens.ts
 apps/mobile/lib/sentry.ts
 apps/mobile/lib/supabase.ts
 apps/mobile/metro.config.js
@@ -980,6 +982,7 @@ apps/web/package.json
 apps/web/playwright.config.ts
 apps/web/postcss.config.mjs
 apps/web/public/.well-known/apple-app-site-association.template.json
+apps/web/scripts/verify-push-tokens.ts
 apps/web/sentry.client.config.ts
 apps/web/sentry.edge.config.ts
 apps/web/sentry.server.config.ts
@@ -1026,6 +1029,7 @@ docs/PRD.md
 docs/PROJECT_OVERVIEW.md
 docs/Persistent.md
 docs/RETENTION_POLICY.md
+docs/RUNBOOKS/APNS_KEY_ROTATION.md
 docs/RUNBOOKS/BACKUP_RESTORE_DRILL.md
 docs/RUNBOOKS/INCIDENT_RESPONSE.md
 docs/RUNBOOKS/IOS_ALARM_REBUILD.md
