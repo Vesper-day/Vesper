@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 076 landed (push-token registration mobile + APNS_KEY_ROTATION runbook; branch chat-076-push-token-registration).
+Last updated: after Chat 090b landed (biometric lock setting mobile + PUT /profile extension; PR #53; branch chat-090b-biometric-lock).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -28,6 +28,27 @@ updated file to project knowledge.
 TECHNICAL_SPEC §3 column-for-column (verified in 028); 028 used the Drizzle
 model, NOT raw SQL. Stub drift is table-specific — still verify per-table, but
 the tasks model needs no raw-SQL fallback.
+
+---
+
+### BIOMETRIC LOCK (090b — landed)
+**Owner:** Cutover (Info.plist) + any mobile settings/auth chat
+**Relevant-to:** Cutover Block (Face ID usage string); any chat touching PUT /profile, mobile settings, or store/auth.ts signOut
+**Status:** Closed-feature / operational notes
+**Detail:** `users.biometric_lock_enabled` is now writable via `PUT /api/v1/profile`
+(`biometricLockEnabled` optional bool → `biometric_lock_enabled`). The 030/earlier route was
+PARTIAL; 090b extended the Zod schema + handler. The handler writes the scalar via a raw SQL
+`UPDATE` because `biometric_lock_enabled` exists in the migration but is MISSING from the
+pull-generated Drizzle `users` model — a next `drizzle-kit pull` should surface it (same class as
+MIGRATION/DB-INFRA STANDING; `db:pull` still broken). New mobile surface: Settings → Privacy →
+Biometric lock, OFF by default, persists the server scalar + a local expo-secure-store cache. Lock
+policy: required on cold start and on foreground after >60s background; 3 failed attempts →
+shared `store/auth.ts` signOut + magic-link re-auth (no second sign-out path). New dep:
+`expo-local-authentication ~15.0.2` (Expo SDK 52) — standard Expo module, testable in Expo Go on
+iPhone, NO EAS build needed; `pnpm install` is required before mobile type-check/build.
+`app.config.js` has the Face ID `Info.plist` usage string pre-staged — no-op for Expo Go, only
+matters at the Cutover native build. `useBiometricLock` now owns the chat-013 `useAppLifecycle`
+mount internally; the standalone `useAppLifecycle()` line was removed from `_layout`. PR #53.
 
 ---
 
@@ -92,6 +113,7 @@ last_used_at; wrong uniqueness), `subscriptions` (missing provider, status, +5 c
 (`./gel-core is not exported` — drizzle-kit↔drizzle-orm version mismatch); recipe to unbreak =
 pin drizzle-kit 0.29.1 + drizzle-orm 0.38.4 then `db:pull`, or hand-correct. Stub drift is
 table-specific: verify each table column-for-column; treat these three as known-stale → raw SQL.
+- users (090b): biometric_lock_enabled present in migration, MISSING from the pull-generated Drizzle users model → 090b wrote the scalar via raw SQL UPDATE. Same class; verify-per-table still holds.
 
 ---
 

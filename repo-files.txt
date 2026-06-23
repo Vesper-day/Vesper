@@ -864,6 +864,10 @@ apps/mobile/store/ui.ts
 apps/mobile/tailwind.config.js
 apps/mobile/tsconfig.json
 apps/mobile/vitest.config.ts
+apps/web/app/(app)/calendar/_components/CalendarView.tsx
+apps/web/app/(app)/calendar/_components/EventFormDialog.tsx
+apps/web/app/(app)/calendar/_components/rbc-theme.css
+apps/web/app/(app)/calendar/page.tsx
 apps/web/app/(app)/layout.tsx
 apps/web/app/(app)/plan/page.tsx
 apps/web/app/(app)/settings/integrations/callback/page.tsx
@@ -888,6 +892,12 @@ apps/web/app/api/v1/blocks/[blockId]/route.ts
 apps/web/app/api/v1/blocks/blocks.integration.test.ts
 apps/web/app/api/v1/blocks/operations.ts
 apps/web/app/api/v1/blocks/route.ts
+apps/web/app/api/v1/calendar-events/[eventId]/route.ts
+apps/web/app/api/v1/calendar-events/calendar-events.integration.test.ts
+apps/web/app/api/v1/calendar-events/operations.ts
+apps/web/app/api/v1/calendar-events/recurrence.test.ts
+apps/web/app/api/v1/calendar-events/recurrence.ts
+apps/web/app/api/v1/calendar-events/route.ts
 apps/web/app/api/v1/energy/energy.integration.test.ts
 apps/web/app/api/v1/energy/logEnergy.ts
 apps/web/app/api/v1/energy/route.ts
@@ -1001,6 +1011,8 @@ apps/web/vitest.config.ts
 docs/ARCHITECTURE.md
 docs/ARCHITECTURE_DECISIONS.md
 docs/BRAINSTORM_MASTER.md
+docs/CALENDAR_LIBRARY_CHOICE.md
+docs/CC_PROMPT_FORMAT_EXAMPLE.md.md
 docs/CHAT_021_RESOLUTION_RECORD.md
 docs/CHAT_022_RESOLUTION_RECORD.md
 docs/CHAT_025_HOTFIX_approved_at_dedup.md
