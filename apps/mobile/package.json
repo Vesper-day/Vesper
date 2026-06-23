@@ -36,6 +36,7 @@
     "posthog-react-native": "^3.0.0",
     "react": "19.2.6",
     "react-native": "0.76.7",
+    "react-native-calendars": "^1.1312.0",
     "react-native-draggable-flatlist": "^4.0.0",
     "react-native-gesture-handler": "~2.20.0",
     "react-native-maps": "~1.18.0",

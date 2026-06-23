@@ -850,6 +850,8 @@ apps/mobile/lib/auth/observability.ts
 apps/mobile/lib/auth/secureStorage.ts
 apps/mobile/lib/biometric.test.ts
 apps/mobile/lib/biometric.ts
+apps/mobile/lib/calendarEvents.test.ts
+apps/mobile/lib/calendarEvents.ts
 apps/mobile/lib/pushTokens.test.ts
 apps/mobile/lib/pushTokens.ts
 apps/mobile/lib/sentry.ts

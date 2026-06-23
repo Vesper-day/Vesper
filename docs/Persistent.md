@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 090b landed (biometric lock setting mobile + PUT /profile extension; PR #53; branch chat-090b-biometric-lock).
+Last updated: after Chat 052-W landed (built-in calendar web: library + CRUD route + RRULE; PR #54; branch 052-W).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -102,9 +102,9 @@ fix the DSN values if local Sentry visibility is wanted.
 
 ---
 
-### STALE push_tokens + subscriptions + integrations DRIZZLE MODELS
+### STALE push_tokens + subscriptions + integrations + calendar_events DRIZZLE MODELS
 **Owner:** Informational — 030 + 063 findings (durable fix = drizzle-kit pull, currently BROKEN)
-**Relevant-to:** 035-W (push_tokens); 081, 089-W, 072 (subscriptions); 064, 034-W (integrations)
+**Relevant-to:** 035-W (push_tokens); 081, 089-W, 072 (subscriptions); 064, 034-W (integrations), 53, any calender touching chat
 **Status:** Open — informational
 **Detail:** STALE vs TECHNICAL_SPEC §3, confirmed: `push_tokens` (missing live_activity_token,
 last_used_at; wrong uniqueness), `subscriptions` (missing provider, status, +5 cols), and
@@ -114,6 +114,23 @@ last_used_at; wrong uniqueness), `subscriptions` (missing provider, status, +5 c
 pin drizzle-kit 0.29.1 + drizzle-orm 0.38.4 then `db:pull`, or hand-correct. Stub drift is
 table-specific: verify each table column-for-column; treat these three as known-stale → raw SQL.
 - users (090b): biometric_lock_enabled present in migration, MISSING from the pull-generated Drizzle users model → 090b wrote the scalar via raw SQL UPDATE. Same class; verify-per-table still holds.
+- calendar_events (052-W): NO Drizzle model exists at all (not just stale) — 052-W ran all CRUD via raw parameterized SQL + validateSession + createDrizzleClient. Same db:pull-broken class. Next drizzle-kit pull should emit it; until then any calendar_events code stays raw SQL + verify columns per-table.
+
+---
+
+### CALENDAR (052-W — landed)
+**Owner:** Each later calendar surface (053 mobile; any calendar UI/edit chat) + spec maintenance
+**Relevant-to:** 053; any chat touching calendar_events, calendar UI, or recurrence
+**Status:** Open — landed-feature forward notes
+**Detail:** 052-W shipped the web built-in calendar (PR #54).
+- LIBRARY: react-big-calendar (web only) — chosen over FullCalendar (lighter bundle, plain-CSS theme maps to @vesper/ui tokens, reuses installed date-fns). FullCalendar rrule plugin moot since recurrence is expanded in-app. Mobile (053) uses react-native-calendars, a separate decision.
+- CRUD TRANSPORT: new /api/v1/calendar-events route set (raw parameterized SQL + validateSession + createDrizzleClient), matching the tasks/blocks/push-tokens own-row convention. Mobile + any later surface must CONSUME this route, not author a second transport.
+- RECURRENCE: calendar_events stores ONLY the RRULE string + series start/end; instances are EXPANDED ON READ (rrule lib), never persisted. Editing a recurring event edits the WHOLE SERIES by id — no per-instance EXDATE/exceptions. "Edit this occurrence only" needs new design (likely an exceptions table → a migration).
+- 107/107a DESIGN PRIMITIVES DON'T EXIST yet: components/ui is empty, no cn, no shadcn set despite components.json — contradicts the build-plan claim that 052/054 compose from 107/107a primitives [PHASE_4_BUILD_PLAN.md L1630]. 052-W composed the web chrome (CalendarView / EventFormDialog / rbc-theme.css) from @vesper/ui Tailwind tokens + token-mapped CSS instead. When 107/107a land, refactor the web chrome onto the real primitives. (Web-only; mobile 053 unaffected.)
+- rbc-theme.css holds LITERAL token hexes (CSS can't read Tailwind tokens) — if @vesper/ui token values change, hand-sync rbc-theme.css (each hex is commented with its token name).
+- NEW WEB DEPS: react-big-calendar, rrule, @types/react-big-calendar — pnpm install required before web type-check/build on a fresh checkout. react-big-calendar carries a React-18 peer warning under React 19 (same class as @hello-pangea/dnd); installs/builds fine.
+- /calendar route not yet in any nav — page mounts under (app) but no link added (no nav shell exists; plan/week/tasks are stubs). Wire into nav when the app-shell chat lands.
+- MIGRATION DOC DRIFT (to file): TECHNICAL_SPEC §3 says calendar_events lives in 000016 new_feature_tables — FALSE. Repo: 000016 = delayed_jobs; calendar_events = standalone 000018 (pkg + supabase mirrors). Repo = truth; spec needs correcting.
 
 ---
 
