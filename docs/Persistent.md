@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 053 landed (built-in calendar mobile; PR #55; branch 053-calendar-mobile).
+Last updated: after Chat 054-W landed (tasks list UI + CRUD; web + mobile).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -22,7 +22,7 @@ updated file to project knowledge.
 
 ### TASKS DRIZZLE MODEL CURRENT
 **Owner:** Informational — 028 finding
-**Relevant-to:** 054-W, 055, 056, any tasks-touching chat
+**Relevant-to:**  055, 056, any tasks-touching chat
 **Status:** Open — informational
 **Detail:** `packages/db/src/schema/daily-planning.ts` tasks table matches
 TECHNICAL_SPEC §3 column-for-column (verified in 028); 028 used the Drizzle
@@ -137,7 +137,7 @@ table-specific: verify each table column-for-column; treat these three as known-
 
 ### 107/107a DESIGN PRIMITIVES ABSENT
 **Owner:** 107/107a design-system chats; any UI chat told to compose from their primitives
-**Relevant-to:** 054-W; any web/mobile UI chat referencing 107/107a primitives
+**Relevant-to:** any web/mobile UI chat referencing 107/107a primitives
 **Status:** Open — standing until 107/107a land
 **Detail:** components/ui is empty, no `cn`, no shadcn set despite `apps/web/components.json` present —
 contradicts the build-plan claim that 052/054 compose from 107/107a primitives [PHASE_4_BUILD_PLAN.md L1630].
@@ -149,7 +149,7 @@ tokens (web) / RN styles (mobile) until the real primitives land, then refactor 
 
 ### EXPO GO SDK 52-vs-54 RENDER BLOCK (053)
 **Owner:** Operator env / SDK-bump owner
-**Relevant-to:** Any 🟢 mobile chat needing an on-device Expo Go render check (054-W, …)
+**Relevant-to:** Any 🟢 mobile chat needing an on-device Expo Go render check ()
 **Status:** Open — environment-only, blocks on-device render
 **Detail:** App Store Expo Go is now SDK 54; the project is pinned Expo SDK 52. Expo Go runs only its
 matching SDK, so the whole mobile app will not load on-device in Expo Go regardless of native-vs-JS —
@@ -157,6 +157,33 @@ this supersedes the earlier "Expo Go is fine for standard JS modules" assumption
 Expo Go app and project SDK match). On-device render checks DEFER until one of: SDK 52→54 bump, a Mac
 simulator, or an EAS dev build (EAS blocked on Apple enrollment). Not a code bug; affects all mobile
 screens. Surfaced trying to render 053's calendar tab.
+
+---
+
+### TASKS UI (054-W — landed)
+**Owner:** Each later tasks surface (055 placement, 056 reflow, any task UI/edit chat); shared-api maintenance
+**Relevant-to:** 055, 056; any chat using the shared apps/web lib/api.ts .delete() against a 204 route; any web component test
+**Status:** Open — landed-feature forward notes
+**Detail:** 054-W shipped the task list UI on web + mobile consuming the existing /api/v1/tasks (PR #__).
+- SORT: client-side only (path b). A Priority↔Deadline toggle re-sorts the already-fetched list; default
+  reproduces the server order (priority DESC, deadline ASC NULLS LAST). NO route/?sort change — GET exposes
+  no sort param.
+- in_progress: the list fetches the FULL set with no ?status (a ?status=in_progress would 400); status
+  filter tabs + sort are client-side off each task's own status field; in_progress is SET via the edit
+  form's status control and shown as a badge — never via a GET filter.
+- DELETE 204 / SHARED lib/api.ts BUG (to fix): the shared apps/web lib/api.ts `.delete()` calls res.json()
+  and throws on the empty 204 body. 054-W used a DIRECT fetch for task delete rather than editing the shared
+  lib (calendar depends on it). ANY future client call to a 204-returning route via api.delete() hits this;
+  fix = make api.delete() tolerate an empty body. NOT absorbed — owner = a shared-api cleanup chat.
+- vitest discovery: apps/web/vitest.config.ts include + coverage globs were widened from {app,lib} to also
+  include components, or new component tests aren't discovered by pnpm test.
+- NO @testing-library/react in web deps: 054-W tested an EXTRACTED PURE helper (TaskForm buildSubmission:
+  validation/payload builder) instead of a DOM render. Pattern for future web component logic tests until a
+  DOM testing lib is added.
+- Files: apps/web/components/tasks/{TaskList,TaskCard,TaskForm}.tsx (+ TaskForm.test.tsx), tasks/page.tsx
+  mounts TaskList, plan/page.tsx adds a Link href="/tasks"; apps/mobile/lib/tasks.ts (thin CRUD client over
+  lib/api/client; listTasks restricts ?status to pending|completed) (+ tasks.test.ts), app/(tabs)/tasks.tsx
+  full RN list/card/form, app/(tabs)/plan.tsx adds a Link to /tasks.
 
 ---
 

@@ -1121,6 +1121,8 @@ packages/ai/src/generateObject.ts
 packages/ai/src/generateRegenerationPrompt.ts
 packages/ai/src/generateText.ts
 packages/ai/src/index.ts
+packages/ai/src/integrations/googleCalendar.test.ts
+packages/ai/src/integrations/googleCalendar.ts
 packages/ai/src/parsePlanEditCommand.ts
 packages/ai/src/prompts/calendar-classify.ts
 packages/ai/src/prompts/checkin-question.ts

@@ -74,3 +74,8 @@ export type { DailyPlanChunk } from './synthesizePlan';
 export { APOLOGY_LINE } from './synthesizePlan';
 export { readBreakerState } from './synthesizePlan.circuitBreaker';
 export type { BreakerState } from './synthesizePlan.circuitBreaker';
+
+// Chat 064: Google Calendar today-sync (token refresh + event classification).
+// Feeds the Layer-4 calendarEvents array consumed by buildPlanContext.
+export { getTodayEvents } from './integrations/googleCalendar';
+export type { GetTodayEventsOptions } from './integrations/googleCalendar';
