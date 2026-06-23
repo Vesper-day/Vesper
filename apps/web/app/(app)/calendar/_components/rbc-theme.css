@@ -1,0 +1,110 @@
+/*
+ * react-big-calendar theme overlay — maps the library's default light theme onto
+ * the Vesper Layer 4 palette. Every value below is a verbatim @vesper/ui token
+ * hex (packages/ui/src/tokens.ts), the single source of truth; the token name is
+ * named in a comment beside each use. No new colors are introduced here.
+ *
+ *   espresso     #1E1815   surface   #2B221C   elevated    #38291E
+ *   cream        #E8DDC9   cream-muted #A89B85 cream-faint #756B57
+ *   bronze       #B8884A   oxblood   #5C2A2A
+ *   line-subtle  #3D332A   line-strong #5C4F40
+ */
+
+.rbc-calendar {
+  color: #e8ddc9; /* cream */
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Toolbar (default rbc nav/view controls) */
+.rbc-toolbar {
+  margin-bottom: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.rbc-toolbar .rbc-toolbar-label {
+  color: #e8ddc9; /* cream */
+  font-weight: 600;
+}
+.rbc-toolbar button {
+  color: #a89b85; /* cream-muted */
+  background: transparent;
+  border: 1px solid #3d332a; /* line-subtle */
+  border-radius: 8px; /* radius.md */
+}
+.rbc-toolbar button:hover,
+.rbc-toolbar button:focus {
+  color: #e8ddc9; /* cream */
+  background: #38291e; /* elevated */
+  border-color: #5c4f40; /* line-strong */
+}
+.rbc-toolbar button.rbc-active,
+.rbc-toolbar button.rbc-active:hover,
+.rbc-toolbar button.rbc-active:focus {
+  color: #1e1815; /* espresso */
+  background: #b8884a; /* bronze */
+  border-color: #b8884a; /* bronze */
+}
+
+/* Grid + borders */
+.rbc-month-view,
+.rbc-time-view,
+.rbc-time-header,
+.rbc-time-content,
+.rbc-header,
+.rbc-day-bg + .rbc-day-bg,
+.rbc-month-row + .rbc-month-row,
+.rbc-time-header-content,
+.rbc-timeslot-group {
+  border-color: #3d332a; /* line-subtle */
+}
+.rbc-header {
+  color: #a89b85; /* cream-muted */
+  padding: 6px 4px;
+}
+.rbc-off-range-bg {
+  background: #1e1815; /* espresso */
+}
+.rbc-today {
+  background: #38291e; /* elevated */
+}
+.rbc-date-cell {
+  color: #a89b85; /* cream-muted */
+  padding: 4px 6px;
+}
+.rbc-date-cell.rbc-now {
+  color: #b8884a; /* bronze */
+  font-weight: 600;
+}
+
+/* Time-grid labels + current-time line */
+.rbc-time-gutter,
+.rbc-label {
+  color: #756b57; /* cream-faint */
+}
+.rbc-current-time-indicator {
+  background: #b8884a; /* bronze */
+}
+
+/* Events */
+.rbc-event,
+.rbc-day-slot .rbc-event {
+  background: #5c2a2a; /* oxblood — fixed commitments read as "blocked" */
+  border: 1px solid #5c4f40; /* line-strong */
+  color: #e8ddc9; /* cream */
+  border-radius: 4px; /* radius.sm */
+}
+.rbc-event.rbc-selected,
+.rbc-day-slot .rbc-event.rbc-selected {
+  background: #b8884a; /* bronze */
+  color: #1e1815; /* espresso */
+}
+.rbc-show-more {
+  color: #b8884a; /* bronze */
+  background: transparent;
+}
+
+/* Slot selection (drag-to-create) */
+.rbc-slot-selection {
+  background: rgba(184, 136, 74, 0.3); /* bronze @ 30% */
+  color: #e8ddc9; /* cream */
+}
