@@ -31,6 +31,7 @@ import {
 import { anthropicProvider, MODELS } from './client';
 import { getProviderOptions } from './cacheConfig';
 import { buildPlanContext, type PendingTask } from './context/planContext';
+import { getTodayEvents } from './integrations/googleCalendar';
 import { buildSimplifiedPlanContext } from './synthesizePlan.simplifiedContext';
 import { readBreakerState, type BreakerState } from './synthesizePlan.circuitBreaker';
 import { runFallbackChain, type DailyPlanChunk } from './synthesizePlan.fallback';
@@ -97,11 +98,23 @@ export async function* synthesizePlan(
   const breakerOpen = breaker.open;
 
   // Breaker open => straight to Step 3; the full context is never used, so skip
-  // the reads. Otherwise read pending tasks and assemble the full context.
+  // the reads. Otherwise read pending tasks + today's calendar events and assemble
+  // the full context.
+  //
+  // Calendar (chat 064): getTodayEvents reads the google_calendar integration row,
+  // refreshes the OAuth token if needed, and returns today's events as fixed
+  // Layer-4 constraints. It degrades to [] (and sets the reconnect flag,
+  // status='error') when the integration is absent / not connected / a refresh
+  // fails, so synthesis never blocks on calendar. NOTE re LOCKED Decision 4
+  // (generate-only): getTodayEvents performs calendar-sync BOOKKEEPING writes
+  // (last_synced_at, and status='error' on failure) on the integrations row — this
+  // is sync metadata, NOT plan persistence (no daily_plan / blocks / idempotency
+  // lock is written here), so it stays within the generate-only boundary.
   const pendingTasks = breakerOpen ? [] : await readPendingTasks(userId, db);
+  const calendarEvents = breakerOpen ? [] : await getTodayEvents(userId, { db });
   const fullMessages: CoreMessage[] = breakerOpen
     ? []
-    : await buildPlanContext(userId, planDate, energyScore, [], pendingTasks, db);
+    : await buildPlanContext(userId, planDate, energyScore, calendarEvents, pendingTasks, db);
 
   yield* runFallbackChain({
     userId,
