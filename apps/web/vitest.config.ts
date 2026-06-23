@@ -6,13 +6,13 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     passWithNoTests: true,
-    // Web app code lives in app/ and lib/ (no src/ dir), so unit tests are
-    // colocated there.
-    include: ['{app,lib}/**/*.{test,spec}.{ts,tsx}'],
+    // Web app code lives in app/, lib/ and components/ (no src/ dir), so unit
+    // tests are colocated there.
+    include: ['{app,lib,components}/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
       provider: 'v8',
-      include: ['{app,lib}/**/*.{ts,tsx}'],
-      exclude: ['{app,lib}/**/*.{test,spec}.{ts,tsx}'],
+      include: ['{app,lib,components}/**/*.{ts,tsx}'],
+      exclude: ['{app,lib,components}/**/*.{test,spec}.{ts,tsx}'],
     },
   },
   resolve: {

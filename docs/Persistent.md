@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 052-W landed (built-in calendar web: library + CRUD route + RRULE; PR #54; branch 052-W).
+Last updated: after Chat 053 landed (built-in calendar mobile; PR #55; branch 053-calendar-mobile).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -104,7 +104,7 @@ fix the DSN values if local Sentry visibility is wanted.
 
 ### STALE push_tokens + subscriptions + integrations + calendar_events DRIZZLE MODELS
 **Owner:** Informational — 030 + 063 findings (durable fix = drizzle-kit pull, currently BROKEN)
-**Relevant-to:** 035-W (push_tokens); 081, 089-W, 072 (subscriptions); 064, 034-W (integrations), 53, any calender touching chat
+**Relevant-to:** 035-W (push_tokens); 081, 089-W, 072 (subscriptions); 064, 034-W (integrations), 53, any calendar touching chat
 **Status:** Open — informational
 **Detail:** STALE vs TECHNICAL_SPEC §3, confirmed: `push_tokens` (missing live_activity_token,
 last_used_at; wrong uniqueness), `subscriptions` (missing provider, status, +5 cols), and
@@ -118,7 +118,7 @@ table-specific: verify each table column-for-column; treat these three as known-
 
 ---
 
-### CALENDAR (052-W — landed)
+### CALENDAR (052-W + 53 — landed)
 **Owner:** Each later calendar surface (053 mobile; any calendar UI/edit chat) + spec maintenance
 **Relevant-to:** 053; any chat touching calendar_events, calendar UI, or recurrence
 **Status:** Open — landed-feature forward notes
@@ -126,11 +126,37 @@ table-specific: verify each table column-for-column; treat these three as known-
 - LIBRARY: react-big-calendar (web only) — chosen over FullCalendar (lighter bundle, plain-CSS theme maps to @vesper/ui tokens, reuses installed date-fns). FullCalendar rrule plugin moot since recurrence is expanded in-app. Mobile (053) uses react-native-calendars, a separate decision.
 - CRUD TRANSPORT: new /api/v1/calendar-events route set (raw parameterized SQL + validateSession + createDrizzleClient), matching the tasks/blocks/push-tokens own-row convention. Mobile + any later surface must CONSUME this route, not author a second transport.
 - RECURRENCE: calendar_events stores ONLY the RRULE string + series start/end; instances are EXPANDED ON READ (rrule lib), never persisted. Editing a recurring event edits the WHOLE SERIES by id — no per-instance EXDATE/exceptions. "Edit this occurrence only" needs new design (likely an exceptions table → a migration).
-- 107/107a DESIGN PRIMITIVES DON'T EXIST yet: components/ui is empty, no cn, no shadcn set despite components.json — contradicts the build-plan claim that 052/054 compose from 107/107a primitives [PHASE_4_BUILD_PLAN.md L1630]. 052-W composed the web chrome (CalendarView / EventFormDialog / rbc-theme.css) from @vesper/ui Tailwind tokens + token-mapped CSS instead. When 107/107a land, refactor the web chrome onto the real primitives. (Web-only; mobile 053 unaffected.)
 - rbc-theme.css holds LITERAL token hexes (CSS can't read Tailwind tokens) — if @vesper/ui token values change, hand-sync rbc-theme.css (each hex is commented with its token name).
 - NEW WEB DEPS: react-big-calendar, rrule, @types/react-big-calendar — pnpm install required before web type-check/build on a fresh checkout. react-big-calendar carries a React-18 peer warning under React 19 (same class as @hello-pangea/dnd); installs/builds fine.
 - /calendar route not yet in any nav — page mounts under (app) but no link added (no nav shell exists; plan/week/tasks are stubs). Wire into nav when the app-shell chat lands.
 - MIGRATION DOC DRIFT (to file): TECHNICAL_SPEC §3 says calendar_events lives in 000016 new_feature_tables — FALSE. Repo: 000016 = delayed_jobs; calendar_events = standalone 000018 (pkg + supabase mirrors). Repo = truth; spec needs correcting.
+- 053 (mobile) shipped (PR #55). react-native-calendars@^1.1312.0 has NO native RRULE support; the existing GET /api/v1/calendar-events already returns server-expanded instances (operations.ts→recurrence.ts), so mobile CONSUMES server-expanded instances — no client expander, no rrule mobile dep (avoids drift from the canonical web expander). Files: apps/mobile/app/(tabs)/calendar.tsx, apps/mobile/lib/calendarEvents.ts (thin CRUD client over apps/mobile/lib/api/client.ts), + calendarEvents.test.ts. This thin-client + consume-existing-route shape is the parity pattern for later mobile surfaces (054-W).
+- MOBILE DAILY-PLAN FIXED-BLOCK SURFACING = forward gap: apps/mobile plan.tsx / store/plan.ts are still stubs; surfacing calendar-events as fixed blocks in the mobile plan needs a server-synthesis change (apps/web / packages/ai owned) — out of 053 scope; no web/ai touched.
+
+---
+
+### 107/107a DESIGN PRIMITIVES ABSENT
+**Owner:** 107/107a design-system chats; any UI chat told to compose from their primitives
+**Relevant-to:** 054-W; any web/mobile UI chat referencing 107/107a primitives
+**Status:** Open — standing until 107/107a land
+**Detail:** components/ui is empty, no `cn`, no shadcn set despite `apps/web/components.json` present —
+contradicts the build-plan claim that 052/054 compose from 107/107a primitives [PHASE_4_BUILD_PLAN.md L1630].
+052-W composed the web calendar chrome from @vesper/ui Tailwind tokens (packages/ui/src/tokens.ts,
+tailwind.ts) + token-mapped CSS; 053 mobile used RN styles. Any UI chat must compose from @vesper/ui
+tokens (web) / RN styles (mobile) until the real primitives land, then refactor onto them.
+
+---
+
+### EXPO GO SDK 52-vs-54 RENDER BLOCK (053)
+**Owner:** Operator env / SDK-bump owner
+**Relevant-to:** Any 🟢 mobile chat needing an on-device Expo Go render check (054-W, …)
+**Status:** Open — environment-only, blocks on-device render
+**Detail:** App Store Expo Go is now SDK 54; the project is pinned Expo SDK 52. Expo Go runs only its
+matching SDK, so the whole mobile app will not load on-device in Expo Go regardless of native-vs-JS —
+this supersedes the earlier "Expo Go is fine for standard JS modules" assumption (true only when the
+Expo Go app and project SDK match). On-device render checks DEFER until one of: SDK 52→54 bump, a Mac
+simulator, or an EAS dev build (EAS blocked on Apple enrollment). Not a code bug; affects all mobile
+screens. Surfaced trying to render 053's calendar tab.
 
 ---
 

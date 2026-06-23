@@ -856,6 +856,8 @@ apps/mobile/lib/pushTokens.test.ts
 apps/mobile/lib/pushTokens.ts
 apps/mobile/lib/sentry.ts
 apps/mobile/lib/supabase.ts
+apps/mobile/lib/tasks.test.ts
+apps/mobile/lib/tasks.ts
 apps/mobile/metro.config.js
 apps/mobile/nativewind-env.d.ts
 apps/mobile/package.json
@@ -974,6 +976,10 @@ apps/web/app/globals.css
 apps/web/app/layout.tsx
 apps/web/app/providers.tsx
 apps/web/components.json
+apps/web/components/tasks/TaskCard.tsx
+apps/web/components/tasks/TaskForm.test.tsx
+apps/web/components/tasks/TaskForm.tsx
+apps/web/components/tasks/TaskList.tsx
 apps/web/hooks/usePlanRealtime.ts
 apps/web/instrumentation.ts
 apps/web/lib/api.ts
