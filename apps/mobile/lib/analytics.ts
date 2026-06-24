@@ -42,6 +42,14 @@ export interface AnalyticsEventMap {
   };
 }
 
+// PENDING (chat 096 to register): the offline mutation queue (chat 038) emits two
+// records-only events through a guarded dev-log seam (apps/*/app/providers.tsx),
+// NOT yet through this typed map / PostHog:
+//   offline_queue_flush_started   { queued_mutation_count: number }
+//   offline_queue_flush_completed { succeeded_count: number; conflict_count: number;
+//                                   network_error_count: number; total_duration_ms: number }
+// (plus a diagnostic offline_queue_mutation_dropped { status, code, mutation_key }).
+
 export type AnalyticsEvent = keyof AnalyticsEventMap;
 
 /**
