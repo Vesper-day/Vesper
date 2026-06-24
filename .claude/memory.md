@@ -28,7 +28,7 @@
 ## Repo
 
 - Root: C:\Users\saket\vesper
-- GitHub: github.com/getvesperday/vesper (private)
+- GitHub: github.com/Vesper-day/Vesper (private)
 - Package manager: pnpm
 
 ## Stack
