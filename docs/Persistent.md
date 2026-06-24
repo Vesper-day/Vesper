@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 064 landed (GCal sync + token refresh + event classification; PR #57).
+Last updated: after Chat 038 landed (TanStack Query offline mutation queue + conflict resolution).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -117,7 +117,7 @@ last_used_at; wrong uniqueness), `subscriptions` (missing provider, status, +5 c
 (`./gel-core is not exported` — drizzle-kit↔drizzle-orm version mismatch); recipe to unbreak =
 pin drizzle-kit 0.29.1 + drizzle-orm 0.38.4 then `db:pull`, or hand-correct. Stub drift is
 table-specific: verify each table column-for-column; treat these three as known-stale → raw SQL.
-- users (090b): biometric_lock_enabled present in migration, MISSING from the pull-generated Drizzle users model → 090b wrote the scalar via raw SQL UPDATE. Same class; verify-per-table still holds.
+- users (090b + 032-W): biometric_lock_enabled present in migration, MISSING from the pull-generated Drizzle users model → 090b wrote the scalar via raw SQL UPDATE. 032-W (CC-reported) found sleep_target_bedtime + sleep_target_wake ALSO absent from the hand-authored users.ts model (only location_lat/lng present); honorific IS present (users.ts:38). Same stale-TS-schema class — whoever wires the real user/profile fetch in the post-032-V onboarding shell may need a raw SQL read for the two sleep_target columns. Verify-per-table still holds.
 - calendar_events (052-W): NO Drizzle model exists at all (not just stale) — 052-W ran all CRUD via raw parameterized SQL + validateSession + createDrizzleClient. Same db:pull-broken class. Next drizzle-kit pull should emit it; until then any calendar_events code stays raw SQL + verify columns per-table.
 - integrations (064): live column contract re-confirmed (11 cols, access/refresh_token bytea, the two
   enums) via the in-repo Postgres node client; 064 used raw parameterized SQL throughout. The
@@ -317,6 +317,98 @@ exports are invisible to a consumer type-check until shared is rebuilt:
 New 037 exports: `realtime/client.ts` (createRealtimeClient) and
 `realtime/selfMutationFilter.ts` (selfMutationFilter, SELF_MUTATION_WINDOW_MS),
 re-exported from `packages/shared/src/index.ts`.
+New 038 exports: `queries/mutationQueue.ts` and `queries/conflictToast.ts`, re-exported from BOTH
+`src/index.ts` (barrel) AND the `./queries` subpath entry (`src/queries/index.ts`). A new queue export must
+update BOTH or web/mobile drift. See the @vesper/shared BARREL PULLS SERVER CODE flag.
+
+---
+
+### @vesper/shared BARREL PULLS SERVER CODE INTO CLIENT BUNDLES (038)
+**Owner:** Future shared-barrel / chat-081 follow-up cleanup (unowned)
+**Relevant-to:** Any new 'use client' web file importing @vesper/shared; any chat adding a shared export consumed by the web client (032-W, 039, 042, …)
+**Status:** Open — ACTIVE (mitigated per-consumer, not structurally fixed)
+**Detail:** The @vesper/shared barrel (`src/index.ts`) statically re-exports `subscriptionState` (chat 081)
+and `api/auth` → `@vesper/db` → `postgres` (Node `fs`/`net`/`tls`/`node:crypto`). ANY new `'use client'` web
+file importing the BARE `@vesper/shared` barrel breaks `next build` with `Module not found: Can't resolve
+'fs'`. (The §3 "zero deps beyond Zod and date-fns" line is STALE — shared now pulls supabase-js/sentry/
+upstash/db.) Mitigation = import client-safe pieces from a SUBPATH export, not the barrel. 038 added
+`@vesper/shared/queries` (`exports["./queries"]`, types `./dist/queries/index.d.ts`) and pointed
+apps/web/app/providers.tsx at it. Findings:
+- WEB↔MOBILE ASYMMETRY (deliberate): web imports the subpath; mobile imports the BARE barrel because mobile's
+  node-classic moduleResolution can't resolve the `./queries` subpath (TS2307). Mobile bundles via Metro
+  (main field), so the barrel→db pull is NOT a mobile gate failure today, but it is latent if Metro tightens.
+  Do NOT "unify" the two imports blindly — switching mobile needs a monorepo moduleResolution change
+  (node16/nodenext/bundler).
+- A subpath export is a SECOND build-artifact dependency: a consumer's type resolution needs shared built
+  (`dist/queries/`). If a chat adds a new export, update BOTH `src/index.ts` (barrel) AND the subpath entry
+  (`src/queries/index.ts`) or web/mobile drift.
+- `sideEffects: false` does NOT work here — Next/webpack didn't tree-shake the transpiled workspace-source
+  barrel re-exports (tried and reverted in 038). The subpath export is the working mitigation; do not
+  re-attempt the sideEffects route.
+- Structural fix (split a client-safe shared entry / stop barrel-re-exporting server code) is unowned — a
+  future chat-081 follow-up, NOT owned by any build chat.
+
+---
+
+### OFFLINE MUTATION QUEUE (038 — landed)
+**Owner:** Each later block-mutation / day-view consumer (039, 042) + spec maintenance
+**Relevant-to:** 039, 042; any chat editing apps/{web,mobile}/app/providers.tsx or the queue helpers
+**Status:** Open — landed-feature forward notes
+**Detail:** 038 shipped the TanStack Query offline mutation queue + conflict resolution.
+- Files: `packages/shared/src/queries/mutationQueue.ts` + `conflictToast.ts` (+ tests), re-exported from the
+  barrel AND `@vesper/shared/queries`. providers.tsx (web + mobile) wire the mutationCache + mutation
+  defaults; mobile adds the shared mutation persister + cold-start hydrate (own AsyncStorage key, separate
+  from chat-013's query cache) + foreground flush; web has NO mutation-cache persistence and flushes on the
+  window `online` event. Single flush path (web online / mobile foreground); no NetInfo dep.
+- conflictToast is a FIXED-window coalescer (NOT sliding/debounce): the 5s window opens on the first 409 and
+  emits once; later 409s only bump the count, never reset the timer. There is intentionally NO clearTimeout /
+  teardown — a chat "fixing" it to clear-on-new-409 would break the documented contract + the coalescing test.
+- Constraints to preserve in ANY provider edit: self-mutation window = 60s; web has NO mutation-cache
+  persistence (mobile only); 409 OPTIMISTIC_LOCK_FAILURE → invalidate + toast (never retried), distinct from
+  other 4xx (dropped, surfaced via dev-log + Sentry breadcrumb) and network errors (backoff-retried).
+- clientMutationId is minted once, persisted on the mutation, reused across retries AND cold-start rehydrate
+  (so `(user_id, client_mutation_id)` idempotency holds); selfMutationFilter.record(id) fires at send.
+
+---
+
+### 032-W PARTIAL — spine landed, all screens/auth BLOCKED on 032-V (Fable)
+**Owner:** 032-W completion (resumes when 032-V ships); 033-W (EO 47, gated on 032-W)
+**Relevant-to:** 032-V, 032-W-resume, 033-W; any chat importing @vesper/shared/onboarding
+**Status:** Open — partially built, blocked on hard prereq
+**Detail:** Model claude-opus-4-8 (Fable deferred — Fable chats not run; 032-V the visual half never
+shipped, absent from main and all branches [PHASE_4_BUILD_PLAN.md L1163]). Per operator call, 032-W built
+ONLY the screen-independent spine; zero screens/shells/routes/auth authored.
+LANDED:
+- packages/shared/src/onboarding/state.ts — deriveOnboardingStep(user, profile): OnboardingStep, PURE
+  (no @vesper/db, no RN, no I/O), + zero-mock state.test.ts.
+- @vesper/shared/onboarding subpath export, mirroring 038 ./queries: src/onboarding/index.ts + barrel
+  re-export + package.json exports["./onboarding"]. NO consumer imports it yet (the web shell that will is
+  blocked) — expected. Subpath resolution UNVERIFIED until pnpm --filter @vesper/shared build runs at the
+  gate; confirm green before relying on it.
+- Honorific persistence: NO edit needed. PUT /profile already accepts honorific (schemas.ts:56,
+  HonorificSchema sir|madam|none) and maps to users.honorific via typed Drizzle write (operations.ts:150);
+  users.honorific present in live Drizzle model (users.ts:38).
+PROVISIONAL field→step map (derived from PRD §3.1 ALONE — 032-V unreadable; marked provisional in code):
+terminal-guard-first then earliest-incomplete PRD screen — onboarding_completed_at set → Done(14);
+no archetype → Archetype(3); location_lat/lng OR sleep_target incomplete → WakeBedLocation(5); honorific
+unchosen → FormOfAddress(10); else Done(14). Build-plan integers (archetype→4, location→6, sleep→7)
+REJECTED — conflict PRD §3.1 (archetype=Screen 3, wake/bed/location=Screen 5); PRD screen identities used
+as canonical. Honorific is NOT NULL DEFAULT 'none' so the column can't distinguish defaulted-vs-chose-none;
+the pure fn relies on the CALLER passing null until an explicit choice (any concrete value incl. 'none' =
+chosen) — documented on the input type. Screens not gated by the four contract fields (4-Calendar branch,
+6-Module, 7-Prefs, 11-Goals, 12/13) are not derivable and not emitted; OnboardingProfileFields
+(modules/base_profile) declared but reserved for post-032-V. The Screen-4 calendar-vs-no-plan branch split
+may reshape ordering — RECONCILE the map against the real 032-V surfaces when they land.
+BLOCKED on 032-V (resume post-Fable, on Opus): web (onboarding)/layout.tsx shell; mobile
+(onboarding)/_layout.tsx shell (+ its deferred unit test); back-button affordance; per-screen
+onboarding_step_completed analytics emission (records-only via the guarded dev-log seam — event is in the
+§3 taxonomy [TECHNICAL_SPEC.md L2262], NOT yet emitted because emission lives in the blocked shells, so
+nothing added to the 096 pending taxonomy); resume-on-entry UI; auth reposition (Google/Apple/magic-link
+onto the repositioned sign-in surface); honorific-screen → PUT /profile call.
+AUTH SURFACES THAT EXIST: standalone (auth)/sign-in only — web page.tsx, mobile sign-in.tsx, from 010/011.
+The onboarding-repositioned sign-in surface 032-W targets does NOT exist (it's a 032-V surface). The
+resume chat REUSES the 010/011 flows onto the repositioned surface — does not author a new auth path.
+PR #__.
 
 ---
 
@@ -345,6 +437,9 @@ states: subscribing, subscribed, error, closed, reconnecting; payload
 both usePlanRealtime hooks; 096 registers + routes it through PostHog.
 037 adds realtime_connection_state_changed (states: subscribing, subscribed, error, closed,
 reconnecting; payload {state, reason, plan_date, retry_count}) to the pending 096 taxonomy.
+038 emits offline_queue_flush_started {queued_mutation_count} and offline_queue_flush_completed
+{succeeded_count, conflict_count, network_error_count, total_duration_ms} via the guarded dev-log seam
+(records-only); both await registration/routing in 096.
 076 adds `push_token_registered` {platform, has_live_activity_token, device_id_hash} (device_id
 hashed via FNV-1a) to the pending 096 taxonomy; emitted via a guarded seam in
 apps/mobile/lib/pushTokens.ts, awaits registration in 096.

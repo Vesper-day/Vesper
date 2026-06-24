@@ -73,6 +73,19 @@ export {
 } from './queries/conflictToast';
 export type { ConflictToast, ConflictToastOptions } from './queries/conflictToast';
 
+// Onboarding resume-state machine (Chat 032-W). Mobile consumes via this barrel;
+// web consumes via the '@vesper/shared/onboarding' subpath (client-bundle safe).
+export {
+  deriveOnboardingStep,
+  OnboardingStep,
+} from './onboarding/state';
+export type {
+  OnboardingArchetype,
+  OnboardingHonorific,
+  OnboardingUserFields,
+  OnboardingProfileFields,
+} from './onboarding/state';
+
 // Subscription state machine (Chat 081) — canonical §8 transitions.
 export {
   transitionToActive,
