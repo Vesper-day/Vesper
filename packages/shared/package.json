@@ -12,6 +12,10 @@
     "./queries": {
       "types": "./dist/queries/index.d.ts",
       "default": "./src/queries/index.ts"
+    },
+    "./onboarding": {
+      "types": "./dist/onboarding/index.d.ts",
+      "default": "./src/onboarding/index.ts"
     }
   },
   "scripts": {
