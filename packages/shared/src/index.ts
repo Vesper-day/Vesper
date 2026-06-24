@@ -33,6 +33,46 @@ export {
 } from './realtime/selfMutationFilter';
 export type { SelfMutationFilter } from './realtime/selfMutationFilter';
 
+// Offline mutation queue + conflict toast (Chat 038)
+export {
+  BACKOFF_BASE_MS,
+  BACKOFF_MAX_MS,
+  MAX_MUTATION_RETRIES,
+  OFFLINE_MUTATION_PERSIST_KEY,
+  OFFLINE_MUTATION_PERSIST_VERSION,
+  BLOCK_MUTATION_KEY_PREFIX,
+  planQueryKey,
+  blockMutationScope,
+  mintClientMutationId,
+  ensureClientMutationId,
+  prepareMutationSend,
+  classifyMutationError,
+  shouldRetryMutation,
+  mutationRetryDelay,
+  buildMutationDefaults,
+  buildMutationCacheConfig,
+  flushQueue,
+  createMutationPersister,
+} from './queries/mutationQueue';
+export type {
+  MutationErrorKind,
+  ClientMutationVariables,
+  AnalyticsEmitter,
+  MutationDroppedInfo,
+  MutationCacheConfigOptions,
+  FlushQueueOptions,
+  AsyncStorageLike,
+  MutationPersister,
+  MutationPersisterOptions,
+} from './queries/mutationQueue';
+export {
+  createConflictToast,
+  CONFLICT_TOAST_COALESCE_WINDOW_MS,
+  CONFLICT_TOAST_SINGLE,
+  CONFLICT_TOAST_MULTI,
+} from './queries/conflictToast';
+export type { ConflictToast, ConflictToastOptions } from './queries/conflictToast';
+
 // Subscription state machine (Chat 081) — canonical §8 transitions.
 export {
   transitionToActive,

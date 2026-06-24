@@ -375,6 +375,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.0.0
         version: 2.105.4
+      '@tanstack/query-core':
+        specifier: 5.100.10
+        version: 5.100.10
       '@upstash/ratelimit':
         specifier: ^2.0.8
         version: 2.0.8(@upstash/redis@1.38.0)
