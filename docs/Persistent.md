@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 054-W landed (tasks list UI + CRUD; web + mobile).
+Last updated: after Chat 064 landed (GCal sync + token refresh + event classification; PR #57).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -65,6 +65,10 @@ Management / Transparent Column Encryption. §14 #1 / LAYER_3 "pgsodium extensio
 exchange at oauth2.googleapis.com/token; dedicated callback page at
 `apps/web/app/(app)/settings/integrations/callback/page.tsx`. Verified end-to-end (293-byte
 ciphertext round-trips; connect→audit INSERT, disconnect→audit DELETE).
+064 CONFIRMED the helpers are `encryptToken` / `decryptToken` (libsodium XChaCha20-Poly1305,
+nonce-prepended bytea, no-AAD). Any consumer outside @vesper/db that imports the encryption helper
+must DYNAMIC-import it — a static import pulls libsodium onto the graph and breaks vitest's SSR
+transform (same class as the @vesper/db barrel rule). 064 loaded it via dynamic import for this reason.
 
 ---
 
@@ -115,6 +119,33 @@ pin drizzle-kit 0.29.1 + drizzle-orm 0.38.4 then `db:pull`, or hand-correct. Stu
 table-specific: verify each table column-for-column; treat these three as known-stale → raw SQL.
 - users (090b): biometric_lock_enabled present in migration, MISSING from the pull-generated Drizzle users model → 090b wrote the scalar via raw SQL UPDATE. Same class; verify-per-table still holds.
 - calendar_events (052-W): NO Drizzle model exists at all (not just stale) — 052-W ran all CRUD via raw parameterized SQL + validateSession + createDrizzleClient. Same db:pull-broken class. Next drizzle-kit pull should emit it; until then any calendar_events code stays raw SQL + verify columns per-table.
+- integrations (064): live column contract re-confirmed (11 cols, access/refresh_token bytea, the two
+  enums) via the in-repo Postgres node client; 064 used raw parameterized SQL throughout. The
+  audit_integrations_changes-on-UPDATE path was NOT exercised live (no google_calendar row in the local
+  DB) — trigger is migration-11 infra, untouched; verify on the first real connect.
+
+---
+
+### GCAL EVENT SYNC (064 — landed)
+**Owner:** Each later GCal consumer (034-W connect, 067 conflict UI, 099 reconnect banner, plan synthesis)
+**Relevant-to:** 067, 099, 065; any chat importing getTodayEvents / CalendarEvent or reading integration sync state
+**Status:** Open — landed-feature forward notes
+**Detail:** 064 shipped getTodayEvents + automatic token refresh + rule-first/Haiku event classification + the
+plan-synthesis wiring. PR #57.
+- PLACEMENT DEVIATION (load-bearing): `getTodayEvents` AND the `CalendarEvent` type live in **@vesper/ai**, NOT
+  @vesper/shared as the build-plan path said — @vesper/shared must not depend on @vesper/ai + @vesper/db. Any
+  later importer uses **@vesper/ai**, not packages/shared/integrations.
+- block_type IS COMPUTED BUT NOT CARRIED: the classifier runs (rule-first → batch 2+ / single 1 / none 0) but
+  CalendarEvent stays `{id,title,startTime,endTime}` — the classification is breadcrumb-only and currently has
+  NO consumer. 067 (conflict UI) must add a field to the event shape or a side channel, or the classify work
+  stays inert. PlanContext.calendarEvents shape was deliberately left unchanged.
+- RECONNECT-BANNER TRIGGER: the surface trigger is `integrations.status='error'`, NOT `last_error IS NOT NULL`,
+  so a transient error the next sync recovers does not flicker the 099 banner. Sentry breadcrumb fires on every
+  refresh attempt (so transient failures stay visible even after last_error is overwritten on recovery).
+- DYNAMIC-IMPORT RULE: anything in @vesper/ai that needs @vesper/db/encryption must dynamic-import it (static
+  import breaks vitest SSR via libsodium). See the GCAL TOKEN ENCRYPTION MODEL flag.
+- getTodayEvents performs integrations bookkeeping writes (last_synced_at / status) inside the generate-only
+  synthesis path — sync metadata, not plan persistence; within the Decision-4 boundary.
 
 ---
 
