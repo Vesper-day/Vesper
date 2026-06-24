@@ -8,6 +8,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./src/index.ts"
+    },
+    "./queries": {
+      "types": "./dist/queries/index.d.ts",
+      "default": "./src/queries/index.ts"
     }
   },
   "scripts": {
@@ -20,6 +24,7 @@
     "@react-email/components": "^1.0.0",
     "@sentry/nextjs": "^8.0.0",
     "@supabase/supabase-js": "^2.0.0",
+    "@tanstack/query-core": "5.100.10",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
     "@vesper/db": "workspace:*",
