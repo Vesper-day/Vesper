@@ -48,7 +48,7 @@ Handle `getvesperday` reserved on all platforms.
 | Product Hunt (Coming Soon) | Complete | |
 | Hacker News | Complete | |
 | LinkedIn (Company page) | Complete | |
-| GitHub org | Complete | getvesperday/vesper (private) |
+| GitHub org | Complete | Vesper-day/Vesper (private) |
 
 ### Service Accounts
 
@@ -110,7 +110,7 @@ ercel | Complete | Pro ($20/month) — active from Phase 4 build
 | packages/ai (@vesper/ai) | Complete | Anthropic SDK + @ai-sdk/anthropic wrapper |
 | packages/ui (@vesper/ui) | Complete | Shared design tokens + Tailwind config only (not a component library) |
 | pnpm type-check all packages | Complete | 10/10 pass |
-| Initial commit pushed to GitHub | Complete | github.com/getvesperday/vesper (private) |
+| Initial commit pushed to GitHub | Complete | github.com/Vesper-day/Vesper (private) |
 
 ---
 
