@@ -71,13 +71,19 @@ module.exports = {
       },
     ],
     [
-      '@sentry/react-native/expo',
+      // Sentry v7 moved the Expo config plugin to the package root; the old
+      // '@sentry/react-native/expo' subpath is replaced by '@sentry/react-native'.
+      // Prop shape (organization/project/url) is unchanged from v6.
+      '@sentry/react-native',
       {
         url: 'https://sentry.io/',
         project: 'vesper-mobile',
         organization: 'vesper',
       },
     ],
+    // expo-web-browser ships a config plugin as of SDK 54; expo install --fix
+    // flagged it as required for the prebuild config.
+    'expo-web-browser',
   ],
   experiments: {
     typedRoutes: true,
