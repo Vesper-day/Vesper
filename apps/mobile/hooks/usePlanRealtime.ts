@@ -7,7 +7,7 @@ import {
   selfMutationFilter,
   type RealtimeConnectionState,
   type RealtimeStateContext,
-} from '@vesper/shared';
+} from '@vesper/shared/realtime';
 import { supabase } from '../lib/supabase';
 
 /**
