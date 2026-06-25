@@ -104,7 +104,7 @@ ercel | Complete | Pro ($20/month) — active from Phase 4 build
 | turbo.json pipelines | Complete | build, lint, dev, test |
 | Root package.json + pnpm-workspace.yaml | Complete | |
 | apps/web (@vesper/web) | Complete | Next.js 15, App Router, TypeScript strict |
-| apps/mobile (@vesper/mobile) | Complete | Expo SDK 52, iOS-only at V1, NativeWind |
+| apps/mobile (@vesper/mobile) | Complete | Expo SDK 54, iOS-only at V1, NativeWind |
 | packages/db (@vesper/db) | Complete | Drizzle ORM; RLS-aware client pattern modelled on rphlmr/drizzle-supabase-rls |
 | packages/shared (@vesper/shared) | Complete | Zod 3.x + date-fns 3.x; zero other external deps |
 | packages/ai (@vesper/ai) | Complete | Anthropic SDK + @ai-sdk/anthropic wrapper |

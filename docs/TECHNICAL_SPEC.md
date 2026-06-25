@@ -52,15 +52,15 @@ Key web dependencies and their locked versions at project initialization:
 
 ### Mobile
 
-The mobile application is built on **Expo SDK 52** with **React Native** and TypeScript. iOS is the only target at V1. Android support is added at V1.5 using the same Expo codebase. The minimum iOS deployment target is **iOS 17.2**, raised from the earlier 16.1 floor so that Live Activity Push Start is guaranteed on every install with no version-based degraded-fallback code path (per the Phase 4 build-plan H-10 decision). 17.2+ covers the large majority of active iOS devices at launch, which is sufficient coverage for an indie V1. Dynamic Island support is a separate hardware axis, not a version axis: all supported installs run 17.2+, but devices without Dynamic Island hardware (iPhone 14 and earlier non-Pro models) fall back to persistent banner notifications as specified in Section 7. There is no longer an iOS-version-based fallback band (the former 16.1–17.1 banner case is eliminated by the raised target); the only fallback is hardware-based.
+The mobile application is built on **Expo SDK 54** with **React Native** and TypeScript. iOS is the only target at V1. Android support is added at V1.5 using the same Expo codebase. The minimum iOS deployment target is **iOS 17.2**, raised from the earlier 16.1 floor so that Live Activity Push Start is guaranteed on every install with no version-based degraded-fallback code path (per the Phase 4 build-plan H-10 decision). 17.2+ covers the large majority of active iOS devices at launch, which is sufficient coverage for an indie V1. Dynamic Island support is a separate hardware axis, not a version axis: all supported installs run 17.2+, but devices without Dynamic Island hardware (iPhone 14 and earlier non-Pro models) fall back to persistent banner notifications as specified in Section 7. There is no longer an iOS-version-based fallback band (the former 16.1–17.1 banner case is eliminated by the raised target); the only fallback is hardware-based.
 
 Key mobile dependencies:
 
 | Package | Version | Purpose |
 |---|---|---|
-| expo | ~52.0 | Framework |
-| react-native | 0.76.x | UI |
-| expo-router | 4.x | Navigation |
+| expo | ~54.0 | Framework |
+| react-native | 0.81.x | UI |
+| expo-router | 6.x | Navigation |
 | expo-secure-store | latest | JWT storage (iOS Keychain) |
 | expo-auth-session | latest | OAuth flows |
 | expo-live-activities | latest | ActivityKit / Dynamic Island |
@@ -70,7 +70,8 @@ Key mobile dependencies:
 | zod | 3.x | Schema validation |
 | @supabase/supabase-js | 2.x | Auth client |
 | date-fns | 3.x | Date math |
-| react-native-reanimated | 3.x | Animations |
+| react-native-reanimated | 4.x | Animations |
+| react-native-worklets | 0.5.x | Reanimated 4 worklets runtime |
 | react-native-gesture-handler | 2.x | Gesture recognition |
 | react-native-draggable-flatlist | latest | Block reordering |
 

@@ -89,9 +89,9 @@ Each entry states: the decision, the rationale (one sentence), and the consequen
 
 ## Decision 09 — React Native New Architecture
 
-**Decision:** React Native New Architecture (Fabric renderer, JSI) enabled per Expo SDK 52 default. Reanimated, Supabase Realtime, and `expo-live-activities` must all be verified as working under Fabric before Chat 037 ships.
+**Decision:** React Native New Architecture (Fabric renderer, JSI) enabled per Expo SDK 54 default. Reanimated, Supabase Realtime, and `expo-live-activities` must all be verified as working under Fabric before Chat 037 ships.
 
-**Rationale:** Expo SDK 52 enables Fabric by default; opting out creates a compatibility debt that grows with every Expo minor release and cannot be deferred to V2 without a disruptive migration.
+**Rationale:** Expo SDK 54 enables Fabric by default; opting out creates a compatibility debt that grows with every Expo minor release and cannot be deferred to V2 without a disruptive migration. SDK 54 is also the final release to support the Legacy Architecture (SDK 55+ is New-Architecture-only), so adopting the New Architecture now avoids a forced migration later.
 
 **Consequence of deviation:** Disabling New Architecture to unblock a library makes the V1.5 migration harder and more expensive; shipping Chat 037 without verifying Fabric compatibility risks a broken Realtime self-mutation filter in production.
 
