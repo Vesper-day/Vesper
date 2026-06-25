@@ -16,6 +16,10 @@
     "./onboarding": {
       "types": "./dist/onboarding/index.d.ts",
       "default": "./src/onboarding/index.ts"
+    },
+    "./realtime": {
+      "types": "./dist/realtime/index.d.ts",
+      "default": "./src/realtime/index.ts"
     }
   },
   "scripts": {

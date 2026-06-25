@@ -12,7 +12,7 @@ import {
   createMutationPersister,
   flushQueue,
   type MutationDroppedInfo,
-} from '@vesper/shared';
+} from '@vesper/shared/queries';
 import { UpdateGateModal } from '../components/UpdateGateModal';
 import { useUiStore } from '../store/ui';
 
