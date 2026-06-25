@@ -41,8 +41,13 @@ function scrubValue(value: unknown, depth = 0): unknown {
   return value;
 }
 
-/** Sentry `beforeSend` — scrub known PII from the outgoing event. */
-function scrubEvent(event: Sentry.ErrorEvent): Sentry.ErrorEvent {
+/**
+ * Sentry `beforeSend` — scrub known PII from the outgoing event. Generic over the
+ * event type so it round-trips the exact type `beforeSend` provides (inferred as the
+ * SDK's `ErrorEvent`). @sentry/react-native 6.14 no longer re-exports `ErrorEvent`
+ * from its namespace — only `Event` (from @sentry/core) — so we constrain to that.
+ */
+function scrubEvent<E extends Sentry.Event>(event: E): E {
   if (event.request?.url) {
     event.request.url = scrubString(event.request.url);
   }
