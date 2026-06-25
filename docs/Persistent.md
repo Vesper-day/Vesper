@@ -178,16 +178,27 @@ tokens (web) / RN styles (mobile) until the real primitives land, then refactor 
 
 ---
 
-### EXPO GO SDK 52-vs-54 RENDER BLOCK (053)
-**Owner:** Operator env / SDK-bump owner
-**Relevant-to:** Any 🟢 mobile chat needing an on-device Expo Go render check ()
-**Status:** Open — environment-only, blocks on-device render
-**Detail:** App Store Expo Go is now SDK 54; the project is pinned Expo SDK 52. Expo Go runs only its
-matching SDK, so the whole mobile app will not load on-device in Expo Go regardless of native-vs-JS —
-this supersedes the earlier "Expo Go is fine for standard JS modules" assumption (true only when the
-Expo Go app and project SDK match). On-device render checks DEFER until one of: SDK 52→54 bump, a Mac
-simulator, or an EAS dev build (EAS blocked on Apple enrollment). Not a code bug; affects all mobile
-screens. Surfaced trying to render 053's calendar tab.
+### EXPO GO SDK RENDER — bundle wall cleared; on-device VISUAL render pending (053→081)
+**Owner:** Operator (on-device visual confirm)
+**Relevant-to:** Any 🟢 mobile chat needing an on-device Expo Go render check
+**Status:** Open — narrowed to operator visual confirmation only
+**Detail:** Two stacked blockers, both now down except the final visual check. (1) SDK MISMATCH — RESOLVED: project on Expo SDK 54 (staged 52→53→54, PRs #62 / SDK-54 / #64), App Store Expo Go is SDK 54, so it matches and the app loads on-device. (2) BUNDLE WALL — RESOLVED in 081 (#64): `expo export -p ios` previously failed both ways (hatch-on → node:crypto from subscriptionState; hatch-off → @vesper/db no main) because the mobile graph reached the server-pulling bare @vesper/shared barrel. 081 collapsed mobile onto client-safe subpaths and went Metro-exports-ON; `expo export -p ios` now bundles (2657 modules → 7.25 MB hbc). REMAINING: on-device VISUAL render unconfirmed — `cd apps/mobile && npx expo start`, scan QR. A clean bundle proves load, not render. Custom native bridges (Alarm / LiveActivity) do NOT load in Expo Go → return null by design; alarm/LA features are inert, not broken, in Expo Go — true test needs Mac/EAS. Retire fully only after the operator sees screens render.
+
+---
+
+### EXPO SDK 52→54 BUMP — LANDED (053 / 054)
+**Owner:** Any later mobile chat assuming the old stack; SDK-bump maintenance
+**Relevant-to:** Any 🟢 mobile chat; any chat citing SDK 52 / RN 0.76 / React 18 / Old-Arch assumptions
+**Status:** Open — landed-feature forward notes
+**Detail:** apps/mobile bumped 52→53→54 across three PRs (#62 = 53; SDK-54 PR merged; #64 = 081 unblock). Current mobile stack: expo ~54.0.35, react-native 0.81.5, react 19.1.0, New Architecture ON (newArchEnabled unset = SDK default), react-native-reanimated 4.1.x + react-native-worklets 0.5.1 (SDK pin — do NOT install worklets@latest, needs RN 0.83+), babel plugin path `react-native-worklets/plugin` (swapped from `react-native-reanimated/plugin`), expo-router 6.0.x (migration zero-code), @sentry/react-native 7.2.x. Config: Sentry v7 moved its Expo config plugin to the package ROOT (`@sentry/react-native`, was `/expo`); `expo-web-browser` config plugin added by `expo install --fix`. Now-DIRECT deps: react-native-safe-area-context ~5.6.x, react-native-svg. MOOT findings (absent from repo — do NOT re-scope as 54 work): expo-file-system (not a dep, zero imports → /legacy migration moot), SafeAreaView (zero usages → RN-0.81 deprecation migration moot), react-native-draggable-flatlist (dep present, ZERO imports — unused; Reanimated-4 drag-test "swing factor" moot; removal candidate, left in place). Custom Swift bridges' New-Arch native verification stays Mac/EAS-gated (OPERATOR HARDWARE) — not cleared by this bump nor by an Expo Go render.
+
+---
+
+### SENTRY ErrorEvent NAMESPACE (053 / 054 — resolved, watch)
+**Owner:** Informational — watch on next @sentry/react-native bump
+**Relevant-to:** Any chat editing apps/mobile/lib/sentry.ts or bumping @sentry/react-native
+**Status:** Open — resolved, standing watch
+**Detail:** @sentry/react-native ≥6.14 dropped `ErrorEvent` from its namespace (only `Event`, from @sentry/core). apps/mobile/lib/sentry.ts was made generic — `scrubEvent<E extends Sentry.Event>(event: E): E` — to round-trip the type `beforeSend` provides without naming ErrorEvent. Confirmed still valid under the 6→7 major (SDK 54). If a future Sentry bump changes the event-type surface again, this is the line to re-check.
 
 ---
 
@@ -308,45 +319,22 @@ stub from 030; Zod request shape already colocated. Full JWS verification lands 
 ---
 
 ### @vesper/shared DIST-VS-SRC REBUILD ORDERING
-**Owner:** No owner — note only (adjacent to the moduleResolution gotcha)
+**Owner:** No owner — note only
 **Relevant-to:** Any chat adding new exports to @vesper/shared
 **Status:** Open — standing build gotcha
-**Detail:** @vesper/shared serves TYPES from `dist/` but RUNTIME from `src/`. New
-exports are invisible to a consumer type-check until shared is rebuilt:
-`pnpm --filter @vesper/shared build` BEFORE type-checking the consumer.
-New 037 exports: `realtime/client.ts` (createRealtimeClient) and
-`realtime/selfMutationFilter.ts` (selfMutationFilter, SELF_MUTATION_WINDOW_MS),
-re-exported from `packages/shared/src/index.ts`.
-New 038 exports: `queries/mutationQueue.ts` and `queries/conflictToast.ts`, re-exported from BOTH
-`src/index.ts` (barrel) AND the `./queries` subpath entry (`src/queries/index.ts`). A new queue export must
-update BOTH or web/mobile drift. See the @vesper/shared BARREL PULLS SERVER CODE flag.
+**Detail:** @vesper/shared serves TYPES from `dist/` but RUNTIME from `src/`. New exports are invisible to a consumer type-check until shared is rebuilt: `pnpm --filter @vesper/shared build` BEFORE type-checking the consumer. Declared subpath exports (each: types → `./dist/<name>/index.d.ts`, default → `./src/<name>/index.ts`): `./queries`, `./onboarding`, and `./realtime` (added in 081 — `src/realtime/index.ts` re-exporting createRealtimeClient / createSelfMutationFilter / selfMutationFilter / SELF_MUTATION_WINDOW_MS + realtime types). A new export consumed by the web client must update BOTH `src/index.ts` (barrel) AND the relevant subpath entry, or web/mobile drift. See the @vesper/shared BARREL PULLS SERVER CODE flag.
 
 ---
 
 ### @vesper/shared BARREL PULLS SERVER CODE INTO CLIENT BUNDLES (038)
-**Owner:** Future shared-barrel / chat-081 follow-up cleanup (unowned)
+**Owner:** Future shared-barrel cleanup for WEB (unowned); mobile half resolved in 081
 **Relevant-to:** Any new 'use client' web file importing @vesper/shared; any chat adding a shared export consumed by the web client (032-W, 039, 042, …)
-**Status:** Open — ACTIVE (mitigated per-consumer, not structurally fixed)
-**Detail:** The @vesper/shared barrel (`src/index.ts`) statically re-exports `subscriptionState` (chat 081)
-and `api/auth` → `@vesper/db` → `postgres` (Node `fs`/`net`/`tls`/`node:crypto`). ANY new `'use client'` web
-file importing the BARE `@vesper/shared` barrel breaks `next build` with `Module not found: Can't resolve
-'fs'`. (The §3 "zero deps beyond Zod and date-fns" line is STALE — shared now pulls supabase-js/sentry/
-upstash/db.) Mitigation = import client-safe pieces from a SUBPATH export, not the barrel. 038 added
-`@vesper/shared/queries` (`exports["./queries"]`, types `./dist/queries/index.d.ts`) and pointed
-apps/web/app/providers.tsx at it. Findings:
-- WEB↔MOBILE ASYMMETRY (deliberate): web imports the subpath; mobile imports the BARE barrel because mobile's
-  node-classic moduleResolution can't resolve the `./queries` subpath (TS2307). Mobile bundles via Metro
-  (main field), so the barrel→db pull is NOT a mobile gate failure today, but it is latent if Metro tightens.
-  Do NOT "unify" the two imports blindly — switching mobile needs a monorepo moduleResolution change
-  (node16/nodenext/bundler).
-- A subpath export is a SECOND build-artifact dependency: a consumer's type resolution needs shared built
-  (`dist/queries/`). If a chat adds a new export, update BOTH `src/index.ts` (barrel) AND the subpath entry
-  (`src/queries/index.ts`) or web/mobile drift.
-- `sideEffects: false` does NOT work here — Next/webpack didn't tree-shake the transpiled workspace-source
-  barrel re-exports (tried and reverted in 038). The subpath export is the working mitigation; do not
-  re-attempt the sideEffects route.
-- Structural fix (split a client-safe shared entry / stop barrel-re-exporting server code) is unowned — a
-  future chat-081 follow-up, NOT owned by any build chat.
+**Status:** Open — ACTIVE for WEB only; MOBILE resolved (081)
+**Detail:** The @vesper/shared barrel (`src/index.ts`) statically re-exports `subscriptionState` (node:crypto + @vesper/db) and `api/auth`/`api/route` → @vesper/db → postgres (Node fs/net/tls). Bare barrel is server-pulling; named subpaths are client-safe.
+- WEB (still ACTIVE): ANY new `'use client'` web file importing the BARE `@vesper/shared` barrel breaks `next build` (`Can't resolve 'fs'`). Mitigation: import client-safe pieces from a SUBPATH (`@vesper/shared/queries`, `/onboarding`, `/realtime`), not the barrel. Web's bare-barrel `.` imports (createRoute/validateSession/ApiError across api routes) remain server-pulling BY DESIGN — the structural fix (Option B: make `.` client-safe) was deliberately REJECTED in 081 (would ripple to every web/api import). Web hazard persists intentionally.
+- MOBILE (RESOLVED, 081 / #64): mobile imported the bare barrel only in providers.tsx + usePlanRealtime.ts. 081 switched them to `@vesper/shared/queries` and a NEW `@vesper/shared/realtime` subpath, then REMOVED the Metro exports hatch (now exports-ON). Mobile graph no longer reaches subscriptionState / api/auth / @vesper/db / node:crypto. `expo export -p ios` bundles clean.
+- STALE prior wording (now false under SDK 54): the old "asymmetry is deliberate / mobile node-classic can't resolve subpaths (TS2307) / latent if Metro tightens / do NOT unify" notes are SUPERSEDED — SDK 54 set moduleResolution: bundler + customConditions: react-native, so mobile resolves subpaths and the asymmetry was deliberately collapsed on the mobile side.
+- `sideEffects: false` still does NOT work here (tried/reverted in 038) — subpath exports are the mitigation.
 
 ---
 
@@ -454,22 +442,15 @@ VITEST UPSTASH ENV — `apps/web/vitest.config.ts` does not load `.env.local`; i
 **Owner:** Pre-existing / no owner — note only
 **Relevant-to:** All @vesper/web chats (🔵)
 **Status:** Open — pre-existing, do not fix
-**Detail:** `pnpm build` for @vesper/web compiles successfully then fails ONLY in
-Next's generated `.next/types/validator.ts` for untouched `layout.tsx`
-(`bigint→ReactNode`). Pre-existing @types/react version skew. If any chat's
-type-check/build trips this: note it, do not absorb. 063 pinned `@types/react` to 18.3.28
-(React runtime 19) to silence the mobile type-check skew — deliberately fragile; revisit on a
-React/Expo bump (a future `@types/react-dom` mismatch may resurface).
+**Detail:** Root pnpm.overrides pins `@types/react` 18.3.28 monorepo-wide (React runtime 19) to silence a mobile type-check skew; load-bearing for apps/web. This pin was the deliberately-fragile item flagged to "revisit on a React/Expo bump" — that bump HAPPENED (SDK 52→54, React 18→19.1) and the pin HELD: mobile + web type-check/build stayed green at 18.3.28 through 53 and 54, no forced move (no new react-skew failure). The "revisit on bump" framing is spent; the pin survives 19.x runtime and STAYS until the web skew is fixed independently. Live note: `next build` for @vesper/web can still trip ONLY in generated `.next/types/validator.ts` (bigint→ReactNode) for untouched layout.tsx — pre-existing, intermittent (did not surface in the 081 run), do NOT absorb. expo-doctor under SDK 54 now warns it wants @types/react ~19.1.10 — NON-blocking, intentionally ignored (moving it re-opens the web skew).
 
 ---
 
-### @vesper/shared TSC moduleResolution GOTCHA
+### @vesper/shared TSC moduleResolution GOTCHA — STALE under SDK 54
 **Owner:** No owner — note only
-**Relevant-to:** Any chat importing @vesper/shared types in apps/web routes
-**Status:** Open — pre-existing, do not fix
-**Detail:** Imports of @vesper/shared types under node resolution may not resolve
-(surfaced in 059b/077). If it bites in a chat: flag, do not absorb a monorepo
-resolution cleanup.
+**Relevant-to:** Historical (pre-SDK-54)
+**Status:** Stale — kept for history
+**Detail:** Pre-SDK-54, @vesper/shared subpath types could fail to resolve under mobile's node-classic moduleResolution (surfaced 059b / 077), forcing the web-subpath / mobile-bare-barrel asymmetry. SDK 54's expo/tsconfig.base sets moduleResolution: bundler + customConditions: ["react-native"], so mobile now resolves `@vesper/shared/<subpath>` types. Confirmed in 081 (mobile type-check green importing ./queries and ./realtime). No longer a live constraint; do not cite it to justify bare-barrel mobile imports.
 
 ---
 
@@ -535,15 +516,11 @@ expo-live-activities — loose spec wording, not the installed dep.
 
 ---
 
-### RN CRYPTO ABSENT — Expo SDK 52 winter runtime (076)
+### RN CRYPTO ABSENT — node:crypto unavailable in RN (076; SDK now 54)
 **Owner:** Informational — standing mobile constraint
 **Relevant-to:** Any mobile (🟢) chat generating IDs or hashing client-side
-**Status:** Open — standing
-**Detail:** Expo SDK 52 winter runtime polyfills only TextDecoder/URL/URLSearchParams/FormData — NO
-crypto (no `crypto.randomUUID`, no `crypto.subtle`), and `expo-crypto` is not a dep. 076 used a
-`Math.random` v4 UUID for `device_id` (generate-once, persisted in expo-secure-store) and FNV-1a
-one-way hex for `hashDeviceId` (not SHA-256); acceptable because device_id is opaque/non-PII. If a real
-cryptographic hash/UUID is ever required, add `expo-crypto` first.
+**Status:** Open — fact, not a blocker
+**Detail:** React Native has no `node:crypto`. 076 (under SDK 52) used a Math.random v4 UUID for `device_id` (persisted in expo-secure-store) and FNV-1a hex for `hashDeviceId` (not SHA-256) — fine because device_id is opaque/non-PII. After 081, node:crypto is NEVER in the mobile bundle graph (subscriptionState, its only user, is off the mobile graph) → inert fact, not a gate. If a real cryptographic hash/UUID is ever needed on mobile, add `expo-crypto` first. NEEDS RE-VERIFY UNDER SDK 54: the original 076 detail enumerated the SDK-52 winter-runtime polyfill set (TextDecoder/URL/URLSearchParams/FormData, no crypto). Whether SDK 54 / RN 0.81 changes that set is UNVERIFIED — do not assume the SDK-52 enumeration still holds; re-check against the SDK 54 runtime before relying on it.
 
 ---
 
