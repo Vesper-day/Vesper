@@ -3,13 +3,11 @@ const { withNativeWind } = require('nativewind/metro');
 
 const config = getDefaultConfig(__dirname);
 
-// SDK 53 enables Metro package.json "exports" resolution by default. That makes Metro
-// resolve the bare @vesper/shared barrel through a path that pulls server-only code into
-// the mobile bundle (src/index.ts re-exports subscriptionState.ts -> node:crypto and
-// @vesper/db -> postgres -> node fs/net/tls), which fails to bundle for iOS. Disabling
-// package.json exports resolution restores the SDK-52 "main"-field behavior the mobile
-// bundle relied on. See PERSISTENT: @vesper/shared BARREL pulls server code into client
-// bundles (038); revisit when the shared barrel is split (future 081 cleanup).
-config.resolver.unstable_enablePackageExports = false;
+// Metro package.json "exports" resolution stays ON (SDK 53+ default). The mobile
+// bundle imports @vesper/shared only via client-safe subpaths ('@vesper/shared/queries'
+// and '@vesper/shared/realtime'), so the bare barrel's server-only re-exports
+// (subscriptionState.ts -> node:crypto and api/auth -> @vesper/db -> postgres -> node
+// fs/net/tls) never enter the mobile module graph. The 053 exports-off hatch was
+// removed in the 081 barrel split; see PERSISTENT 081 / 038.
 
 module.exports = withNativeWind(config, { input: './global.css' });

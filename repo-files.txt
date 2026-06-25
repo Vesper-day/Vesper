@@ -1272,6 +1272,7 @@ packages/shared/src/queries/index.ts
 packages/shared/src/queries/mutationQueue.test.ts
 packages/shared/src/queries/mutationQueue.ts
 packages/shared/src/realtime/client.ts
+packages/shared/src/realtime/index.ts
 packages/shared/src/realtime/selfMutationFilter.ts
 packages/shared/src/schemas/__tests__/dailyPlan.test.ts
 packages/shared/src/schemas/block.ts
