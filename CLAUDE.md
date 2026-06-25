@@ -57,7 +57,7 @@ Turborepo monorepo, pnpm workspaces.
 
 ```
 apps/web       → @vesper/web    Next.js 15, App Router, TypeScript strict, React 19
-apps/mobile    → @vesper/mobile Expo SDK 52, React Native, NativeWind, iOS 17.2+
+apps/mobile    → @vesper/mobile Expo SDK 54, React Native, NativeWind, iOS 17.2+
 packages/ai    → @vesper/ai     Anthropic SDK wrapper, prompt constants, voice gate
 packages/db    → @vesper/db     Drizzle ORM schema, RLS-aware client, migrations
 packages/shared → @vesper/shared Zod schemas, constants, utils — zero deps beyond zod + date-fns
