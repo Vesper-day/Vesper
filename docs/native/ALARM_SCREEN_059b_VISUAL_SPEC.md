@@ -1,7 +1,7 @@
 # iOS Alarm Screen — Visual Spec (059b)
 
 **Status:** Design-track visual spec (Chat 107). Implemented by the **build track**
-(Opus-native, SwiftUI) — this document is the contract, not the implementation.
+(native Swift, SwiftUI) — this document is the contract, not the implementation.
 **Tokens:** `apps/mobile/ios/Shared/DesignTokens.swift` (the Swift mirror of
 `packages/ui/src/tokens.ts`). Every value below names a token; the build track must
 not re-derive a hex, size, radius, or duration.

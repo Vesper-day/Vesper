@@ -47,7 +47,7 @@ native surfaces the build track owns from a design-track spec:
 - Live Activity widgets (077 / 078) — `docs/native/LIVE_ACTIVITY_078_VISUAL_SPEC.md`
 
 The design track supplies the Swift token values + the visual specs; the build track
-(Opus-native) writes the SwiftUI. (DESIGN_STRATEGY.md §5.)
+writes the SwiftUI. (DESIGN_STRATEGY.md §5.)
 
 ---
 
