@@ -1,7 +1,7 @@
 # Vesper Design Strategy
 
 **Status:** Locked propagation document. Code-free.
-**Authored at:** Phase 4, Chat 106 (Design Cluster, EO 1, Fable design track).
+**Authored at:** Phase 4, Chat 106 (Design Cluster, EO 1, design track).
 **Purpose:** Carry the already-locked Layer 4 / 5 / 6 and PRD decisions into a single surface-by-surface design plan that every later design-build chat (107 onward, and every `-V` half) composes against.
 
 This document introduces **no new product, pricing, persuasion, or retention decision.** Every claim below traces to a decision already locked in `LAYER_4_EXPERIENCE_IDENTITY.md`, `LAYER_5_BUSINESS_MONETIZATION.md`, `LAYER_6_LAUNCH_GROWTH.md`, or `PRD.md`. Where a surface is mapped to a persuasion principle, the principle is cited by the exact name it carries in Layer 4's "Persuasion Principles Quietly Applied" section, and the mapping is held to the one ethical bar Layer 4 sets:
@@ -49,15 +49,15 @@ Mobile talks only through `/api/v1/` routes (per `CLAUDE.md` architecture rules)
 | Surface | Shell today | Design weight | Notes |
 |---|---|---|---|
 | Waitlist landing (5 locked sections) | Stub only | High | Custom-built; section set locked in Layer 4 / Layer 6 (Section 4.1). |
-| Referral landing `/r/[code]` | None | High | Dedicated path-based referee-facing brand surface (link format `vesper.studio/r/[code]`). Built by chat **095-V**, a Fable design-window chat (Window Y, Fwin F15). Carries a personalized greeting plus an invalid-code soft-redirect page (HTTP 200, ~2s auto-redirect so a mistyped code does not dead-end). UI **not-yet-scaffolded** (Section 4.3). |
+| Referral landing `/r/[code]` | None | High | Dedicated path-based referee-facing brand surface (link format `vesper.studio/r/[code]`). Built by chat **095-V**, a design-track window chat (Window Y, Fwin F15). Carries a personalized greeting plus an invalid-code soft-redirect page (HTTP 200, ~2s auto-redirect so a mistyped code does not dead-end). UI **not-yet-scaffolded** (Section 4.3). |
 
 ### 1.4 Native Swift surfaces (build-track-owned, design-track-specified)
 
 | Surface | Source chat | Owner | Design-track deliverable |
 |---|---|---|---|
-| iOS alarm screen | 059b | Build track (Opus-native, SwiftUI) | Visual spec authored in chat 107 |
-| Live Activity widget target + app group | 077 | Build track (Opus-native) | Token values via 107 |
-| Live Activity widget UI (3 variants) | 078 | Build track (Opus-native) | `DesignTokens.swift` + written visual spec from 107 |
+| iOS alarm screen | 059b | Build track (native Swift, SwiftUI) | Visual spec authored in chat 107 |
+| Live Activity widget target + app group | 077 | Build track (native Swift) | Token values via 107 |
+| Live Activity widget UI (3 variants) | 078 | Build track (native Swift) | `DesignTokens.swift` + written visual spec from 107 |
 
 See Section 5 for the ownership rule and its source.
 
@@ -82,7 +82,7 @@ Each of the four conversion / retention surfaces is mapped to **one primary Laye
 
 ### 2.3 Referral — two distinct surfaces
 
-The referral program is **two-sided in reward and two surfaces in design**: a referee-facing landing at `/r/[code]` (built by chat 095-V, the Fable design track) and a referrer-facing settings panel (built by chat 095-W, the build track). Each gets its own thesis.
+The referral program is **two-sided in reward and two surfaces in design**: a referee-facing landing at `/r/[code]` (built by chat 095-V, the design track) and a referrer-facing settings panel (built by chat 095-W, the build track). Each gets its own thesis.
 
 - **Shared locked behavior (Layer 6 Referral Program):** A quiet, two-sided program. Referrer gets 50% off their next billing cycle; referee gets 50% off their first paid month; trial stays the standard seven days for everyone. The referral link is the literal path `vesper.studio/r/[code]` (the section prose says "URL parameter" loosely; the literal link and the build plan govern). **No leaderboard, no public referral count, no badge, no streak, and no surface that highlights how many referrals the user has made.** Credit applies **only on the referee's paid conversion** (applied-only; no pending-count display), and is voided if the referrer is no longer in active subscription at the moment of application.
 
@@ -144,17 +144,17 @@ A single butler-voice acknowledgment surface after the portal/Apple flow returns
 
 Two tracks run the Phase 4 build:
 
-- **Design track (Fable).** Owns the design system and tokens (chat 107), the core primitives (107/107a), and the visual surfaces composed from them (e.g. the Butler's Notebook card, plan/Vesper-hour surfaces, the landing). Produces this strategy and the visual specs the build track implements against. Does **not** write native Swift.
-- **Build track (Opus / Opus-native).** Owns the application logic, the API routes, the state machines, and **all native Swift implementation.**
+- **Design track.** Owns the design system and tokens (chat 107), the core primitives (107/107a), and the visual surfaces composed from them (e.g. the Butler's Notebook card, plan/Vesper-hour surfaces, the landing). Produces this strategy and the visual specs the build track implements against. Does **not** write native Swift.
+- **Build track.** Owns the application logic, the API routes, the state machines, and **all native Swift implementation.**
 
 ### Native Swift surfaces are build-track-owned, from a design-track visual spec
 
 The native Swift surfaces are **not** implemented by the design track. They are built by the **build track in Swift, from a design-track-authored visual spec:**
 
-- **iOS alarm screen (chat 059b)** — built by the build track (Opus-native, SwiftUI). The design track (Fable) supplies only the visual spec, authored in chat 107. The alarm screen is a Notification Service Extension with custom two-button UI; it is native iOS work, not a React Native or design-track surface.
-- **Live Activity widgets (chats 077 / 078)** — the widget extension target and app group (077) and the three widget UI variants (078) are built by the build track (Opus-native). The design track supplies `DesignTokens.swift` values plus a written visual spec via chat 107. Fable does not write the SwiftUI.
+- **iOS alarm screen (chat 059b)** — built by the build track (native Swift, SwiftUI). The design track supplies only the visual spec, authored in chat 107. The alarm screen is a Notification Service Extension with custom two-button UI; it is native iOS work, not a React Native or design-track surface.
+- **Live Activity widgets (chats 077 / 078)** — the widget extension target and app group (077) and the three widget UI variants (078) are built by the build track (native Swift). The design track supplies `DesignTokens.swift` values plus a written visual spec via chat 107. The design track does not write the SwiftUI.
 
-**Source that establishes this:** `docs/PHASE_4_BUILD_PLAN.md` — the chat 059b note ("Opus owns the native SwiftUI alarm screen and Fable supplies only the visual spec via 107, per Stage 2 §1"), the chat 107 deliverables list ("`DesignTokens.swift` token values plus a written visual spec for the iOS alarm screen (059b) and the three Live Activity widget variants (078), handed to Opus — Fable does not write the Swift itself"), and the master-schedule rows for 059b / 077 / 078 (all Model "Opus-native"). The build plan in turn cites `PHASE_4_REPLAN_STAGE_2_REORDER.md` §1. The chat 106 end-of-session check itself requires this document to "assign the native Swift surfaces to Opus-from-spec rather than to Fable."
+**Source that establishes this:** `docs/PHASE_4_BUILD_PLAN.md` — the chat 059b note ("the build track owns the native SwiftUI alarm screen and the design track supplies only the visual spec via 107, per Stage 2 §1"), the chat 107 deliverables list ("`DesignTokens.swift` token values plus a written visual spec for the iOS alarm screen (059b) and the three Live Activity widget variants (078), handed to the build track — the design track does not write the Swift itself"), and the master-schedule rows for 059b / 077 / 078 (all build-track native). The build plan in turn cites `PHASE_4_REPLAN_STAGE_2_REORDER.md` §1. The chat 106 end-of-session check itself requires this document to "assign the native Swift surfaces to the build track from a spec rather than to the design track."
 
 ---
 
