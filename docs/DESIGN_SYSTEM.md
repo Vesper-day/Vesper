@@ -114,6 +114,63 @@ transform never parses React Native's Flow source.)
 
 ---
 
+## 3a. Part-2 components (Chat 107a)
+
+The second tier — form controls, time/date pickers, the rendered butler-line voice
+surface, and motion primitives — authored per-app and composing the **same** tokens +
+107 primitives (no second token system, no new container, no scorekeeping primitive).
+
+- **Web** — `apps/web/components/ui/`: `TextField`, `Toggle`, `Select`,
+  `SegmentedControl`, `TimePicker`, `DatePicker`, `ButlerVoice`, `motion` (Entrance /
+  Interaction / `useReducedMotion` / `motionDurationClass`).
+- **Mobile** — `apps/mobile/components/ui/`: the same set **minus `Select`**
+  (`TextField`, `Toggle`, `SegmentedControl`, `TimePicker`, `DatePicker`, `ButlerVoice`,
+  `motion`). RN has no native `<select>`, so the select/segmented role ships as
+  `SegmentedControl` only on mobile.
+
+| Component | Treatment / contract |
+|---|---|
+| `TextField` | 107 input tokens: `bg-surface`, `border-line-subtle`, `rounded-md`, `font-body text-sm`, `text-cream`, cream-faint placeholder; Quick-band focus token. Same value/onChange (web) / onChangeText (mobile) contract as the inline TaskForm field, lifted to a primitive. |
+| `Toggle` | On/off switch; `rounded-full` track fills `bronze` when on (the on-state claims the single accent), cream knob slides on the Quick-band token. Controlled `checked` + `onChange(next)`. |
+| `Select` (web) | Token-styled native `<select>` — same option `{label,value}` shape + value/onChange as TaskForm. Selection only; never a score/ratio/progress control. |
+| `SegmentedControl` | Inline few-option track; selected segment fills `bronze`; Quick-band swap. `value` + `onChange(value)`, `{label,value}` options. The mobile select/segmented control. Selection only — no score/progress. |
+| `TimePicker` | Round-trips **`"HH:mm"`** (24-hour, zero-padded) — the `BaseProfile.wakeTarget` / `bedtimeTarget` wire format (parsed live as `/^(\d{2}):(\d{2})$/` in `apps/mobile/lib/alarm.ts`). |
+| `DatePicker` | Round-trips **`"YYYY-MM-DD"`** for the surfaces that capture a date alongside wake/bed. |
+| `ButlerVoice` | The rendered butler-line voice surface — a **thin wrapper composing the existing `ButlerLine` container** (107a determination #7), exposing a `copy` slot for the voice-gated line authored later (Chat 044). Authors no copy; renders nothing when the slot is empty; ONE container (107's). Not a scorekeeping surface. |
+| `motion` | Reusable entrance + interaction primitives in the Quick / Considered bands, reading the band/easing tokens (never an inline ms/bezier), each with an explicit reduced-motion → instant fallback. |
+
+### Picker approach (chosen)
+
+No date/time picker library is a dependency of either app. **Web** pickers wrap a
+token-skinned **native `<input type="time">` / `<input type="date">`** — the native
+time input's value IS exactly `"HH:mm"` and the date input's `"YYYY-MM-DD"`, so they
+round-trip the data-layer string with no conversion and no heavy picker dep (matching
+TaskForm's native-input convention). **Mobile** has no native datetime input and no
+picker dep, so the pickers **compose the `TextField` primitive** as a validated
+`"HH:mm"` / `"YYYY-MM-DD"` entry via `onChangeText`; a native wheel/calendar picker is
+a later on-device pass.
+
+### Motion mechanism (chosen) + reduced-motion fallback
+
+No web motion library is a dependency, so **web** motion primitives drive entrances /
+interactions with **CSS transitions using the preset's token classes** —
+`duration-quick` / `duration-considered` (band midpoints), `ease-standard-out`, and
+`duration-instant` for the reduced path; `useReducedMotion` reads
+`prefers-reduced-motion` and composes on the `globals.css` collapse already in place.
+**Mobile** builds on **react-native-reanimated** (a live dep): declarative `FadeIn`
+for timed entrances at the band duration, and a spring (the `motion.spring` token,
+damping 18 / stiffness 150) for press feedback. Durations + spring are read from the
+`@vesper/ui` `motion` token object — never a hardcoded ms/stiffness. Reduced motion is
+detected via `AccessibilityInfo.isReduceMotionEnabled` (`useReducedMotion`) and swaps
+every animation to **instant** (no entering animation, no spring).
+
+Each part-2 component has a colocated unit test in the shallow 107 shape (web:
+`react-dom/server` markup; mobile: call-as-function + read `element.props.className`,
+mocking `react-native` and `react-native-reanimated`). These assert token classes /
+shapes — not resolved on-device styles.
+
+---
+
 ## 4. Composition rule (binding on every later screen)
 
 > **Later screens MUST compose from these tokens and primitives — never re-derive.**
