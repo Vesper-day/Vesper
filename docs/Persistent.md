@@ -20,6 +20,48 @@ updated file to project knowledge.
 
 ## Open Flags
 
+---
+
+### DEV AUTH BYPASS IN MOBILE SIGN-IN (Expo Go render-check scaffolding)
+**Owner:** Apple Developer Program enrollment chat (must delete this) + any mobile auth/sign-in chat
+**Relevant-to:** the chat that begins Apple Developer Program / dev-build work; any chat touching `apps/mobile/app/(auth)/sign-in.tsx`
+**Status:** Open — TEMPORARY scaffolding, must be removed
+**Detail:** A `__DEV__`-guarded "DEV: Skip sign-in" button was added to `apps/mobile/app/(auth)/sign-in.tsx` to reach the post-auth mobile screens (013/053/054/063/090b) in Expo Go for an on-device RENDER check after the SDK 52→54 bump. It sets a mock authenticated session via the existing `setSession` setter (NO `store/auth.ts` edit) — mock data only, no network/auth call, stripped from production by `__DEV__`. It exists because NO real sign-in completes in Expo Go: Google's `makeRedirectUri` emits an `exp://<LAN-IP>:8081/--/auth/callback` redirect that mismatches the `vesper://auth/callback` allow-list entry (and the `matchesDeepLinkPath` validator would reject `exp://` anyway); magic link needs the OS to honor the `vesper://` scheme; native Apple needs the `usesAppleSignIn` entitlement. All three require a dev build (expo-dev-client), blocked on Apple Developer Program enrollment + EAS (no Mac). **Removal:** the Apple-dev-build chat MUST delete this — grep `DEV-BYPASS` in `sign-in.tsx`, remove the whole `{__DEV__ && ( … )}` block plus its two comment fences. **Uncommitted:** lives as a local working-tree change only — NOT committed/pushed. If it ever appears in a commit, revert it.
+
+---
+
+### EXPO GO SDK 52-vs-54 RENDER BLOCK (053) — RESOLVED / render-verified
+**Owner:** Operator env / SDK-bump owner
+**Relevant-to:** closed; reference for any later mobile on-device verification
+**Status:** Closed — on-device render verified on Expo SDK 54 (Expo Go, physical iPhone)
+**Detail:** SDK 52→54 bump (PRs #62/#63) + barrel split (PR #64) unblocked on-device render; bundle builds clean (2657 modules). On-device Expo Go walk completed via the DEV auth bypass (see DEV AUTH BYPASS flag). RENDER RESULTS (all pass — no redboxes; data/error states expected under bypass + unreachable API):
+- 011 sign-in — pass (renders pre-bypass)
+- 013 shell — pass (tab bar Plan/Tasks/Calendar/Settings, routed in)
+- 054 plan — pass; minimal/near-stub appearance — RE-CHECK appearance once real data + plan synthesis reachable
+- 054 tasks — pass (list UI, sort controls, new-task button; "could not load" data error expected)
+- 053 calendar — pass (month grid, today highlighted; "could not load" data error expected)
+- 063 settings + integrations — pass (settings tree, Connect button navigates)
+- 090b privacy — pass (biometric toggle renders; "could not save" write error expected)
+NOT covered by this walk (still open, separate track): real auth, real data, and button/mutation behavior — all blocked on a dev build (Apple enrollment + EAS) AND a phone-reachable API (web API currently localhost:3000, unreachable from device; hosted Supabase has no migrations yet). Custom-native screens 059b/077 remain Expo-Go-inert by design.
+
+---
+
+### MOBILE FUNCTIONAL/AUTH/DATA TEST — BLOCKED on dev build + reachable API
+**Owner:** Apple Developer Program / dev-build chat; any mobile E2E chat
+**Relevant-to:** Apple-dev-build chat; any chat scoping mobile functional (not render) verification
+**Status:** Open — deferred to dev-build track
+**Detail:** Mobile screens are RENDER-verified (see EXPO GO SDK flag) but NOT functionally verified. Two stacked blockers: (1) no real session on device — Expo Go can't complete any sign-in; needs expo-dev-client (Apple enrollment + EAS, no Mac). (2) Mobile data calls target the web API at `localhost:3000`, unreachable from a physical phone — needs the web app deployed or tunneled. Also: hosted Supabase project (`gexrqyaggqexpfidfwnp.supabase.co`) has NO migrations yet — DB must be migrated/seeded before data renders. Full functional walk needs all three: dev build + reachable+migrated backend.
+
+---
+
+### HOSTED SUPABASE PROJECT EXISTS (mobile on-device test)
+**Owner:** Informational — operator env
+**Relevant-to:** any chat scoping on-device mobile against a real backend
+**Status:** Open — informational
+**Detail:** A hosted Supabase project exists (`gexrqyaggqexpfidfwnp.supabase.co`, Free tier, us-west-2), Google provider enabled with the existing `GOOGLE_CLIENT_ID/SECRET` + the Supabase callback added to the Google OAuth client, and `vesper://auth/callback` in the redirect allow-list. `apps/mobile/.env.local` now carries `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` pointing at it (mobile reads `EXPO_PUBLIC_*`, not `NEXT_PUBLIC_*`). Project has NO migrations yet. The `NEXT_PUBLIC_SUPABASE_URL` in that file still points at the local stack (`127.0.0.1:54321`) — harmless for mobile (ignored), but stale if anything web-side ever reads it.
+
+---
+
 ### TASKS DRIZZLE MODEL CURRENT
 **Owner:** Informational — 028 finding
 **Relevant-to:**  055, 056, any tasks-touching chat
