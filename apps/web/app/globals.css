@@ -1,6 +1,64 @@
-/* Palette lives in the @vesper/ui Tailwind preset as static Layer 4 values.
+/* Palette, radii, type and motion live in the @vesper/ui Tailwind preset as
+   static Layer 4 values (packages/ui/src/tokens.ts — the single source of
+   truth). This file carries the things a token object cannot: the Google-Fonts
+   wiring for the three Layer 4 families, the vellum card-noise material, the
+   carved-wood corner darkening, and the reduced-motion fallback.
+
    Time-aware atmosphere (Tailwind colors → var(--…) references that mutate by
    time of day) is deferred to the dedicated time-aware chat — not added here. */
+
+/* Layer 4 type families. Loaded from Google Fonts so no binary font asset is
+   committed. Fraunces ships its optical-size (opsz) + soft axes; Inter and
+   JetBrains Mono cover body and mono roles. */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* Carved-wood ground: the espresso page darkens almost imperceptibly toward
+     the corners, so the screen reads as a lit surface rather than flat fill.
+     Flat-aesthetic discipline preserved — this is a single radial wash, not a
+     texture. */
+  body {
+    background-color: theme('colors.espresso');
+    background-image: radial-gradient(
+      120% 120% at 50% 0%,
+      rgba(0, 0, 0, 0) 55%,
+      rgba(0, 0, 0, 0.22) 100%
+    );
+    background-attachment: fixed;
+    color: theme('colors.cream');
+    font-family: theme('fontFamily.sans');
+  }
+}
+
+@layer components {
+  /* Vellum: a subtle warm noise overlay at ~3% opacity, at the limit of
+     perceptibility. Inline data-URI SVG fractal noise — no binary asset. Place
+     a <span class="vellum-overlay" aria-hidden /> as the first child of a
+     position:relative card (the Card primitive does this). */
+  .vellum-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* Reduced motion: every animation/transition collapses to the INSTANT path.
+   This is the reduced-motion fallback for the Layer 4 motion bands, not a
+   separate band. Mirror on mobile via AccessibilityInfo.isReduceMotionEnabled. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
