@@ -1,7 +1,7 @@
 # Live Activity Widget — Visual Spec (078)
 
 **Status:** Design-track visual spec (Chat 107). Implemented by the **build track**
-(Opus-native, SwiftUI / WidgetKit) — this document is the contract, not the
+(native Swift, SwiftUI / WidgetKit) — this document is the contract, not the
 implementation.
 **Tokens:** `apps/mobile/ios/Shared/DesignTokens.swift`.
 **Data:** `VesperBlockAttributes.ContentState` in
@@ -12,7 +12,7 @@ countdown from `endTime` each minute.
 
 > Ownership (DESIGN_STRATEGY.md §5): the widget target + app group (077) and the
 > three UI variants (078) are build-track-owned; the design track supplies these
-> token values and this spec only. Fable does not write the SwiftUI.
+> token values and this spec only. The design track does not write the SwiftUI.
 
 The Live Activity tracks the **current block** and shows time remaining. It is calm,
 ambient context — never a countdown engineered for urgency, never scorekeeping.
