@@ -208,15 +208,86 @@ plan-synthesis wiring. PR #57.
 
 ---
 
-### 107/107a DESIGN PRIMITIVES ABSENT
-**Owner:** 107/107a design-system chats; any UI chat told to compose from their primitives
-**Relevant-to:** any web/mobile UI chat referencing 107/107a primitives
-**Status:** Open — standing until 107/107a land
-**Detail:** components/ui is empty, no `cn`, no shadcn set despite `apps/web/components.json` present —
-contradicts the build-plan claim that 052/054 compose from 107/107a primitives [PHASE_4_BUILD_PLAN.md L1630].
-052-W composed the web calendar chrome from @vesper/ui Tailwind tokens (packages/ui/src/tokens.ts,
-tailwind.ts) + token-mapped CSS; 053 mobile used RN styles. Any UI chat must compose from @vesper/ui
-tokens (web) / RN styles (mobile) until the real primitives land, then refactor onto them.
+### 107/107a DESIGN PRIMITIVES — 107 part-1 LANDED; 107a part-2 OPEN
+**Owner:** 107a (part-2); any UI chat composing from the primitives
+**Relevant-to:** 107a; any web/mobile UI chat referencing the design primitives
+**Status:** Open — 107 landed part-1; closes when 107a lands part-2
+**Detail:** 107 (PR #67) landed the part-1 primitives (Card/Button/BlockRow/ButlerLine in
+apps/web/components/ui + apps/mobile/components/ui) and consolidated tokens onto @vesper/ui (see DESIGN SYSTEM
+(107 — landed)). The earlier "components/ui empty, no cn" condition is RESOLVED for part-1. 107a still owes
+part-2: form controls, time/date pickers, the rendered butler-line component, and the shared motion primitives.
+Until 107a lands, compose part-2 needs from the 107 tokens directly. Closes when 107a ships.
+
+---
+
+### DESIGN STRATEGY (106 — landed)
+**Owner:** Each design-build chat (107/107a) + every later `-V` surface half; the referral chats (095-V, 095-W)
+**Relevant-to:** 107a, 095-V, 095-W, any `-V` visual half, any conversion/retention surface chat
+**Status:** Open — landed-doc forward notes
+**Detail:** Chat 106 committed `docs/DESIGN_STRATEGY.md` — the binding design-strategy doc every design-build
+chat (107 onward) and every later `-V` half follows.
+- REFERRAL IS TWO SURFACES: the strategy splits referral into §2.3a referee landing `/r/[code]` (built by
+  095-V) and §2.3b referrer settings panel (built by 095-W). Each carries its own Layer 4 persuasion principle
+  and its own 24-hr honesty bar — referee landing: Tactical empathy, real/disclosed discount, mistyped code
+  soft-redirects, nothing baited; referrer panel: Reciprocity through "together" framing, mutual disclosed
+  discount, applied-only, no count/leaderboard. Both UIs are NOT-YET-SCAFFOLDED; 095-V / 095-W build them.
+- SCOREKEEPING IS A PRIMITIVE-LEVEL CONSTRAINT: §3 promotes the anti-scorekeeping/anti-gamification discipline
+  from a voice rule to a layout+component constraint binding on every surface designed after the doc — no
+  grade/score-as-headline/streak/badge/points/level/leaderboard/progress-bar primitive may be built into the
+  library. Enforced as component ABSENCE (107 honored this).
+- NATIVE SWIFT = BUILD-TRACK-FROM-SPEC: §5 assigns the native Swift surfaces (059b alarm, 077/078 Live
+  Activity) to the build track, implemented from a design-track-authored visual spec delivered by 107. The
+  design track does not author Swift.
+- Persuasion-principle names in the strategy are traceable verbatim to LAYER_4_EXPERIENCE_IDENTITY.md
+  "Persuasion Principles Quietly Applied."
+
+---
+
+### DESIGN SYSTEM (107 — landed)
+**Owner:** Each later UI chat (composes from these primitives/tokens); 107a (part-2); the native build chats
+(059b/077/078)
+**Relevant-to:** 107a, every web/mobile UI chat, 059b, 077, 078, any chat editing packages/ui
+**Status:** Open — landed-feature forward notes (PR #67)
+**Detail:** Chat 107 consolidated the design system onto a single token home and built the part-1 primitives.
+- CANONICAL TOKEN HOME = @vesper/ui: `packages/ui/src/tokens.ts` (raw token object) + `packages/ui/src/
+  tailwind.ts` (preset), exported via `index.ts`. Web Tailwind and mobile NativeWind both consume the same
+  preset; RN style consumers and the Swift mirror read the raw object. Do NOT stand up a second token system —
+  extend these.
+- PRIMITIVES: Card / Button / BlockRow / ButlerLine in BOTH `apps/web/components/ui/` and
+  `apps/mobile/components/ui/`, plus the `cn` helper (web). Later screens compose from these, never re-derive
+  tokens. `docs/DESIGN_SYSTEM.md` is the composition reference.
+- SCOREKEEPING-AS-ABSENCE confirmed: no grade/score/streak/badge/points/level/leaderboard/progress-bar
+  primitive exists in the library.
+- FONTS NOT LOADED ON MOBILE: web loads Fraunces/Inter/JetBrains Mono via a Google-Fonts `@import` in
+  `globals.css`; mobile `font-display`/`font-mono` classes resolve to family names only (no expo-font dep, no
+  font assets). On device, ButlerLine/mono fall back to system fonts until a later on-device chat wires
+  expo-font. (107 gate was build/lint only — never rendered on device.)
+- WEB FONT @import IS RENDER-BLOCKING + not self-hosted (top of `globals.css`). If the waitlist/landing chat
+  cares about LCP, migrate to next/font (needs layout.tsx edits) — deliberately deferred by 107.
+- MOTION DURATION TOKENS ARE BAND MIDPOINTS: `duration-quick`=200ms, `duration-considered`=400ms, etc. are
+  representative picks; the authoritative `[min,max]` bands live in `motion.duration.bands` (TS) / the Swift
+  `*Band` constants. Do NOT treat a single duration token as a locked value — read the band.
+- DesignTokens.swift lives at `apps/mobile/ios/Shared/`. The native build chats (059b/077/078) must add it to
+  BOTH the VesperAlarmExtension and VesperLiveActivity target memberships and keep it hand-synced with
+  `tokens.ts` — no automated check enforces the mirror. Visual specs are at `docs/native/` (alarm 059b, Live
+  Activity 078).
+- KEEP `packages/ui/src/tailwind.ts` TYPE-ONLY: the `index.ts` barrel now pulls `tailwind.ts`, which
+  type-imports `tailwindcss` (erased at runtime → no tailwindcss in the RN bundle). A VALUE import from
+  `tailwindcss` into `tailwind.ts` would leak into the mobile bundle via the barrel. Keep that file type-only.
+
+---
+
+### VITEST JSX RUNTIME + PRIMITIVE TESTS ARE SHALLOW (107)
+**Owner:** Informational — standing test-infra constraint
+**Relevant-to:** Any chat adding web or mobile component tests, or relying on the 107 primitive tests
+**Status:** Open — standing
+**Detail:** 107 set `esbuild: { jsx: 'automatic' }` in BOTH vitest configs (web tsconfig is `jsx: preserve` →
+classic runtime → "React is not defined" without it). JSX no longer needs a React import, but any web component
+using `forwardRef` or a VALUE use of React still needs its own `import * as React`. Also the 107 primitive
+tests are SHALLOW: mobile tests call the component as a function and read `element.props.className` (NativeWind's
+className→style transform is a build step that does not run under vitest); web tests assert class attributes via
+react-dom/server markup, not computed CSS. A class typo that Tailwind/NativeWind silently drops at build still
+PASSES these tests — a green primitive test is not proof the styles resolve.
 
 ---
 
@@ -595,7 +666,6 @@ in any current build chat. Listed here so they don't re-surface as questions.
 
 - **077 + 059b native iOS halves** — DEFERRED to a Mac session
 - **@vesper/ui gaps** — deferred
-- **Design-token Fable migration** — deferred (Fable access suspended)
 - **Local dev auth config** — deferred
 - **Stripe identity (C-20)** — Cutover step
 - **Sentry release placeholders** — Cutover step
