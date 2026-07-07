@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 038 landed (TanStack Query offline mutation queue + conflict resolution).
+Last updated: after Chat 039 landed (web plan day view — vertical block timeline, Realtime sync, SSE skeleton, empty state, day-rollover; PR #__).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -27,6 +27,7 @@ updated file to project knowledge.
 **Relevant-to:** the chat that begins Apple Developer Program / dev-build work; any chat touching `apps/mobile/app/(auth)/sign-in.tsx`
 **Status:** Open — TEMPORARY scaffolding, must be removed
 **Detail:** A `__DEV__`-guarded "DEV: Skip sign-in" button was added to `apps/mobile/app/(auth)/sign-in.tsx` to reach the post-auth mobile screens (013/053/054/063/090b) in Expo Go for an on-device RENDER check after the SDK 52→54 bump. It sets a mock authenticated session via the existing `setSession` setter (NO `store/auth.ts` edit) — mock data only, no network/auth call, stripped from production by `__DEV__`. It exists because NO real sign-in completes in Expo Go: Google's `makeRedirectUri` emits an `exp://<LAN-IP>:8081/--/auth/callback` redirect that mismatches the `vesper://auth/callback` allow-list entry (and the `matchesDeepLinkPath` validator would reject `exp://` anyway); magic link needs the OS to honor the `vesper://` scheme; native Apple needs the `usesAppleSignIn` entitlement. All three require a dev build (expo-dev-client), blocked on Apple Developer Program enrollment + EAS (no Mac). **Removal:** the Apple-dev-build chat MUST delete this — grep `DEV-BYPASS` in `sign-in.tsx`, remove the whole `{__DEV__ && ( … )}` block plus its two comment fences. **Uncommitted:** lives as a local working-tree change only — NOT committed/pushed. If it ever appears in a commit, revert it.
+**git add -A hazard:** until removed, this uncommitted change will be staged by any `git add -A` — every chat must add selectively (see REPO WORKING-TREE LITTER + git add -A HAZARD flag).
 
 ---
 
@@ -208,15 +209,32 @@ plan-synthesis wiring. PR #57.
 
 ---
 
-### 107/107a DESIGN PRIMITIVES — 107 part-1 LANDED; 107a part-2 OPEN
-**Owner:** 107a (part-2); any UI chat composing from the primitives
-**Relevant-to:** 107a; any web/mobile UI chat referencing the design primitives
-**Status:** Open — 107 landed part-1; closes when 107a lands part-2
-**Detail:** 107 (PR #67) landed the part-1 primitives (Card/Button/BlockRow/ButlerLine in
-apps/web/components/ui + apps/mobile/components/ui) and consolidated tokens onto @vesper/ui (see DESIGN SYSTEM
-(107 — landed)). The earlier "components/ui empty, no cn" condition is RESOLVED for part-1. 107a still owes
-part-2: form controls, time/date pickers, the rendered butler-line component, and the shared motion primitives.
-Until 107a lands, compose part-2 needs from the 107 tokens directly. Closes when 107a ships.
+### DESIGN SYSTEM PART 2 (107a — landed)
+**Owner:** Each later web/mobile UI chat composing form controls / pickers / butler-line / motion; the -V surface halves
+**Relevant-to:** 093-V, 032-V, 033-V, 034-V, 035-V, 036-V, 041-V, 044-V, 046-V, 089-V, 095-V, any UI chat
+**Status:** Closed — 107/107a DESIGN PRIMITIVES flag CLOSED; part-2 landed (PR #69). Forward notes only.
+**Detail:** 107a (PR #69) closed the component library: part-2 primitives in apps/web/components/ui +
+apps/mobile/components/ui — TextField, Toggle, Select (web-only), SegmentedControl, TimePicker, DatePicker,
+ButlerVoice, and the motion primitives. Compose these; do not re-derive a second form/motion system.
+- PICKERS: no picker lib in either app. Web = token-skinned native <input type="time">/<input type="date">
+  (time = "HH:mm", date = "YYYY-MM-DD"), round-tripping wakeTarget/bedtimeTarget with zero conversion (matches
+  TaskForm). Mobile = composed from TextField (onChangeText string entry); NO datetime-picker dep; the native
+  wheel is a deferred on-device pass.
+- MOTION: web = CSS transitions on the preset token classes (duration-quick/considered/instant + the standard-
+  out/in easing classes) + a useReducedMotion hook over prefers-reduced-motion. Mobile = react-native-
+  reanimated (live dep) — declarative FadeIn at band duration + the spring token (damping 18 / stiffness 150);
+  reads motion tokens from @vesper/ui, never hardcoded; reduced via AccessibilityInfo.isReduceMotionEnabled →
+  instant. (Verify no literal ms/cubic-bezier leaked into the motion files — shallow tests do not catch it.)
+- BUTLER SURFACE: ButlerVoice is a THIN WRAPPER composing the existing 107 ButlerLine container — ONE
+  container, a copy slot, no authored copy, renders nothing when empty. The copy library is still authored
+  later (044). Not a scorekeeping surface.
+- WEB/MOBILE ASYMMETRY: Select (native <select>) is web-only; mobile uses SegmentedControl for the select/
+  segmented role (RN has no <select>). Stated in both index barrels + DESIGN_SYSTEM.md.
+- MOBILE-ONLY NOTES (not relevant to web chats): the mobile TextInput placeholder rides the
+  placeholder:text-cream-faint NativeWind variant (no inline hex) — depends on NativeWind v4 placeholder-
+  variant support resolving on-device (gated build/lint/test only here). Mobile pickers are text-entry until a
+  future on-device pass — same class as the existing expo-font/vellum on-device deferrals.
+- NO TOKEN VALUE CHANGED by 107a → rbc-theme.css needed no sync.
 
 ---
 
@@ -469,6 +487,22 @@ stub from 030; Zod request shape already colocated. Full JWS verification lands 
   other 4xx (dropped, surfaced via dev-log + Sentry breadcrumb) and network errors (backoff-retried).
 - clientMutationId is minted once, persisted on the mutation, reused across retries AND cold-start rehydrate
   (so `(user_id, client_mutation_id)` idempotency holds); selfMutationFilter.record(id) fires at send.
+
+---
+
+### PLAN DAY VIEW (039 — landed)
+**Owner:** Each later day-view consumer (041-V/041-W block detail, 042 block actions, 043 drag-reorder) + the energy/check-in chat + the icon-primitive chat
+**Relevant-to:** 041-V, 041-W, 042, 043; any chat touching `apps/web/app/(app)/plan` or the `['plan', planDate]` cache
+**Status:** Open — landed-feature forward notes (PR #__)
+**Detail:** 039 shipped the web read-only vertical block timeline (skeleton / timeline / empty), Realtime-synced, day-rollover.
+- MOUNT DEVIATION (load-bearing): the brief named `apps/web/app/(app)/page.tsx`, but that route-group index resolves to `/` and COLLIDES with `(marketing)/page.tsx` (`/`) → hard `next build` error (two parallel pages, same path). The day view mounts at **`apps/web/app/(app)/plan/page.tsx`** (route `/plan`) — the existing 054-W scaffold, now `'use client'`, Tasks link preserved. Any chat expecting the day view at `/` must use `/plan`.
+- QUERY HOOK: `apps/web/hooks/usePlanQuery.ts`, cache key **`['plan', planDate]`** (planDate = `YYYY-MM-DD`), GET `/api/v1/plans/date/[date]` (NOT `/today` — client computes the local date). Throws `PlanQueryError{status, code, isPlanNotFound}`; a PLAN_NOT_FOUND 404 is retry-suppressed and drives the empty state. 041-W hydrates block detail from THIS cache — reuse the key, do not author a second plan query/client.
+- RENDER CONTRACT: BlockTimeline/BlockCard render **§9 PlanResponse** (`apps/web/app/api/v1/plans/operations.ts`) ONLY — camelCase, ISO `startTime`/`endTime`, server-computed `status` rendered AS-IS (`in_progress` NOT recomputed client-side). Never DailyPlanSchema. All PlanResponse/PlanBlock imports are `import type` (erased → no `@vesper/db`→`fs` pull; see the @vesper/shared BARREL flag).
+- REALTIME: reuses 037 `usePlanRealtime` + `selfMutationFilter` invalidating `['plan', planDate]`; `SELF_MUTATION_WINDOW_MS` (60s) constant, no hardcoded number. No second subscription; provider mutation defaults untouched (read-only render).
+- SSE PATH: POST `/plans/generate` is a **HAND-ROLLED** SSE (`event: plan|done|error`), NOT the `@ai-sdk/react` data-stream protocol — the SDK gives no usable completion callback, so 039 consumes the stream MANUALLY (fetch + ReadableStream reader) inline in the page: `plan` frames raise the skeleton `filledCount`; the terminal `done` frame either shows the fallback empty state (`source:'fallback'` + `fallbackNotice`) or invalidates `['plan', planDate]` → BlockTimeline (SSE partials never render a real BlockCard). Any regeneration UI (042) reuses this consumer shape.
+- GENERATE CTA ENERGY DEFAULT (flag): the empty-state "Generate plan" CTA posts `energyScore: 5` (DEFAULT_ENERGY_SCORE) — energy capture is the daily check-in surface, not this read-only view. The check-in/energy chat must feed a real score here.
+- NO ICON PRIMITIVE: `@vesper/ui` exports tokens only (no icon component), so BlockCard uses a per-block-type unicode glyph. 041-V (visual half) swaps for a real icon primitive when one ships.
+- DAY ROLLOVER: `useDayRollover` = `visibilitychange` (immediate foreground check) + 60s poll, both gated on pure `hasRolledOver`; advances to the CURRENT local date (browser IANA zone as the client proxy for the authoritative `users.timezone`). Pure helpers in `apps/web/components/plan/planViewHelpers.ts` (+test) — no DOM (web has no @testing-library/react; 054-W pure-helper pattern). NO vitest glob change (`components/**` already covered).
 
 ---
 

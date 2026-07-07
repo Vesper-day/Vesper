@@ -1,12 +1,16 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import * as Sentry from '@sentry/nextjs';
+// Client-safe SUBPATH import (not the bare '@vesper/shared' barrel): the barrel
+// statically pulls api/auth → @vesper/db → postgres (fs/perf_hooks), which breaks
+// `next build` the moment a 'use client' page mounts this hook (chat 039 is the
+// first such consumer). The '/realtime' subpath exports exactly these symbols.
 import {
   createRealtimeClient,
   selfMutationFilter,
   type RealtimeConnectionState,
   type RealtimeStateContext,
-} from '@vesper/shared';
+} from '@vesper/shared/realtime';
 import { supabase } from '../lib/supabase';
 
 /**
