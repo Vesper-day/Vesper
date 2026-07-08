@@ -1001,6 +1001,12 @@ apps/web/app/globals.css
 apps/web/app/layout.tsx
 apps/web/app/providers.tsx
 apps/web/components.json
+apps/web/components/plan/BlockCard.tsx
+apps/web/components/plan/BlockTimeline.tsx
+apps/web/components/plan/PlanEmpty.tsx
+apps/web/components/plan/PlanSkeleton.tsx
+apps/web/components/plan/planViewHelpers.test.ts
+apps/web/components/plan/planViewHelpers.ts
 apps/web/components/tasks/TaskCard.tsx
 apps/web/components/tasks/TaskForm.test.tsx
 apps/web/components/tasks/TaskForm.tsx
@@ -1030,6 +1036,8 @@ apps/web/components/ui/Toggle.tsx
 apps/web/components/ui/index.ts
 apps/web/components/ui/motion.test.tsx
 apps/web/components/ui/motion.tsx
+apps/web/hooks/useDayRollover.ts
+apps/web/hooks/usePlanQuery.ts
 apps/web/hooks/usePlanRealtime.ts
 apps/web/instrumentation.ts
 apps/web/lib/api.ts
