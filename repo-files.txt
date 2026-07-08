@@ -821,6 +821,13 @@ apps/mobile/assets/splash.png
 apps/mobile/babel.config.js
 apps/mobile/components/BiometricGate.tsx
 apps/mobile/components/UpdateGateModal.tsx
+apps/mobile/components/plan/BlockCard.tsx
+apps/mobile/components/plan/BlockTimeline.tsx
+apps/mobile/components/plan/PlanEmpty.tsx
+apps/mobile/components/plan/PlanSkeleton.tsx
+apps/mobile/components/plan/planViewHelpers.test.ts
+apps/mobile/components/plan/planViewHelpers.ts
+apps/mobile/components/plan/types.ts
 apps/mobile/components/ui/BlockRow.test.tsx
 apps/mobile/components/ui/BlockRow.tsx
 apps/mobile/components/ui/ButlerLine.test.tsx
@@ -850,6 +857,8 @@ apps/mobile/global.css
 apps/mobile/hooks/useAppLifecycle.ts
 apps/mobile/hooks/useBiometricLock.test.ts
 apps/mobile/hooks/useBiometricLock.ts
+apps/mobile/hooks/useDayRollover.ts
+apps/mobile/hooks/usePlanQuery.ts
 apps/mobile/hooks/usePlanRealtime.ts
 apps/mobile/ios/Shared/DesignTokens.swift
 apps/mobile/ios/VesperAlarmExtension/AlarmContentView.swift
