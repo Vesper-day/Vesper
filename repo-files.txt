@@ -811,6 +811,7 @@ apps/mobile/app/(tabs)/plan.tsx
 apps/mobile/app/(tabs)/settings/_layout.tsx
 apps/mobile/app/(tabs)/settings/index.tsx
 apps/mobile/app/(tabs)/settings/integrations.tsx
+apps/mobile/app/(tabs)/settings/medications.tsx
 apps/mobile/app/(tabs)/settings/privacy.tsx
 apps/mobile/app/(tabs)/tasks.tsx
 apps/mobile/app/_layout.tsx
@@ -886,6 +887,11 @@ apps/mobile/lib/biometric.test.ts
 apps/mobile/lib/biometric.ts
 apps/mobile/lib/calendarEvents.test.ts
 apps/mobile/lib/calendarEvents.ts
+apps/mobile/lib/medicationReminders.ts
+apps/mobile/lib/medicationSchedule.test.ts
+apps/mobile/lib/medicationSchedule.ts
+apps/mobile/lib/medications.test.ts
+apps/mobile/lib/medications.ts
 apps/mobile/lib/pushTokens.test.ts
 apps/mobile/lib/pushTokens.ts
 apps/mobile/lib/sentry.ts
@@ -907,6 +913,7 @@ apps/web/app/(app)/calendar/_components/EventFormDialog.tsx
 apps/web/app/(app)/calendar/_components/rbc-theme.css
 apps/web/app/(app)/calendar/page.tsx
 apps/web/app/(app)/layout.tsx
+apps/web/app/(app)/medications/page.tsx
 apps/web/app/(app)/plan/page.tsx
 apps/web/app/(app)/settings/integrations/callback/page.tsx
 apps/web/app/(app)/settings/integrations/page.tsx
@@ -946,6 +953,10 @@ apps/web/app/api/v1/internal/auth-event/auth-event.integration.test.ts
 apps/web/app/api/v1/internal/auth-event/operations.ts
 apps/web/app/api/v1/internal/auth-event/route.ts
 apps/web/app/api/v1/internal/auth-event/schemas.ts
+apps/web/app/api/v1/medications/[id]/route.ts
+apps/web/app/api/v1/medications/medications.integration.test.ts
+apps/web/app/api/v1/medications/operations.ts
+apps/web/app/api/v1/medications/route.ts
 apps/web/app/api/v1/notebook/confirm/confirmInference.ts
 apps/web/app/api/v1/notebook/confirm/route.ts
 apps/web/app/api/v1/notebook/correct/correctInference.ts
@@ -1101,6 +1112,7 @@ docs/CHAT_030_RESOLUTION_RECORD.md
 docs/CHAT_031_RESOLUTION_RECORD.md
 docs/CHAT_048_RESOLUTION_RECORD.md
 docs/CHAT_059B_RESOLUTION_RECORD.md
+docs/CHAT_060_RESOLUTION_RECORD.md
 docs/CHAT_077_RESOLUTION_RECORD.md
 docs/CHAT_108_RESOLUTION_RECORD.md
 docs/CHAT_111_RESOLUTION_RECORD.md
@@ -1274,6 +1286,7 @@ packages/db/package.json
 packages/db/scripts/check-client.ts
 packages/db/scripts/inspect-integrations.ts
 packages/db/scripts/setup-test-db.ts
+packages/db/scripts/verify-medications-rls-audit.mjs
 packages/db/seed/recipe_templates.json
 packages/db/seed/scripts/buildRecipeTemplates.ts
 packages/db/seed/scripts/buildWorkoutTemplates.ts
