@@ -20,6 +20,11 @@ export default function SettingsStackLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="integrations" />
       <Stack.Screen name="privacy" />
+      {/* Medications is a MODULE (chat 060), OFF by default and gated on
+          modulesEnabled.medication.enabled — mounted here as a settings sub-screen
+          (NOT a new top-level tab). The screen self-gates; the settings/index link
+          to it is shown only when the module is enabled. */}
+      <Stack.Screen name="medications" />
     </Stack>
   );
 }
