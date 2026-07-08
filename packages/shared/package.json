@@ -20,6 +20,10 @@
     "./realtime": {
       "types": "./dist/realtime/index.d.ts",
       "default": "./src/realtime/index.ts"
+    },
+    "./copy": {
+      "types": "./dist/copy/index.d.ts",
+      "default": "./src/copy/index.ts"
     }
   },
   "scripts": {
