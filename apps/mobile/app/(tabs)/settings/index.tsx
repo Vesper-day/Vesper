@@ -4,9 +4,14 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../../lib/api/client';
 
 /** Minimal gate slice of GET /api/v1/profile ({ user, profile }, unwrapped). Only
- * the medication module flag is read here. */
+ * the module flags read on this screen (medication, finance) are typed here. */
 interface ProfileGate {
-  profile: { modulesEnabled: { medication: { enabled: boolean } } };
+  profile: {
+    modulesEnabled: {
+      medication: { enabled: boolean };
+      finance: { enabled: boolean };
+    };
+  };
 }
 
 /**
@@ -22,6 +27,7 @@ export default function SettingsScreen() {
     queryFn: () => apiClient.get<ProfileGate>('/profile'),
   });
   const medicationEnabled = gate?.profile.modulesEnabled.medication.enabled ?? false;
+  const financeEnabled = gate?.profile.modulesEnabled.finance.enabled ?? false;
 
   return (
     <View className="flex-1 bg-espresso px-6 pt-16">
@@ -43,9 +49,17 @@ export default function SettingsScreen() {
       </Link>
       {medicationEnabled && (
         <Link href={'/settings/medications' as Href} asChild>
-          <Pressable className="rounded-lg border border-line-subtle p-4">
+          <Pressable className="mb-3 rounded-lg border border-line-subtle p-4">
             <Text className="text-cream">Medications</Text>
             <Text className="text-sm text-cream-faint">Doses and reminders</Text>
+          </Pressable>
+        </Link>
+      )}
+      {financeEnabled && (
+        <Link href={'/settings/bills' as Href} asChild>
+          <Pressable className="rounded-lg border border-line-subtle p-4">
+            <Text className="text-cream">Bills</Text>
+            <Text className="text-sm text-cream-faint">Due days and reminders</Text>
           </Pressable>
         </Link>
       )}

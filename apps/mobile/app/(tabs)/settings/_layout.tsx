@@ -25,6 +25,11 @@ export default function SettingsStackLayout() {
           (NOT a new top-level tab). The screen self-gates; the settings/index link
           to it is shown only when the module is enabled. */}
       <Stack.Screen name="medications" />
+      {/* Bills is the Finance MODULE (chat 061), OFF by default and gated on
+          modulesEnabled.finance.enabled — mounted here as a settings sub-screen
+          (NOT a new top-level tab). The screen self-gates; the settings/index link
+          to it is shown only when the module is enabled. */}
+      <Stack.Screen name="bills" />
     </Stack>
   );
 }
