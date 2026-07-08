@@ -11,7 +11,7 @@ import {
   type RealtimeConnectionState,
   type RealtimeStateContext,
 } from '@vesper/shared/realtime';
-import { supabase } from '../lib/supabase';
+import { getSupabaseClient } from '../lib/supabase';
 
 /**
  * Web Realtime hook (build chat 037). Subscribes to block changes for the current
@@ -56,7 +56,7 @@ export function usePlanRealtime(userId: string | undefined, planDate: string): v
   useEffect(() => {
     if (!userId || !planDate) return;
 
-    const client = createRealtimeClient(supabase);
+    const client = createRealtimeClient(getSupabaseClient());
 
     void client.subscribeToBlocks(
       userId,
