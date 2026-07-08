@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 060 landed (Medications module — web CRUD API + web/mobile surfaces + local-notification scheduling engine; PR #__). Prior: Chat 040 (mobile plan day view).
+Last updated: after Chat 061 landed (Finance/Bills module — dual-surface bills CRUD API + web/mobile surfaces + a client-safe butler-line copy entry; PR #__). Prior: Chat 060 (Medications module).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -149,7 +149,7 @@ fix the DSN values if local Sentry visibility is wanted.
 
 ---
 
-### STALE push_tokens + subscriptions + integrations + calendar_events DRIZZLE MODELS
+### STALE push_tokens + subscriptions + integrations + calendar_events + bills DRIZZLE MODELS
 **Owner:** Informational — 030 + 063 findings (durable fix = drizzle-kit pull, currently BROKEN)
 **Relevant-to:** 035-W (push_tokens); 081, 089-W, 072 (subscriptions); 064, 034-W (integrations), 53, any calendar touching chat
 **Status:** Open — informational
@@ -162,6 +162,7 @@ pin drizzle-kit 0.29.1 + drizzle-orm 0.38.4 then `db:pull`, or hand-correct. Stu
 table-specific: verify each table column-for-column; treat these three as known-stale → raw SQL.
 - users (090b + 032-W): biometric_lock_enabled present in migration, MISSING from the pull-generated Drizzle users model → 090b wrote the scalar via raw SQL UPDATE. 032-W (CC-reported) found sleep_target_bedtime + sleep_target_wake ALSO absent from the hand-authored users.ts model (only location_lat/lng present); honorific IS present (users.ts:38). Same stale-TS-schema class — whoever wires the real user/profile fetch in the post-032-V onboarding shell may need a raw SQL read for the two sleep_target columns. Verify-per-table still holds.
 - calendar_events (052-W): NO Drizzle model exists at all (not just stale) — 052-W ran all CRUD via raw parameterized SQL + validateSession + createDrizzleClient. Same db:pull-broken class. Next drizzle-kit pull should emit it; until then any calendar_events code stays raw SQL + verify columns per-table.
+- bills (061): a `bills` Drizzle model DOES exist in `packages/db/src/schema/modules.ts` but has DRIFTED HARD from the live migration-0006 DDL - it carries a phantom `autopay boolean` column that does NOT exist on the DB, marks `amount`/`due_day_of_month` NOT NULL (both are NULLABLE live), and OMITS the real `frequency bill_frequency_enum NOT NULL` + `category text` columns. Using it would fail at runtime (insert of a non-existent column / missing NOT NULL frequency). 061 therefore ran ALL bills CRUD via raw parameterized SQL (calendar_events/push-tokens precedent) and did NOT edit the model (out of scope). A future drizzle-kit pull / schema-resync should replace the drifted stub; until then bills code stays raw SQL. Live bills cols (verified via node client): id, user_id, name(NN), amount numeric(10,2) NULL, due_day_of_month int NULL CHECK 1..31, frequency bill_frequency_enum{monthly,quarterly,annually,one_time} NN, category text NULL, created_at, updated_at.
 - integrations (064): live column contract re-confirmed (11 cols, access/refresh_token bytea, the two
   enums) via the in-repo Postgres node client; 064 used raw parameterized SQL throughout. The
   audit_integrations_changes-on-UPDATE path was NOT exercised live (no google_calendar row in the local
@@ -538,6 +539,23 @@ stub from 030; Zod request shape already colocated. Full JWS verification lands 
 - MOBILE PICKER IS TEXT-ENTRY (TimePicker→"HH:mm", DatePicker→"YYYY-MM-DD") until a future on-device wheel pass — matches the 107a primitive mechanism.
 - MEDICATIONS DRIZZLE MODEL NOW CURRENT: the pull-generated `medications` stub had drifted (modelled `dosage text`/`schedule_time text`, lacked `frequency`/`times`/`start_date`/`end_date`/`shift_out_of_quiet_hours`); 060 re-synced it to the LIVE applied DDL (enum `medication_frequency_enum`={daily,twice_daily,weekly,custom}; `times time[] NOT NULL DEFAULT '{}'`). No migration — a future `drizzle-kit pull` produces the same. The ORM path is now typed correctly; verify-per-table still holds.
 - ANALYTICS: emits ONE event `medication_notification_schedule_failed {medication_id, scheduled_times_count, error_class}` via the mobile `track()` seam only (no PII — row id, count, error constructor name). Autocapture OFF. Pending 096 registration (see 096 PostHog TAXONOMY). On a schedule throw the wrapper ALSO captures to Sentry (no-ops without DSN). Local notification CONTENT may carry med name/dose (on-device only, never emitted).
+
+---
+
+### FINANCE/BILLS MODULE (061 — landed)
+**Owner:** Bill reminder worker chat (075); copy-library chat (044); any bills UI/edit chat
+**Relevant-to:** Any chat touching `apps/web/app/api/v1/bills/*`, `apps/web/app/(app)/bills/page.tsx`, `apps/mobile/app/(tabs)/settings/bills.tsx`, `apps/mobile/lib/bills.ts`, `packages/shared/src/copy/*`, or the bill reminder worker
+**Status:** Open - landed-feature forward notes (PR #__)
+**Detail:** 061 shipped the Finance/Bills module dual-surface: web CRUD API + web surface + mobile surface + a thin mobile client + one voice-gated butler-line copy entry. Table/RLS/two indexes already existed (migration 0006) - 061 authored NO migration, column, trigger, or enum. Simpler than medications (060): NO scheduling, NO times[]/quiet-hours, NO reminder worker (that is 075).
+- MODULE GATE: gated on `modulesEnabled.finance.enabled` - the `modules_enabled` JSONB key is the SINGULAR `finance` (NOT `bills`). OFF by default, NOT a core tab.
+- MOUNT PATTERN (mirrors 060): web page `app/(app)/bills/page.tsx` self-gates via `GET /api/v1/profile`, "module off" card until enabled. Mobile mounts as a Stack sub-screen of Settings at `apps/mobile/app/(tabs)/settings/bills.tsx` (registered in `settings/_layout.tsx`), reached from a link in `settings/index.tsx` hidden while off; the screen self-gates a deep link. (Actual settings dir is under `(tabs)/`; the kickoff's `app/settings/bills.tsx` was approximate.)
+- RAW SQL, NOT ORM: bills Drizzle model is drifted/unusable - all CRUD via raw parameterized SQL. See STALE ... + bills DRIZZLE MODELS flag for the exact drift.
+- RLS CONFIRMED STRICTEST (direct SQL, `packages/db/scripts/verify-bills-rls.mjs`): row security enabled; SELECT/INSERT/UPDATE/DELETE all own-row `auth.uid() = user_id`; live enforcement confirmed a 2nd user cannot SELECT/UPDATE/DELETE another user's bill and cannot INSERT a row owned by another user; both migration-0006 indexes present.
+- BILLS-AUDIT DETERMINATION (drift filed): bills has NO `audit_bills_changes` trigger and is INTENTIONALLY EXCLUDED from audit coverage (TECHNICAL_SPEC §11/§19 - audit scoped to medications + integrations only). The verify script confirmed ABSENT. **PHASE_4_BUILD_PLAN §061 end-of-session checks are WRONG** - they assert a bills audit trigger "parallel to medications"; TECHNICAL_SPEC is authoritative, so those checks should be corrected. (Because bills has no audit trigger, it is NOT exposed to the AUDIT-CASCADE FK HAZARD.)
+- BUTLER-LINE COPY HOME (new, for 044/075): the copy library (044) has not landed and the ButlerVoice/ButlerLine UI containers hold no authored copy, so 061 authored a minimal client-safe copy module at the NEW subpath `@vesper/shared/copy` (`packages/shared/src/copy/index.ts`, `./copy` added to shared `package.json` exports). Pure string/template, zero imports - safe for web, mobile, and a Cloudflare Worker (075). Entry: `billDueTomorrow(name) -> "<name> is due tomorrow."`, id `finance.bill_due_tomorrow`. 044 should consolidate this into the full copy library and re-point importers. 061 authored the line ONLY - it does NOT render it, schedule it, or build the reminder block/worker (075).
+- POSTHOG POSTURE: NO analytics event emitted, NO live PostHog wired. Verified autocapture OFF on both surfaces (no `posthog.capture` on form inputs or amount fields), documented in both file headers. No `data-ph-no-capture` needed at V1 (session recording off); it becomes REQUIRED at V1.5 if recording is enabled on financial fields.
+- WEB FREQUENCY CONTROL: used the `Select` native dropdown (4 values, longer labels read better) - note `Select` is a native `<select>`, so its `onChange` is EVENT-based (`e.target.value`), not value-based like `SegmentedControl`. Mobile uses `SegmentedControl`. amount + due-day are text-entry (inputMode/keyboardType numeric).
+- TESTS: web `bills.integration.test.ts` = ungated pure-Zod suite (6) + VESPER_DB_TESTS-gated integration suite (8, all green live); mobile `lib/bills.test.ts` = 7 tests with `./api/client` mocked (method+path+camelCase<->snake_case mapping); shared `copy/copy.test.ts` = 2 pure string assertions. No vitest glob change needed - existing include globs already matched all new test paths.
 
 ---
 
