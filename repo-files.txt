@@ -809,6 +809,7 @@ apps/mobile/app/(tabs)/_layout.tsx
 apps/mobile/app/(tabs)/calendar.tsx
 apps/mobile/app/(tabs)/plan.tsx
 apps/mobile/app/(tabs)/settings/_layout.tsx
+apps/mobile/app/(tabs)/settings/bills.tsx
 apps/mobile/app/(tabs)/settings/index.tsx
 apps/mobile/app/(tabs)/settings/integrations.tsx
 apps/mobile/app/(tabs)/settings/medications.tsx
@@ -883,6 +884,8 @@ apps/mobile/lib/auth/google-oauth.ts
 apps/mobile/lib/auth/magic-link.ts
 apps/mobile/lib/auth/observability.ts
 apps/mobile/lib/auth/secureStorage.ts
+apps/mobile/lib/bills.test.ts
+apps/mobile/lib/bills.ts
 apps/mobile/lib/biometric.test.ts
 apps/mobile/lib/biometric.ts
 apps/mobile/lib/calendarEvents.test.ts
@@ -908,6 +911,7 @@ apps/mobile/store/ui.ts
 apps/mobile/tailwind.config.js
 apps/mobile/tsconfig.json
 apps/mobile/vitest.config.ts
+apps/web/app/(app)/bills/page.tsx
 apps/web/app/(app)/calendar/_components/CalendarView.tsx
 apps/web/app/(app)/calendar/_components/EventFormDialog.tsx
 apps/web/app/(app)/calendar/_components/rbc-theme.css
@@ -933,6 +937,10 @@ apps/web/app/api/v1/ai/command/operations.ts
 apps/web/app/api/v1/ai/command/route.ts
 apps/web/app/api/v1/ai/command/schemas.ts
 apps/web/app/api/v1/auth/magic-link/route.ts
+apps/web/app/api/v1/bills/[id]/route.ts
+apps/web/app/api/v1/bills/bills.integration.test.ts
+apps/web/app/api/v1/bills/operations.ts
+apps/web/app/api/v1/bills/route.ts
 apps/web/app/api/v1/blocks/[blockId]/route.ts
 apps/web/app/api/v1/blocks/blocks.integration.test.ts
 apps/web/app/api/v1/blocks/operations.ts
@@ -1112,7 +1120,6 @@ docs/CHAT_030_RESOLUTION_RECORD.md
 docs/CHAT_031_RESOLUTION_RECORD.md
 docs/CHAT_048_RESOLUTION_RECORD.md
 docs/CHAT_059B_RESOLUTION_RECORD.md
-docs/CHAT_060_RESOLUTION_RECORD.md
 docs/CHAT_077_RESOLUTION_RECORD.md
 docs/CHAT_108_RESOLUTION_RECORD.md
 docs/CHAT_111_RESOLUTION_RECORD.md
@@ -1286,6 +1293,7 @@ packages/db/package.json
 packages/db/scripts/check-client.ts
 packages/db/scripts/inspect-integrations.ts
 packages/db/scripts/setup-test-db.ts
+packages/db/scripts/verify-bills-rls.mjs
 packages/db/scripts/verify-medications-rls-audit.mjs
 packages/db/seed/recipe_templates.json
 packages/db/seed/scripts/buildRecipeTemplates.ts
@@ -1343,6 +1351,8 @@ packages/shared/src/api/rateLimit.ts
 packages/shared/src/api/response.ts
 packages/shared/src/api/route.ts
 packages/shared/src/constants/index.ts
+packages/shared/src/copy/copy.test.ts
+packages/shared/src/copy/index.ts
 packages/shared/src/errors.ts
 packages/shared/src/index.ts
 packages/shared/src/liveActivity/schema.json
