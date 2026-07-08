@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 040 landed (mobile plan day view — RN vertical block timeline, Realtime sync, duration-skeleton generate, empty state, local-midnight rollover, pull-to-refresh, swipe-reveal affordance, Reanimated layout animation; PR #__).
+Last updated: after Chat 060 landed (Medications module — web CRUD API + web/mobile surfaces + local-notification scheduling engine; PR #__). Prior: Chat 040 (mobile plan day view).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -525,6 +525,34 @@ stub from 030; Zod request shape already colocated. Full JWS verification lands 
 
 ---
 
+### MEDICATIONS MODULE (060 — landed)
+**Owner:** Each later medications consumer (the screen↔scheduler wiring chat; any med UI/edit chat); quiet-hours-window chat (046/059a)
+**Relevant-to:** Any chat touching `apps/web/app/api/v1/medications/*`, `apps/mobile/app/(tabs)/settings/medications.tsx`, `apps/mobile/lib/medication*`, or the medication reminder engine
+**Status:** Open — landed-feature forward notes (PR #__)
+**Detail:** 060 shipped the Medications module dual-surface: web CRUD API + web surface + mobile surface + a built-but-unwired local-notification scheduling engine. Table/RLS/audit-trigger already existed (migrations 0006 + 0011 + migration-20 shift column) — 060 authored NO migration.
+- MODULE GATE: Medications is a MODULE, OFF by default, gated on `modulesEnabled.medication.enabled` — the `modules_enabled` JSONB uses the SINGULAR key `medication`. NOT a core tab.
+- MOUNT PATTERN: web app shell has NO persistent nav, so the page (`app/(app)/medications/page.tsx`) self-gates via `GET /api/v1/profile`, rendering a "module off" card until enabled. Mobile tab bar is a FIXED four-tab (plan/tasks/calendar/settings) — a top-level tab was forbidden, so Medications mounts as a **Stack sub-screen of Settings** (`settings/medications.tsx`, registered in `settings/_layout.tsx`), reached from a link in `settings/index.tsx` hidden while off; the screen ALSO self-gates a deep link.
+- SCREEN↔SCHEDULER WIRING DEFERRED (load-bearing gap): the reminder engine (pure `medicationSchedule.ts` compute + `medicationReminders.ts` expo-notifications wrapper + failure telemetry) is built and unit-tested, but the mobile surface does NOT yet call `scheduleMedicationReminders` on save. Correct lifecycle (schedule on create, cancel+reschedule on edit, cancel on delete) needs persisted notification-ids per medication — left as its own unit of work rather than shipped half-correct (a partial wire leaks duplicate notifications). This is the primary follow-up.
+- F2 SCHEDULING CONTRACT: fire-on-time is the DEFAULT and enforced in the pure helper — `shift_out_of_quiet_hours=false` NEVER delays a dose. `=true` shifts out of a quiet-hours window ONLY when a window is supplied. Frequency map: daily/twice_daily/custom → one DAILY reminder per time; weekly → one WEEKLY reminder per time on the start-date weekday (expo convention 1=Sun..7=Sat). Reminders are LOCAL triggers only (never `getDevicePushTokenAsync`), timeSensitive foreground banner, SOFT permission gate (requests only when `canAskAgain`, else routes to iOS Settings — never re-prompts after denial).
+- QUIET-HOURS WINDOW ABSENT: repo has NO quiet-hours window utility (046/059a not landed) — only `BaseProfile.wakeTarget`/`bedtimeTarget`. So `shift=true` is a DEFENSIVE NO-OP today (`applyQuietHoursShift` returns the dose time unchanged when no window supplied). Full window logic (incl. wrap-past-midnight) IS implemented in the pure helper, so when a window source lands ONLY the caller changes — not the core.
+- MOBILE PICKER IS TEXT-ENTRY (TimePicker→"HH:mm", DatePicker→"YYYY-MM-DD") until a future on-device wheel pass — matches the 107a primitive mechanism.
+- MEDICATIONS DRIZZLE MODEL NOW CURRENT: the pull-generated `medications` stub had drifted (modelled `dosage text`/`schedule_time text`, lacked `frequency`/`times`/`start_date`/`end_date`/`shift_out_of_quiet_hours`); 060 re-synced it to the LIVE applied DDL (enum `medication_frequency_enum`={daily,twice_daily,weekly,custom}; `times time[] NOT NULL DEFAULT '{}'`). No migration — a future `drizzle-kit pull` produces the same. The ORM path is now typed correctly; verify-per-table still holds.
+- ANALYTICS: emits ONE event `medication_notification_schedule_failed {medication_id, scheduled_times_count, error_class}` via the mobile `track()` seam only (no PII — row id, count, error constructor name). Autocapture OFF. Pending 096 registration (see 096 PostHog TAXONOMY). On a schedule throw the wrapper ALSO captures to Sentry (no-ops without DSN). Local notification CONTENT may carry med name/dose (on-device only, never emitted).
+
+---
+
+### AUDIT-CASCADE FK HAZARD (060 finding — durable, cross-cutting)
+**Owner:** Owning migration chat (make FK deferrable); hard-delete worker chat (074); account-delete owner
+**Relevant-to:** 074, any hard-delete / user-purge path, any chat populating `medications` or `integrations`, migration chats (006/011)
+**Status:** Open — LATENT + PRE-EXISTING (not introduced by 060); recommendation to file
+**Detail:** `security_audit_log.user_id` FK → `users(id)` is **NON-deferrable**, and the audit trigger fires on BOTH `medications` and `integrations`. A HARD delete of a user who owns an audited row (e.g. `DELETE FROM auth.users`, or Supabase admin "delete user") cascades → the audited child row is deleted → the AFTER trigger inserts a `security_audit_log` row referencing the user being deleted in the SAME statement → FK violation → the whole delete fails.
+- Pre-existing (migrations 0006 + 0011); 060 is simply the FIRST surface to populate `medications` and thus first to trip it. `integrations` has the identical exposure.
+- Never observed because production account deletion is a SOFT delete (30-day grace; `apps/web/app/api/v1/account/operations.ts`), which never hard-deletes the user inline.
+- 060's integration test `afterEach` + the verify script both delete child `medications` FIRST (trigger fires while the user still exists → OK), then the user; accumulated `security_audit_log` rows then cascade-delete cleanly.
+- **RECOMMENDATION (requires a migration — deliberately NOT authored in 060):** make `security_audit_log_user_id_fkey` `DEFERRABLE INITIALLY DEFERRED` (FK check runs at COMMIT, by which point the audit row has itself cascade-deleted), OR ensure every hard-purge path deletes audited children before the user. **Until then, any hard user-deletion routine MUST delete `medications` + `integrations` first.**
+
+---
+
 ### 032-W PARTIAL — spine landed, all screens/auth BLOCKED on 032-V (Fable)
 **Owner:** 032-W completion (resumes when 032-V ships); 033-W (EO 47, gated on 032-W)
 **Relevant-to:** 032-V, 032-W-resume, 033-W; any chat importing @vesper/shared/onboarding
@@ -597,6 +625,9 @@ reconnecting; payload {state, reason, plan_date, retry_count}) to the pending 09
 076 adds `push_token_registered` {platform, has_live_activity_token, device_id_hash} (device_id
 hashed via FNV-1a) to the pending 096 taxonomy; emitted via a guarded seam in
 apps/mobile/lib/pushTokens.ts, awaits registration in 096.
+060 adds `medication_notification_schedule_failed` {medication_id, scheduled_times_count, error_class}
+(no PII) to the pending 096 taxonomy; emitted via the mobile track() seam in
+apps/mobile/lib/medicationReminders.ts (+ Sentry capture), awaits registration in 096.
 
 ---
 
