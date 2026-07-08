@@ -40,6 +40,15 @@ export interface AnalyticsEventMap {
     has_live_activity_token: boolean;
     device_id_hash: string;
   };
+  // Emitted by lib/medicationReminders.ts (chat 060) when scheduling a medication's
+  // local dose notifications throws. No PII: only the medication row id, the count of
+  // scheduled times, and the error constructor name — never the medication name/dose
+  // or any user-entered text [Decision 08 / §11]. Full taxonomy registration lands in 096.
+  medication_notification_schedule_failed: {
+    medication_id: string;
+    scheduled_times_count: number;
+    error_class: string;
+  };
 }
 
 // PENDING (chat 096 to register): the offline mutation queue (chat 038) emits two
