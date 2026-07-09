@@ -53,6 +53,11 @@ module.exports = {
     'expo-router',
     'expo-secure-store',
     'expo-apple-authentication',
+    // chat-085 StoreKit 2 in-app purchase. Config plugin links the native IAP
+    // module (iOS StoreKit 2 by default; no options needed). Applied only at
+    // prebuild/EAS — inert in Expo Go, where the native layer does not exist.
+    // The real purchase flow is EAS/Cutover-gated and deferred.
+    'expo-iap',
     [
       // chat-090b biometric lock. Sets NSFaceIDUsageDescription so Face ID works
       // in custom dev/TestFlight/production builds (Expo Go already carries its

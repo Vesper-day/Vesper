@@ -47,6 +47,14 @@ export default function SettingsScreen() {
           <Text className="text-sm text-cream-faint">Biometric lock</Text>
         </Pressable>
       </Link>
+      {/* Subscription (chat 085): upgrade + Apple manage-subscription. Not module-
+          gated — always shown. */}
+      <Link href={'/settings/subscription' as Href} asChild>
+        <Pressable className="mb-3 rounded-lg border border-line-subtle p-4">
+          <Text className="text-cream">Subscription</Text>
+          <Text className="text-sm text-cream-faint">Plan and billing</Text>
+        </Pressable>
+      </Link>
       {medicationEnabled && (
         <Link href={'/settings/medications' as Href} asChild>
           <Pressable className="mb-3 rounded-lg border border-line-subtle p-4">
