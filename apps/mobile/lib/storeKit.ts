@@ -58,7 +58,9 @@ export class PurchaseIncompleteError extends Error {
  * price for display. Throws ProductUnavailableError if StoreKit yields nothing.
  */
 export async function fetchStandardProduct(): Promise<StoreProduct> {
-  const products = await fetchProducts({ skus: SUBSCRIPTION_PRODUCT_IDS, type: 'subs' });
+  // Spread the readonly id tuple into a mutable array — expo-iap's `skus` param
+  // is typed `string[]` (mutable), not `readonly string[]`.
+  const products = await fetchProducts({ skus: [...SUBSCRIPTION_PRODUCT_IDS], type: 'subs' });
   for (const p of products ?? []) {
     if (p.id === SUBSCRIPTION_PRODUCT_ID) {
       return {
