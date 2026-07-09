@@ -32,6 +32,7 @@ import { BlockTimeline } from '@/components/plan/BlockTimeline';
 import { PlanSkeleton } from '@/components/plan/PlanSkeleton';
 import { PlanEmpty } from '@/components/plan/PlanEmpty';
 import { selectEmptyStateVariant } from '@/components/plan/planViewHelpers';
+import { SundayPrompt } from '@/components/weekly-planning/SundayPrompt';
 
 // The browser IANA zone is the client proxy for the day boundary. The
 // authoritative per-user zone is users.timezone (used server-side by /plans/today
@@ -193,6 +194,9 @@ export default function PlanPage(): React.JSX.Element {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-6">
+      {/* Sunday weekly-planning nudge (Chat 057). Self-hides off-Sunday / when dismissed. */}
+      <SundayPrompt />
+
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-cream">Daily plan</h1>
         {/* Entry link to the task pool (Chat 054-W). Link only; no nav-shell work here. */}
