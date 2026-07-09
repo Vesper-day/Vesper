@@ -66,6 +66,36 @@ describe('Stripe sessions (mocked)', () => {
       createCheckoutSession(stripe, { userId: 'u1', email: 'a@b.co' }),
     ).rejects.toMatchObject({ code: 'INTEGRATION_ERROR' });
   });
+
+  it('createPortalSession passes the §8 params and returns the session url', async () => {
+    process.env.NEXT_PUBLIC_APP_URL = 'https://vesper.test';
+    // Mock the raw-SQL customer read: a row carrying the stripe_customer_id.
+    const db = {
+      execute: vi.fn().mockResolvedValue([{ stripe_customer_id: 'cus_test_123' }]),
+    } as never;
+    const create = vi
+      .fn()
+      .mockResolvedValue({ url: 'https://billing.stripe.com/session/bps_1' });
+    const stripe = { billingPortal: { sessions: { create } } } as never;
+
+    const out = await createPortalSession(stripe, db, 'u1');
+    expect(out).toEqual({ url: 'https://billing.stripe.com/session/bps_1' });
+
+    const params = create.mock.calls[0]![0];
+    expect(params.customer).toBe('cus_test_123');
+    expect(params.return_url).toBe('https://vesper.test/settings/billing');
+  });
+
+  it('createPortalSession 409s (mocked, no DB) when the read returns no customer', async () => {
+    // No subscriptions row / null stripe_customer_id ⇒ CONFLICT before any Stripe call.
+    const create = vi.fn();
+    const db = { execute: vi.fn().mockResolvedValue([]) } as never;
+    const stripe = { billingPortal: { sessions: { create } } } as never;
+    await expect(createPortalSession(stripe, db, 'u1')).rejects.toMatchObject({
+      code: 'CONFLICT',
+    });
+    expect(create).not.toHaveBeenCalled();
+  });
 });
 
 // --- Integration suite (gated on VESPER_DB_TESTS) ----------------------------
