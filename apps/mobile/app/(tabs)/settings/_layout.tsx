@@ -20,6 +20,9 @@ export default function SettingsStackLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="integrations" />
       <Stack.Screen name="privacy" />
+      {/* Subscription upgrade + Apple manage-subscription entry (chat 085). Always
+          mounted (not module-gated); reached from the settings/index link. */}
+      <Stack.Screen name="subscription" />
       {/* Medications is a MODULE (chat 060), OFF by default and gated on
           modulesEnabled.medication.enabled — mounted here as a settings sub-screen
           (NOT a new top-level tab). The screen self-gates; the settings/index link
