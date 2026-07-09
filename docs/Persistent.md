@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 085 landed (Apple StoreKit 2 in-app purchase CLIENT — mobile iOS; expo-iap wrapper + trial-end upgrade UI + thin apple-verify client; PR #__). Prior: Chat 057 (Weekly-planning steps 1–3), Chat 061 (Finance/Bills module).
+Last updated: after Chat 083 landed (Stripe Checkout + Customer Portal completion + cutover runbook — web billing; PR #77). Prior: Chat 085 (Apple StoreKit 2 IAP client — mobile iOS), Chat 057 (Weekly-planning steps 1–3), Chat 061 (Finance/Bills module).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -19,6 +19,23 @@ updated file to project knowledge.
 ---
 
 ## Open Flags
+
+---
+
+### STRIPE CHECKOUT + PORTAL landed (083); webhook handler + live cutover OPEN
+**Owner:** The Stripe webhook-handler chat (state transitions); the Cutover operator (test→live key/Tax/webhook)
+**Relevant-to:** the webhook-handler chat; any chat touching subscription state, the subscriptions row, or the web billing surface; the Cutover chat
+**Status:** Open — both session routes + builders + tests shipped; webhook handler + live cutover NOT done
+**Detail:** 083 completed the two web-only Stripe billing entry points on `@vesper/web`. Session creation ONLY — no state write, no webhook, no migration, no new copy. Durable facts:
+- **Both routes were already correct on main** (Chat 030 landed more than "stubs"): `apps/web/app/api/v1/subscription/{checkout,portal}/route.ts` + pure builders in the co-located `operations.ts` + `schemas.ts`. 083 did NOT re-edit them (reuse directive; live repo = truth). It added the missing **portal unit tests** + the **runbook**.
+- **checkout route** → `POST /api/v1/subscription/checkout` returns `{ url }` (Stripe-hosted Checkout). Builder `createCheckoutSession(stripe, {userId,email})` sets §8 params verbatim: `mode:'subscription'`, `line_items:[{price: STRIPE_PRICE_ID, quantity:1}]`, `customer_email`, `metadata:{vesper_user_id}`, `automatic_tax:{enabled:true}`, `subscription_data:{trial_period_days:0}`, success/cancel on `/settings/billing`. Throws `INTEGRATION_ERROR` if Stripe returns no url.
+- **portal route** → `POST /api/v1/subscription/portal` returns `{ url }` (Stripe billing portal). Builder `createPortalSession(stripe, db, userId)` reads `stripe_customer_id` via **raw parameterized SQL** through the in-repo Postgres client (`db.execute(sql\`SELECT stripe_customer_id FROM subscriptions WHERE user_id = ${userId}::uuid\`)`) — the subscriptions Drizzle model is KNOWN-STALE (missing provider/status/stripe_customer_id/+others), so never use the ORM model for this read. **No `stripe_customer_id` (never checked out) ⇒ typed 409 CONFLICT**, before any Stripe call; the portal route NEVER creates a customer.
+- **Seam mirrored (single, not a second one):** both routes use `createRoute<StripeUrlResponse>` (auth via the injected `user` + version-gate + §9 error map) and construct `new Stripe(STRIPE_SECRET_KEY)` in the route, injecting the client into the PURE builder so tests pass a plain-object mock (no module mock). `runtime='nodejs'` (Stripe SDK needs Node, not Edge).
+- **URL base convention = `NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'`** (helper `appBaseUrl()` in operations.ts; matches the `getReferralCode` precedent). Not a hardcoded domain.
+- **STRIPE_PRICE_ID read from env** (`requireEnv`) — the price ($19.99) and price id are NEVER hardcoded in app code. All Stripe env vars already in `.env.example` (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID`) — no env change.
+- **Test approach = PURE builders, Stripe MOCKED** in `subscription.integration.test.ts` "Stripe sessions (mocked)" suite (ungated, offline). 083 ADDED the portal happy-path (asserts `customer` + `return_url` + `{url:session.url}` mapping via a mocked `db.execute` returning a `stripe_customer_id` row) and the no-customer CONFLICT-without-DB case; the checkout params + INTEGRATION_ERROR tests pre-existed. The DB-gated integration suite (VESPER_DB_TESTS) still covers `getSubscription` + the DB-backed portal 409.
+- **Runbook `docs/RUNBOOKS/STRIPE_CUTOVER.md`** (Chat 083, in README index): (1) Stripe Tax onboarding prerequisite — accept Tax terms + register nexus before first live Checkout (`automatic_tax` fails the session otherwise), confirm product tax code `txcd_10103001`; (2) test→live key swap ORDER — `STRIPE_SECRET_KEY`+`STRIPE_PRICE_ID` (both differ live) flipped LAST, after the live webhook exists; (3) webhook endpoint registration at the CF Worker `…/webhooks/stripe` + capture `STRIPE_WEBHOOK_SECRET` (handler itself is a later chat — out of scope); (4) verification (Checkout opens, Portal for a test customer — deferred until a `stripe_customer_id` exists post-webhook, automatic-tax renders, where to watch failures).
+- **Explicitly OUT of 083:** no webhook handler, no state transition, no subscriptions-row write, no `users.subscription_status` write, no `subscriptionState.ts` call, no migration/column/trigger, no new voice/butler copy.
 
 ---
 
