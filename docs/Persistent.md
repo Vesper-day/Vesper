@@ -39,14 +39,6 @@ updated file to project knowledge.
 
 ---
 
-### PRE-EXISTING: mobile type-check RED on main (storeKit.ts TS4104, from 085)
-**Owner:** A mobile (🟢) chat — the StoreKit / mobile-cleanup owner
-**Relevant-to:** any chat running the full `pnpm type-check` gate; the StoreKit follow-up chat
-**Status:** Open — pre-existing on main, NOT introduced by 083
-**Detail:** `pnpm type-check` currently fails on `apps/mobile/lib/storeKit.ts(61,42): error TS4104 — 'readonly string[]' is 'readonly' and cannot be assigned to the mutable type 'string[]'` (last touched by commit 92b5ce1, Chat 085 StoreKit, merged to main via PR #75). `SUBSCRIPTION_PRODUCT_IDS` is `readonly` but `fetchProducts({skus})` wants a mutable `string[]`. 083 did NOT touch `apps/mobile` and did NOT introduce this — its own web changes pass test/lint/build and web type-check. Treated like the documented pre-existing `@types/react` build skew: NOT chased in an out-of-scope web chat (scope rule: no cross-package sprawl). Fix in a mobile chat: widen the `fetchProducts` param to `readonly string[]` or spread `[...SUBSCRIPTION_PRODUCT_IDS]` at the call site.
-
----
-
 ### STOREKIT 2 IAP CLIENT landed (085); server verify + native/device path OPEN
 **Owner:** Chat 086 (server-side JWS verify + subscriptions upsert); the Apple-dev-build / EAS / Cutover chat (native + on-device purchase)
 **Relevant-to:** 086; any chat touching subscription state, the apple-verify route, or the mobile subscription surface; the EAS/Apple-Developer-Program chat
