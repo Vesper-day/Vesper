@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 057 landed (Weekly-planning session steps 1–3 — dual-surface web/mobile; prior-week review + priority entry + read-only event review; PR #__). Prior: Chat 061 (Finance/Bills module).
+Last updated: after Chat 085 landed (Apple StoreKit 2 in-app purchase CLIENT — mobile iOS; expo-iap wrapper + trial-end upgrade UI + thin apple-verify client; PR #__). Prior: Chat 057 (Weekly-planning steps 1–3), Chat 061 (Finance/Bills module).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -19,6 +19,24 @@ updated file to project knowledge.
 ---
 
 ## Open Flags
+
+---
+
+### STOREKIT 2 IAP CLIENT landed (085); server verify + native/device path OPEN
+**Owner:** Chat 086 (server-side JWS verify + subscriptions upsert); the Apple-dev-build / EAS / Cutover chat (native + on-device purchase)
+**Relevant-to:** 086; any chat touching subscription state, the apple-verify route, or the mobile subscription surface; the EAS/Apple-Developer-Program chat
+**Status:** Open — client steps 1–4 shipped; server verify (step 5) + all native/device verification NOT done
+**Detail:** 085 built the iOS StoreKit 2 in-app purchase CLIENT + UI on `@vesper/mobile`. No DB, no migration, no server verify (apple-verify is still a 501 stub). Durable facts:
+- **Native mechanism = `expo-iap@4.3.6`** (OpenIAP), ADDED as a dependency (neither it nor a native bridge pre-existed). Registered as a config plugin (bare `'expo-iap'`) in `apps/mobile/app.config.js`. The plugin's native mods run ONLY at prebuild/EAS — **inert in Expo Go** (native module absent there), so the real product-fetch / purchase-sheet / JWS path is UNTESTED until an EAS dev build. Peer deps are all `*`, zero runtime deps — low-risk install.
+- **JWS field = `purchase.purchaseToken`** — the OpenIAP unified token carries the signed StoreKit 2 JWS on iOS. Mapped to the request body `{ jwsTransaction }` by the PURE helper `lib/subscriptionVerify.ts` (`toVerifyPayload`).
+- **apple-verify is a 501 (NOT_IMPLEMENTED) stub** (`apps/web/app/api/v1/subscription/apple-verify/route.ts`) — request Zod `{ jwsTransaction }` in place for 086; full verify + subscriptions upsert is 086. The client treats **any non-200 as "verification pending" without crashing** (`classifyVerifyStatus`: 200→verified, else→pending). `apiClient` throws `ApiError(status)` on non-2xx, so the thin client `lib/subscription.ts` catches it, RE-THROWS the global gates (401/426, owned by `api/client`), and maps everything else (incl. 501) to pending.
+- **`finishTransaction` is DELIBERATELY NOT called** by the client — the transaction stays in the StoreKit queue until 086 verifies server-side, so an unverified purchase is never dropped. 086 (or the client once 086 lands) must finish it after a verified 200.
+- **Price is NEVER hardcoded** — product name + price render from the runtime-fetched `Product.displayName` / `Product.displayPrice`. `lib/storeKit.config.ts` holds only the product id `com.vesper.standard.monthly` (subscription group "Vesper", display "Vesper Standard") — no price const. `lib/storeKit.testConfig.ts` captures $19.99 ONLY as the Xcode LOCAL-simulation price for a deferred `.storekit` file — read by nothing at runtime.
+- **Upgrade UI path = `apps/mobile/app/(tabs)/settings/subscription.tsx`** (a Settings-stack sub-screen, registered in `settings/_layout.tsx`; entry `<Link>` added to `settings/index.tsx`, always shown / not module-gated). Composed from the 107/107a primitives (`Card`, `Button`) + `@vesper/ui` `colors.bronze` (no hardcoded hex). Subscribe → `storeKit.purchaseStandard()` → `verifyApplePurchase()`; a 501 shows "Activation is pending." "Manage subscription" button → `storeKit.showManageSubscriptions()` → `deepLinkToSubscriptions()` (iOS system UI).
+- **Mobile-graph safety:** imports only client-safe subpaths — no bare `@vesper/shared` barrel, no `subscriptionState` (server-side), no `api/auth`, no `@vesper/db`, no `@vesper/ai`. The pure helper imports nothing native (testable with no mock).
+- **PostHog autocapture OFF** on the new screen — no posthog import, no `track()` call (Decision 08).
+- **No new voice/butler copy** — fixed labels are minimal functional strings; product name/price come from StoreKit.
+- **vitest globs already cover `lib/*.test.ts`** (`{src,lib,store,app,hooks,components}/**/*.{test,spec}.{ts,tsx}`) — no widen needed. Native-importing modules are mocked (`./api/client` wholesale; the ApiError stand-in is defined INSIDE the hoisted `vi.mock` factory, not top-level, or it errors "cannot access before initialization").
 
 ---
 
@@ -813,6 +831,10 @@ in any current build chat. Listed here so they don't re-surface as questions.
 - **Founder mailing-address + marketing DNS (C-22a)** — Cutover step
 - **091 follow-ups (PR #31)** — deferred
 - **@vesper/ai dist-rebuild ordering** — deferred
+- **On-device StoreKit 2 purchase E2E (085)** — real product fetch / native payment sheet / signed JWS
+  need an EAS dev build (expo-iap native module is inert in Expo Go); the local `.storekit` Xcode file and
+  simulator run need a Mac. The `expo-iap` config plugin's native mods are untested until an EAS prebuild.
+  Blocked on Apple Developer Program + EAS. Defer until then; server verify is chat 086.
 - **On-device APNs / Live Activity push-to-start test (076)** — blocked on Apple Developer Program
   ($99) + APNs .p8 + the native VesperLiveActivityBridge being wired. EAS cloud build needs no Mac
   but is blocked on the Apple-account work; Expo Go does NOT work on SDK 52 (no remote push token /

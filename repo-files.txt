@@ -814,6 +814,7 @@ apps/mobile/app/(tabs)/settings/index.tsx
 apps/mobile/app/(tabs)/settings/integrations.tsx
 apps/mobile/app/(tabs)/settings/medications.tsx
 apps/mobile/app/(tabs)/settings/privacy.tsx
+apps/mobile/app/(tabs)/settings/subscription.tsx
 apps/mobile/app/(tabs)/tasks.tsx
 apps/mobile/app/_layout.tsx
 apps/mobile/app/providers.tsx
@@ -902,6 +903,13 @@ apps/mobile/lib/medications.ts
 apps/mobile/lib/pushTokens.test.ts
 apps/mobile/lib/pushTokens.ts
 apps/mobile/lib/sentry.ts
+apps/mobile/lib/storeKit.config.ts
+apps/mobile/lib/storeKit.testConfig.ts
+apps/mobile/lib/storeKit.ts
+apps/mobile/lib/subscription.test.ts
+apps/mobile/lib/subscription.ts
+apps/mobile/lib/subscriptionVerify.test.ts
+apps/mobile/lib/subscriptionVerify.ts
 apps/mobile/lib/supabase.ts
 apps/mobile/lib/tasks.test.ts
 apps/mobile/lib/tasks.ts
