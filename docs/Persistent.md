@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 061 landed (Finance/Bills module — dual-surface bills CRUD API + web/mobile surfaces + a client-safe butler-line copy entry; PR #__). Prior: Chat 060 (Medications module).
+Last updated: after Chat 057 landed (Weekly-planning session steps 1–3 — dual-surface web/mobile; prior-week review + priority entry + read-only event review; PR #__). Prior: Chat 061 (Finance/Bills module).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -19,6 +19,45 @@ updated file to project knowledge.
 ---
 
 ## Open Flags
+
+---
+
+### completion_log.value IS NOT NULL (057 finding)
+**Owner:** Informational — standing DB-schema constraint
+**Relevant-to:** any chat that INSERTs into `completion_log` (analytics writes, plan-gen, block completion, any test seeding block/energy events)
+**Status:** Open — standing fact
+**Detail:** The applied `completion_log` (migration 20260601000010) columns are `(user_id, block_id, event_type, value, logged_at)` and **`value` is NOT NULL** — every INSERT must supply a `value` jsonb (use `'{}'::jsonb` when there's no payload). 057's DB-gated seed initially omitted it and hit `null value in column "value" ... violates not-null constraint`. `generatePlan.ts` / `logEnergy.ts` always pass a real `value`; mirror that. Reads stay raw parameterized SQL on the real columns (the ORM model `analytics.ts` is STALE — event_name/occurred_at — do not use it; chat-006 drizzle-kit pull is the durable fix). `block_id` is nullable (plan_* / energy rows omit it).
+
+---
+
+### WEEKLY-PLANNING SESSION — steps 1–3 landed (057); steps 4+ OPEN
+**Owner:** Any future weekly-planning chat (steps 4+, plan-regeneration handoff)
+**Relevant-to:** the chat building weekly-planning steps 4+; any chat touching weekly-priorities, the Sunday prompt, or `/weekly-review`
+**Status:** Open — steps 1–3 shipped, steps 4+ / plan regeneration / regeneration handoff NOT built
+**Detail:** 057 built steps 1–3 dual-surface (web `app/(app)/weekly-planning/page.tsx`, mobile `app/weekly-planning.tsx`). Key durable facts:
+- **Target week = the COMING Monday** (`addDays(mondayOf(now),7)`) — a Sunday session plans the week ahead; surfaces pass `weekStart=comingMonday`, server derives the reviewed prior window `[targetMonday−7, targetMonday)`.
+- **Step-1 completion source (DECISION A):** new thin **`GET /api/v1/weekly-review[?weekStart]`** reads `completion_log` block events; denominator = **actioned-share** `block_completed / (block_completed+block_skipped+block_rescheduled)`; `rate=null` when 0 actioned → plain "nothing to review yet" (never `weekly_priorities.completedAt`, which is structurally always null).
+- **AI suggestion seam (DECISION B):** no route exposed `suggestWeeklyPriorities`, so 057 added thin stateless **`POST /api/v1/weekly-priorities/suggest`** (body-driven, mirrors `ai/command`); mobile reaches it via the thin client and NEVER imports `@vesper/ai`.
+- **029 weekly-priorities API consumed as-is** — camelCase boundary, 3–5 enforced server-side, PUT items carry only `{ text, source }`; source flips `ai_suggested`→`user` on edit (pure `buildPrioritiesSubmission`, DUPLICATED per surface, not shared).
+- **Step 3 (DECISION D):** READ-ONLY event review over the target-week Mon–Sun window via the landed `/calendar-events` range route; edits link out to the Calendar surface (web `/calendar`, mobile `/(tabs)/calendar`); Confirm persists nothing. No calendar CRUD/DELETE here (avoids the 054-W `.delete()` 204 bug).
+- **Sunday-prompt dismissal (DECISION C):** client-only, NO API/DB. Web = `localStorage`; mobile = existing `secureStorageAdapter` (expo-secure-store; same adapter `device_id` uses — no new dep). Keyed `userId + targetWeekStartDate` (re-appears next Sunday, no cross-account leak). Two lines transcribed verbatim from PRD §6.7 — NOT voice-gated.
+- **Mobile route placement:** mobile has no `(app)` route group (root Stack over `(auth)`+`(tabs)`); the session screen lives at **root `app/weekly-planning.tsx`** (NOT under `(tabs)`, which would register a stray 5th tab) and is reached via `router.push('/weekly-planning')`. Prompt hosted in the real `app/(tabs)/plan.tsx` day view (chat 040 — it is NOT a stub, contrary to earlier assumptions).
+
+---
+
+### TYPED ROUTES stale on a NEW route → standalone tsc fails (057 finding)
+**Owner:** Informational — standing gotcha for any chat that adds a NEW route + links to it
+**Relevant-to:** any chat adding a new web route (Next `experimental.typedRoutes`) or a new expo-router route and navigating to it (`Link href` / `router.push`)
+**Status:** Open — standing
+**Detail:** Both apps use typed routes. The literal route-type union is regenerated only by a build/dev run (web: `.next/types/*`; mobile: expo-router's generated types). `pnpm type-check` runs `tsc --noEmit` standalone against the STALE generated types, so a brand-new route fails: web `Type '"/x"' is not assignable to RouteImpl<...>`, mobile `Argument of type '"/x"' is not assignable to ... RelativePathString | ...`. Fixes that don't depend on regeneration: **web** — pass the `UrlObject` form `href={{ pathname: '/x' }}` (the Link union accepts `UrlObject`); **mobile** — `router.push('/x' as Href)` (`import { type Href } from 'expo-router'`; it is re-exported from the root via `export type * from './types'`). 057 hit this for `/weekly-planning` on both surfaces. Existing routes are unaffected (already in the generated types).
+
+---
+
+### pnpm build CRASHES with access violation on Windows (057 observation)
+**Owner:** Informational — operator env (Windows)
+**Relevant-to:** any chat running `pnpm build` in the local gate on Windows
+**Status:** Open — environmental, non-deterministic
+**Detail:** `next build` for `@vesper/web` on this Windows machine has crashed with exit code **3221225477** (`0xC0000005` STATUS_ACCESS_VIOLATION) during "Creating an optimized production build", AFTER type-check/lint were clean — i.e. a native SWC/Node crash, NOT a TS/lint error. Also: `pnpm type-check` can take ~18min (mobile `tsc` over RN types is genuinely slow) and the batch prompt "Terminate batch job (Y/N)?" can look like a hang — it's waiting on input, not stuck. Guidance: judge build "no NEW errors vs main" from the ERROR OUTPUT, not the crash exit; retry the build once; don't chase the crash as a code defect. The pre-existing `@types/react` 18-vs-19 skew in `apps/web` is a separate known non-issue.
 
 ---
 

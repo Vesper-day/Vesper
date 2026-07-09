@@ -40,6 +40,7 @@ import {
   selectEmptyStateVariant,
   localDateInTimeZone,
 } from '../../components/plan/planViewHelpers';
+import { SundayPrompt } from '../../components/weekly-planning/SundayPrompt';
 
 // Raw token hex (verbatim from @vesper/ui tokens.ts) for the RefreshControl color props,
 // which take a color value, not a NativeWind class (the tasks.tsx convention).
@@ -261,6 +262,9 @@ export default function PlanScreen(): React.JSX.Element {
             />
           }
         >
+          {/* Sunday weekly-planning nudge (Chat 057). Self-hides off-Sunday / when dismissed. */}
+          <SundayPrompt />
+
           <View className="mb-4 flex-row items-center justify-between">
             <Text className="text-2xl font-semibold text-cream">Daily plan</Text>
             {/* Entry link to the task pool (preserved from chat 054-W). */}
