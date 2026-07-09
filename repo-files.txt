@@ -1123,6 +1123,7 @@ apps/web/tsconfig.json
 apps/web/vitest.config.ts
 docs/ARCHITECTURE.md
 docs/ARCHITECTURE_DECISIONS.md
+docs/ASSET_MANIFEST_KICKOFF.md
 docs/BRAINSTORM_MASTER.md
 docs/CALENDAR_LIBRARY_CHOICE.md
 docs/CC_PROMPT_FORMAT_EXAMPLE.md.md
@@ -1161,6 +1162,12 @@ docs/PHASE_4_BUILD_PLAN.md
 docs/PRD.md
 docs/PROJECT_OVERVIEW.md
 docs/Persistent.md
+docs/REEL_REFERENCE_SHEETS/README.txt
+docs/REEL_REFERENCE_SHEETS/REEL2_editorial-ecomm_crossfade.jpg
+docs/REEL_REFERENCE_SHEETS/REEL6_cafe-LOUNGE_warmdark-staging.jpg
+docs/REEL_REFERENCE_SHEETS/REEL7_skincare-galaxy_static-staging.jpg
+docs/REEL_REFERENCE_SHEETS/REEL8_VELOUR-candle_warmdark-REGISTER-MATCH.jpg
+docs/REEL_REFERENCE_SHEETS/REEL9_color_60-30-10-rule.jpg
 docs/RETENTION_POLICY.md
 docs/RUNBOOKS/APNS_KEY_ROTATION.md
 docs/RUNBOOKS/BACKUP_RESTORE_DRILL.md
@@ -1172,6 +1179,7 @@ docs/RUNBOOKS/README.md
 docs/SCALING_THRESHOLDS.md
 docs/SUBSCRIPTION_STATE_MACHINE.md
 docs/TECHNICAL_SPEC.md
+docs/VISUAL_DIRECTION_BANK_v2.md
 docs/native/ALARM_SCREEN_059b_VISUAL_SPEC.md
 docs/native/LIVE_ACTIVITY_078_VISUAL_SPEC.md
 eslint.config.mjs
