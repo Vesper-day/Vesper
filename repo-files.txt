@@ -1050,6 +1050,8 @@ apps/web/app/auth/confirm/route.ts
 apps/web/app/globals.css
 apps/web/app/layout.tsx
 apps/web/app/providers.tsx
+apps/web/app/webhooks/google-calendar/resolveChannelUser.test.ts
+apps/web/app/webhooks/google-calendar/resolveChannelUser.ts
 apps/web/app/webhooks/google-calendar/route.ts
 apps/web/app/webhooks/google-calendar/validateNotification.test.ts
 apps/web/app/webhooks/google-calendar/validateNotification.ts
@@ -1184,6 +1186,7 @@ docs/REEL_REFERENCE_SHEETS/REEL9_color_60-30-10-rule.jpg
 docs/RETENTION_POLICY.md
 docs/RUNBOOKS/APNS_KEY_ROTATION.md
 docs/RUNBOOKS/BACKUP_RESTORE_DRILL.md
+docs/RUNBOOKS/GCAL_CHANNEL_RENEWAL.md
 docs/RUNBOOKS/INCIDENT_RESPONSE.md
 docs/RUNBOOKS/IOS_ALARM_REBUILD.md
 docs/RUNBOOKS/IOS_WIDGET_REBUILD.md
@@ -1254,6 +1257,8 @@ packages/ai/src/generateText.ts
 packages/ai/src/index.ts
 packages/ai/src/integrations/googleCalendar.test.ts
 packages/ai/src/integrations/googleCalendar.ts
+packages/ai/src/integrations/persistChannelState.ts
+packages/ai/src/integrations/registerWatch.ts
 packages/ai/src/parsePlanEditCommand.ts
 packages/ai/src/prompts/calendar-classify.ts
 packages/ai/src/prompts/checkin-question.ts
@@ -1327,6 +1332,8 @@ packages/db/migrations/20260601000021_notebook_inferences.down.sql
 packages/db/migrations/20260601000021_notebook_inferences.sql
 packages/db/migrations/20260601000023_auth_event_trigger.down.sql
 packages/db/migrations/20260601000023_auth_event_trigger.sql
+packages/db/migrations/20260601000024_gcal_channel_state.down.sql
+packages/db/migrations/20260601000024_gcal_channel_state.sql
 packages/db/migrations/20260601100001_seed_workout_templates.down.sql
 packages/db/migrations/20260601100001_seed_workout_templates.sql
 packages/db/migrations/20260601100002_seed_recipe_templates.down.sql
@@ -1456,8 +1463,17 @@ supabase/migrations/20260601000019_start_of_local_day.sql
 supabase/migrations/20260601000020_chat111_schema_checkpoint.sql
 supabase/migrations/20260601000021_notebook_inferences.sql
 supabase/migrations/20260601000023_auth_event_trigger.sql
+supabase/migrations/20260601000024_gcal_channel_state.sql
 supabase/migrations/20260601100001_seed_workout_templates.sql
 supabase/migrations/20260601100002_seed_recipe_templates.sql
 tsconfig.json
 turbo.json
 vitest.config.ts
+workers/daily-cron/modules/gcal-channel-renewal.logic.ts
+workers/daily-cron/modules/gcal-channel-renewal.test.ts
+workers/daily-cron/modules/gcal-channel-renewal.ts
+workers/daily-cron/package.json
+workers/daily-cron/src/index.ts
+workers/daily-cron/tsconfig.json
+workers/daily-cron/vitest.config.ts
+workers/daily-cron/wrangler.toml
