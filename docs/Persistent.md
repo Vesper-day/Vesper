@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 083 landed (Stripe Checkout + Customer Portal completion + cutover runbook — web billing; PR #77). Prior: Chat 085 (Apple StoreKit 2 IAP client — mobile iOS), Chat 057 (Weekly-planning steps 1–3), Chat 061 (Finance/Bills module).
+Last updated: after Chat 065 landed (Google Calendar push webhook receiver + authored-but-uninvoked registerWatch — web). Prior: Chat 083 (Stripe Checkout + Customer Portal completion + cutover runbook — web billing; PR #77), Chat 085 (Apple StoreKit 2 IAP client — mobile iOS), Chat 057 (Weekly-planning steps 1–3).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -264,6 +264,48 @@ plan-synthesis wiring. PR #57.
   import breaks vitest SSR via libsodium). See the GCAL TOKEN ENCRYPTION MODEL flag.
 - getTodayEvents performs integrations bookkeeping writes (last_synced_at / status) inside the generate-only
   synthesis path — sync metadata, not plan persistence; within the Decision-4 boundary.
+
+---
+
+### GCAL PUSH WEBHOOK (065 — landed; channel-state persistence OPEN for 066)
+**Owner:** 066 (channel renewal + channel-state persistence); the Cutover operator (C-17 real channel registration)
+**Relevant-to:** 066; 034-W / Cutover (registerWatch call site); any chat touching the integrations row or GCal sync
+**Status:** Open — receiver + registerWatch landed; channel-state persistence + real registration NOT done
+**Detail:** 065 shipped the push-notification receiver + an authored-but-uninvoked `registerWatch`. PR (this chat).
+- **ROUTE CONVENTION:** unauthenticated raw `POST` handler at `apps/web/app/webhooks/google-calendar/route.ts`
+  (OUTSIDE /api/v1). `runtime='nodejs'`, `dynamic='force-dynamic'`. NO createRoute / validateSession /
+  checkAppVersion — Google is the only caller and cannot present a session. No prior `app/webhooks/` route
+  existed (Stripe/Apple webhooks are on Cloudflare Workers); it follows the `api/v1/internal/auth-event`
+  secret-validated raw-handler shape (constant-time compare, fail-closed).
+- **TOKEN VALIDATION = ENV SECRET, not a DB row:** the `X-Goog-Channel-Token` is validated (constant-time)
+  against the deployment env var **`GOOGLE_WEBHOOK_CHANNEL_TOKEN`** (added to `.env.example`, placeholder only).
+  Mismatch → 401 + Sentry alert + NO sync. NOT a per-channel DB value — integrations has no channel columns.
+  The pure classifier `validateNotification.ts` (co-located; imports nothing native) maps headers →
+  `{action:'ignore'|'ack'|'sync', tokenValid}`: `sync` state → ack (200, no sync); `exists` → trigger; else ignore.
+- **SYNC SEAM = INLINE re-invocation of 064 `getTodayEvents`, NOT enqueued:** the `delayed_jobs` table exists
+  (migration 16) but has ZERO code refs — no enqueue helper, no tick worker dispatching job_types — so the
+  enqueue seam is not reusable. `exists` therefore RE-RUNS `getTodayEvents` (a re-fetch through the existing
+  seam). There is **NO persisted Google syncToken anywhere** (no column), so this is NOT a true Google delta.
+- **CHANNEL-STATE PERSISTENCE GAP (066/Cutover):** `events.watch` returns `{id, resourceId, expiration}` the 066
+  renewal worker needs, but integrations has NO channel_id / resource_id / channel_expiration / sync_token column
+  and 065 authored NO migration. `registerWatch` RETURNS them and persists nothing. Likewise the **channel→user
+  mapping is unresolved** — no channel_id→user_id store exists, so `resolveChannelUser` returns null in dev; an
+  unresolvable channel logs `syncOutcome:'error'` but still 200s (don't retry-storm a permanent gap). Tests exercise
+  the sync path with a mock mapping. Filling this (a migration + real mapping) is owned by 066/Cutover.
+- **registerWatch AUTHORED BUT NOT INVOKED:** `apps/web/lib/googleCalendar/registerWatch.ts` calls `events.watch`
+  (generated channel id, the same `GOOGLE_WEBHOOK_CHANNEL_TOKEN`, address `${NEXT_PUBLIC_APP_URL}/webhooks/google-calendar`,
+  type `web_hook`), decrypts the access token via the 064 dynamic-import path (`import('@vesper/db/encryption')`).
+  Nothing calls it in dev — real channel registration is **Cutover-blocked (C-17)**: needs a verified public HTTPS
+  domain. Its call site is deferred to 034-W / Cutover.
+- **RECEIPT→SYNC = ONE Sentry event:** every receipt logs one structured `Sentry.captureMessage` entry carrying
+  channel id / resource id / message number / token-validation result; on a triggered sync the outcome
+  (success | no-changes | error) is appended to that same entry. Reuses 064's `@sentry/nextjs` — no second client.
+- **ENV ADDED:** `GOOGLE_WEBHOOK_CHANNEL_TOKEN` (placeholder). `NEXT_PUBLIC_APP_URL` reused (already present) for the
+  webhook address — no new base-URL var. NO migration / column / trigger / UI / React / mobile / butler copy authored.
+- **TESTS:** pure `validateNotification.test.ts` (9 offline cases: valid+exists→sync, valid+sync→ack, mismatch/missing/
+  no-secret→tokenValid:false, malformed→ignore, not_exists→ignore) + `registerWatch.test.ts` (5 cases, fetch mocked +
+  `@vesper/db/encryption` decrypt stubbed — NO libsodium module-graph mock; asserts the watch request body + the
+  `{id,resourceId,expiration}` mapping). Web vitest glob `{app,lib,components}/**` already covered both — no widening.
 
 ---
 
