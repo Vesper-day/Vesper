@@ -40,6 +40,8 @@ import { extractCachedTokens } from './cost/tracker';
 import { voiceGate } from './voiceGate';
 import { getFallbackPlan } from './fallback';
 import { buildUserContext } from './context/userContext';
+import type { CalendarEvent, PendingTask } from './context/planContext';
+import { applyTaskPlacement } from './scheduling/taskPlacement';
 import { recordFailure } from './synthesizePlan.circuitBreaker';
 import { emitPlanCompletion } from './synthesizePlan.observability';
 
@@ -68,6 +70,13 @@ export interface FallbackChainParams {
   fullMessages: CoreMessage[];
   /** Lazily builds the trimmed Step-2 context (only assembled if we reach Step 2). */
   buildSimplifiedMessages: () => Promise<CoreMessage[]>;
+  /**
+   * The day's pending tasks + today's calendar events, for the deterministic Chat-055
+   * task-placement post-process over a GENERATED plan. Both default to [] (breaker-open
+   * / eval paths), which makes applyTaskPlacement a no-op.
+   */
+  pendingTasks?: PendingTask[];
+  calendarEvents?: CalendarEvent[];
   breakerOpen: boolean;
   db: Database;
   signal?: AbortSignal;
@@ -244,7 +253,16 @@ export async function* runFallbackChain(
       const messages = await step.getMessages();
       const outcome = yield* runSynthesisAttempt(messages, params.signal);
 
-      const gated = await gatePlanStrings(outcome.plan, params.breakerOpen);
+      // Chat 055: deterministically place the day's real pending tasks into the
+      // model's work blocks BEFORE gating. Placement writes only details.tasks (user's
+      // own task titles, never AI copy), which the voice gate does not touch. No-op
+      // when pendingTasks is empty.
+      const placed = applyTaskPlacement(
+        outcome.plan,
+        params.pendingTasks ?? [],
+        params.calendarEvents ?? [],
+      );
+      const gated = await gatePlanStrings(placed, params.breakerOpen);
       await emitPlanCompletion({
         db: params.db,
         userId: params.userId,

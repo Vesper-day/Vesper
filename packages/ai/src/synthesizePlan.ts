@@ -123,6 +123,10 @@ export async function* synthesizePlan(
     fullMessages,
     buildSimplifiedMessages: () =>
       buildSimplifiedPlanContext(userId, planDate, energyScore, db),
+    // Chat 055: forwarded for the deterministic task-placement post-process on a
+    // generated plan. Empty when the breaker is open (skips placement, as intended).
+    pendingTasks,
+    calendarEvents,
     breakerOpen,
     db,
     ...(options?.signal ? { signal: options.signal } : {}),

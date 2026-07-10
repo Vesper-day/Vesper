@@ -1260,6 +1260,8 @@ packages/ai/src/prompts/template-selection.ts
 packages/ai/src/prompts/types.ts
 packages/ai/src/prompts/voiceGateReview.ts
 packages/ai/src/prompts/weekly-review.ts
+packages/ai/src/scheduling/taskPlacement.test.ts
+packages/ai/src/scheduling/taskPlacement.ts
 packages/ai/src/selectRecipeTemplate.ts
 packages/ai/src/selectWorkoutTemplate.ts
 packages/ai/src/streamText.ts
