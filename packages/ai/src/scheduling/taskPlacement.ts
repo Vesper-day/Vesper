@@ -13,8 +13,16 @@
 // a `focus` variant. `focus` in the live BlockDetailsSchema is a notes-only generic
 // variant with no task array. The build-plan prose ("task -> focus block") predates
 // the chat-006 schema; the committed schema carries the list on `work`, so that is
-// what we populate. Element type is the task TITLE string (matches the model's own
-// output and the DailyPlan tests), NOT the task id.
+// what we populate. Element type is the task ID string (the tasks-row uuid), NOT the
+// title: titles are non-unique and a split task repeats across blocks, so a title
+// cannot be joined back to a tasks row (two distinct same-title tasks are then
+// indistinguishable). The id is the durable, unambiguous reference the downstream
+// join-back consumers need (chat-056 reflow moves/re-statuses a displaced chunk;
+// completion logging maps a block chunk to its task). The same id appearing in two
+// blocks is therefore unambiguously ONE split task. When placement runs it OWNS every
+// work block's `tasks` array (overwriting the model's placeholder titles, emptying
+// blocks it places nothing into); the model's title-ish strings only survive on a day
+// with zero pending tasks, where placement is a no-op and there is nothing to join.
 //
 // ALGORITHM
 //   sort   tasks by priority DESC (high>medium>low), then deadline ASC (nulls last),
@@ -23,8 +31,8 @@
 //          holds the WHOLE task; place it there.
 //   split  if no single window is large enough, split the task across the LARGEST
 //          available windows (largest remaining capacity first), filling each until
-//          the task is placed. A split task's title therefore appears in more than
-//          one block (semantics: same task, continued across windows).
+//          the task is placed. A split task's id therefore appears in more than one
+//          block (semantics: same task, continued across windows).
 //   carry  the split loop IS the single-day carry-forward: leftover minutes flow to
 //          the next available window within the day. Once same-day windows are
 //          exhausted the remainder is DROPPED (V1 single-day horizon; cross-day /
@@ -219,7 +227,7 @@ export function placeTasks(tasks: PendingTask[], windows: OpenWindow[]): PlacedC
 
 /**
  * Deterministic post-process over a synthesized DailyPlan: place the day's real pending
- * tasks into the model's WORK blocks and write their titles onto `details.tasks`.
+ * tasks into the model's WORK blocks and write their IDS onto `details.tasks`.
  *
  * Pure: (plan + pending tasks + calendar events) -> new plan. No mutation of the input.
  * A no-op (returns the plan untouched) when there are no pending tasks or the model
@@ -246,21 +254,21 @@ export function applyTaskPlacement(
   const windows = carveOpenWindows(candidates, calendarEventsToBusy(calendarEvents));
   const chunks = placeTasks(pendingTasks, windows);
 
-  // Group placed titles back per originating block (strip the `::k` carve suffix),
+  // Group placed task IDS back per originating block (strip the `::k` carve suffix),
   // order-preserving and de-duplicated within a block (a task bisected by an event can
-  // land twice under the same block id).
-  const titlesByBlock = new Map<string, string[]>();
+  // land twice under the same block id -> keep one id, not two).
+  const idsByBlock = new Map<string, string[]>();
   for (const chunk of chunks) {
     const blockId = chunk.windowId.split('::')[0]!;
-    const list = titlesByBlock.get(blockId) ?? [];
-    if (!list.includes(chunk.title)) list.push(chunk.title);
-    titlesByBlock.set(blockId, list);
+    const list = idsByBlock.get(blockId) ?? [];
+    if (!list.includes(chunk.taskId)) list.push(chunk.taskId);
+    idsByBlock.set(blockId, list);
   }
 
   const blocks = plan.blocks.map((block, i) => {
     if (block.details.blockType !== 'work') return block;
-    const titles = titlesByBlock.get(String(i)) ?? [];
-    return { ...block, details: { ...block.details, tasks: titles } };
+    const ids = idsByBlock.get(String(i)) ?? [];
+    return { ...block, details: { ...block.details, tasks: ids } };
   });
 
   return { ...plan, blocks };

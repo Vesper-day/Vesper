@@ -158,16 +158,31 @@ describe('applyTaskPlacement (DailyPlan post-process)', () => {
     ],
   });
 
-  it('writes real pending-task titles onto the work block, replacing model output', () => {
+  it('writes real pending-task IDS onto the work block, replacing model output', () => {
     const plan = applyTaskPlacement(
       workPlan(),
       [task({ id: 't1', title: 'Write spec', estimatedMinutes: 60, priority: 'high' })],
       [],
     );
     const work = plan.blocks[0]!;
-    expect(work.details).toMatchObject({ blockType: 'work', tasks: ['Write spec'] });
+    // Element is the task id (join-safe), not the title.
+    expect(work.details).toMatchObject({ blockType: 'work', tasks: ['t1'] });
     // Non-work block untouched.
     expect(plan.blocks[1]!.details.blockType).toBe('nutrition');
+  });
+
+  it('de-duplicates a split task to a single id within one block (event-bisected window)', () => {
+    // A 09:00-11:00 work block bisected by a 09:30-10:00 event -> two sub-windows, same
+    // block id. One long task splits across both pieces but must appear as ONE id.
+    const events: CalendarEvent[] = [
+      { id: 'e', title: 'Sync', startTime: '2026-07-09T09:30:00Z', endTime: '2026-07-09T10:00:00Z' },
+    ];
+    const plan = applyTaskPlacement(
+      workPlan(),
+      [task({ id: 't1', title: 'Deep work', estimatedMinutes: 90 })],
+      events,
+    );
+    expect(plan.blocks[0]!.details).toMatchObject({ blockType: 'work', tasks: ['t1'] });
   });
 
   it('is a no-op when there are no pending tasks (leaves the model output intact)', () => {
