@@ -1050,6 +1050,9 @@ apps/web/app/auth/confirm/route.ts
 apps/web/app/globals.css
 apps/web/app/layout.tsx
 apps/web/app/providers.tsx
+apps/web/app/webhooks/google-calendar/route.ts
+apps/web/app/webhooks/google-calendar/validateNotification.test.ts
+apps/web/app/webhooks/google-calendar/validateNotification.ts
 apps/web/components.json
 apps/web/components/plan/BlockCard.tsx
 apps/web/components/plan/BlockTimeline.tsx
@@ -1101,6 +1104,8 @@ apps/web/lib/blocks/effectiveStatus.ts
 apps/web/lib/csp/nonce.ts
 apps/web/lib/dates/localDate.test.ts
 apps/web/lib/dates/localDate.ts
+apps/web/lib/googleCalendar/registerWatch.test.ts
+apps/web/lib/googleCalendar/registerWatch.ts
 apps/web/lib/idempotency.ts
 apps/web/lib/regenerationLimits.ts
 apps/web/lib/sentry/scrub.ts
