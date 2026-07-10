@@ -435,6 +435,52 @@ PASSES these tests — a green primitive test is not proof the styles resolve.
 
 ---
 
+### TASK PLACEMENT ALGORITHM (055 — landed)
+**Owner:** 056 (mid-day reflow/over-commit consumes placement); any chat touching synthesis block output
+**Relevant-to:** 056; @vesper/ai synthesis path; anyone reading work-block details.tasks
+**Status:** Open — landed-feature forward notes
+**Detail:** 055 shipped the deterministic greedy task→work-block placement inside plan synthesis (PR #78).
+- PURE MODULE: `packages/ai/src/scheduling/taskPlacement.ts` (+ `.test.ts`, 14 offline tests). No I/O, no DB,
+  no model call, no clock. Signature built against the LIVE `PendingTask` from context/planContext.ts
+  (`{id,title,estimatedMinutes:number,priority:string,deadline:string|null}`), NOT the §3 snake_case row.
+- CARRIER = live-schema truth, NOT build-plan prose. Build-plan says "task → focus block" but the committed
+  chat-006 `BlockDetailsSchema` carries the list on the **WORK** variant (`tasks: z.array(z.string())`);
+  `focus` is a notes-only GENERIC variant with NO task array. Output populates work `details.tasks`. Element
+  = task **ID** string (the tasks-row uuid), NOT the title (2nd commit c75cbeb switched it). Rationale: titles
+  are non-unique and a split task repeats across blocks, so a title cannot be joined back to a tasks row (two
+  distinct same-title tasks would be indistinguishable); id is the durable join-back key that 056 reflow
+  (move/re-status a displaced chunk) and completion logging need. Same id in >1 work block = unambiguously ONE
+  split task. Placement OWNS every work block's tasks array when it runs (overwrites model placeholder titles,
+  empties non-placed work blocks); model title-ish strings only survive on a ZERO-pending-task day where
+  placement is a no-op and there is nothing to join. NO live consumer reads details.tasks today (persist
+  stores details as opaque jsonb passthrough; no plan/tasks UI renders it; blocks has NO FK to tasks) — so
+  this is forward-safety, no current runtime-behavior change.
+- INTEGRATION = deterministic POST-PROCESS (path b), NOT prompt-side. `applyTaskPlacement(plan, pendingTasks,
+  calendarEvents)` runs in synthesizePlan.fallback.ts on the GENERATED success path only (right after
+  `outcome.plan`, before gatePlanStrings), threaded from synthesizePlan.ts via new optional
+  FallbackChainParams `pendingTasks`/`calendarEvents` (default [] → no-op for breaker-open/eval/existing
+  tests). NOT applied to the Step-3 hardcoded fallback. Model still decides WHEN work windows sit; the
+  algorithm only fills them. NO prompt text changed → **NO version bump** (the 🤖 flag on 055 was a
+  prediction; pure post-process closes it without a bump).
+- NO VOICE GATE: placement writes only details.tasks (task ids / user's own task rows, never AI copy);
+  gatePlanStrings only gates block.title + note, so tasks are never gated. Consistent, no new gate call.
+- OPEN WINDOWS: the pure `placeTasks` TAKES windows as input (`OpenWindow{id,start,end}` minutes-from-
+  midnight). Windows derived at the integration site FROM the model's work blocks, then `carveOpenWindows`
+  subtracts busy intervals (`calendarEventsToBusy` maps timed events; ALL-DAY/date-only events skipped so
+  they don't blank the day) → placement can never overlap a fixed calendar event. Carved sub-windows keep a
+  `<blockIndex>::<k>` id so capacity is per-piece but placed ids group back (de-duped) per block.
+- ALGO: sort priority DESC (high>medium>low) → deadline ASC nulls-last, stable (mirrors readPendingTasks
+  fetch order). First-fit whole task into earliest window large enough; else split across LARGEST windows;
+  leftover carries to next same-day window; once same-day windows exhausted the remainder is DROPPED (V1
+  single-day horizon — cross-day/cross-week rebalance is V2). No min-chunk floor in V1 (MIN_CHUNK_MINUTES is
+  a V2 refinement).
+- NO migration / NO new column / NO new trigger / NO DB write / NO new persistence path / NO UI/route / NO
+  new butler copy. Pure @vesper/ai build.
+- Files: packages/ai/src/scheduling/taskPlacement.ts (+ .test.ts); synthesizePlan.fallback.ts (params +
+  applyTaskPlacement call + imports); synthesizePlan.ts (forwards pendingTasks/calendarEvents).
+
+---
+
 ### AUTH-EVENT VAULT SECRETS (operational)
 **Owner:** Cutover / deploy
 **Relevant-to:** Cutover Block; any staging/prod deploy chat
