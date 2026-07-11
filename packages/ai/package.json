@@ -6,6 +6,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./src/index.ts"
+    },
+    "./integrations/registerWatch": {
+      "types": "./dist/integrations/registerWatch.d.ts",
+      "default": "./src/integrations/registerWatch.ts"
+    },
+    "./integrations/persistChannelState": {
+      "types": "./dist/integrations/persistChannelState.d.ts",
+      "default": "./src/integrations/persistChannelState.ts"
     }
   },
   "scripts": {
