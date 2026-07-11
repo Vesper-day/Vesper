@@ -1,0 +1,20 @@
+# workers/daily-cron — consolidated scheduled worker (Chat 066 scaffold, Decision 20).
+#
+# ONE Cloudflare Worker hosting all daily-tick modules, dispatched by UTC hour in
+# src/index.ts. Chat 066 establishes the minimal shell with the first module
+# (gcal-channel-renewal at 05:00 UTC). Later chats register more modules against other
+# hours; they extend the dispatch table in src/index.ts — the single hourly cron below
+# stays as-is (one trigger routes every hour, well within the 250-trigger Paid limit).
+#
+# Cloudflare Workers Paid is required (Decision 20). Real deployment (account_id, the
+# Postgres binding / Hyperdrive, and the GOOGLE_WEBHOOK_CHANNEL_TOKEN secret) is an
+# operator/Cutover step — gcal-channel-renewal is inert until Cutover registers the
+# first channel (C-17).
+name = "vesper-daily-cron"
+main = "src/index.ts"
+compatibility_date = "2026-07-10"
+compatibility_flags = ["nodejs_compat"]
+
+# Hourly tick; src/index.ts routes hour-of-UTC → module (gcal-channel-renewal at 05:00).
+[triggers]
+crons = ["0 * * * *"]

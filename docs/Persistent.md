@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 065 landed (Google Calendar push webhook receiver + authored-but-uninvoked registerWatch — web). Prior: Chat 083 (Stripe Checkout + Customer Portal completion + cutover runbook — web billing; PR #77), Chat 085 (Apple StoreKit 2 IAP client — mobile iOS), Chat 057 (Weekly-planning steps 1–3).
+Last updated: after Chat 066 landed (Google Calendar channel-renewal daily-cron worker + channel-state migration 24 + channel→user mapping — CLOSES the 065 channel-state persistence + mapping gap). Prior: Chat 065 (GCal push webhook receiver + authored-but-uninvoked registerWatch — web), Chat 083 (Stripe Checkout + Customer Portal completion + cutover runbook — web billing; PR #77), Chat 085 (Apple StoreKit 2 IAP client — mobile iOS).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -267,11 +267,11 @@ plan-synthesis wiring. PR #57.
 
 ---
 
-### GCAL PUSH WEBHOOK (065 — landed; channel-state persistence OPEN for 066)
-**Owner:** 066 (channel renewal + channel-state persistence); the Cutover operator (C-17 real channel registration)
-**Relevant-to:** 066; 034-W / Cutover (registerWatch call site); any chat touching the integrations row or GCal sync
-**Status:** Open — receiver + registerWatch landed; channel-state persistence + real registration NOT done
-**Detail:** 065 shipped the push-notification receiver + an authored-but-uninvoked `registerWatch`. PR (this chat).
+### GCAL PUSH WEBHOOK (065 — landed; channel-state persistence CLOSED by 066)
+**Owner:** the Cutover operator (C-17 real channel registration — the only remaining open item)
+**Relevant-to:** 034-W / Cutover (registerWatch call site); any chat touching the integrations row or GCal sync
+**Status:** Channel-state persistence + channel→user mapping CLOSED by 066 (migration 24 + wired resolveChannelUser). Only real channel registration remains, Cutover-blocked (C-17).
+**Detail:** 065 shipped the push-notification receiver + an authored-but-uninvoked `registerWatch`. 066 added the persistence + mapping (see GCAL CHANNEL RENEWAL (066) below).
 - **ROUTE CONVENTION:** unauthenticated raw `POST` handler at `apps/web/app/webhooks/google-calendar/route.ts`
   (OUTSIDE /api/v1). `runtime='nodejs'`, `dynamic='force-dynamic'`. NO createRoute / validateSession /
   checkAppVersion — Google is the only caller and cannot present a session. No prior `app/webhooks/` route
@@ -286,17 +286,18 @@ plan-synthesis wiring. PR #57.
   (migration 16) but has ZERO code refs — no enqueue helper, no tick worker dispatching job_types — so the
   enqueue seam is not reusable. `exists` therefore RE-RUNS `getTodayEvents` (a re-fetch through the existing
   seam). There is **NO persisted Google syncToken anywhere** (no column), so this is NOT a true Google delta.
-- **CHANNEL-STATE PERSISTENCE GAP (066/Cutover):** `events.watch` returns `{id, resourceId, expiration}` the 066
-  renewal worker needs, but integrations has NO channel_id / resource_id / channel_expiration / sync_token column
-  and 065 authored NO migration. `registerWatch` RETURNS them and persists nothing. Likewise the **channel→user
-  mapping is unresolved** — no channel_id→user_id store exists, so `resolveChannelUser` returns null in dev; an
-  unresolvable channel logs `syncOutcome:'error'` but still 200s (don't retry-storm a permanent gap). Tests exercise
-  the sync path with a mock mapping. Filling this (a migration + real mapping) is owned by 066/Cutover.
-- **registerWatch AUTHORED BUT NOT INVOKED:** `apps/web/lib/googleCalendar/registerWatch.ts` calls `events.watch`
-  (generated channel id, the same `GOOGLE_WEBHOOK_CHANNEL_TOKEN`, address `${NEXT_PUBLIC_APP_URL}/webhooks/google-calendar`,
-  type `web_hook`), decrypts the access token via the 064 dynamic-import path (`import('@vesper/db/encryption')`).
-  Nothing calls it in dev — real channel registration is **Cutover-blocked (C-17)**: needs a verified public HTTPS
-  domain. Its call site is deferred to 034-W / Cutover.
+- **CHANNEL-STATE PERSISTENCE GAP — CLOSED by 066:** `events.watch` returns `{id, resourceId, expiration}`; 066's
+  migration 24 added `integrations.channel_id / resource_id / channel_expiration` (all nullable; `channel_id` indexed),
+  and `persistChannelState` (`@vesper/ai`) is the single write path. The **channel→user mapping is CLOSED** too:
+  `resolveChannelUser` now does a real `SELECT user_id ... WHERE channel_id = $1` lookup (an unresolvable channel still
+  logs `syncOutcome:'error'` + 200s — fail-soft unchanged). NO `sync_token` column (no delta anywhere; full re-fetch).
+- **registerWatch AUTHORED BUT NOT INVOKED (re-homed to `@vesper/ai` by 066):** the implementation moved from
+  `apps/web/lib/googleCalendar/registerWatch.ts` to `packages/ai/src/integrations/registerWatch.ts` so the daily-cron
+  worker can import it worker-safely; the old path is now a thin re-export (065's landed test still passes). It calls
+  `events.watch` (generated channel id, the same `GOOGLE_WEBHOOK_CHANNEL_TOKEN`, address
+  `${NEXT_PUBLIC_APP_URL}/webhooks/google-calendar`, type `web_hook`), decrypts via `import('@vesper/db/encryption')`.
+  Still nothing invokes it in dev — real channel registration is **Cutover-blocked (C-17)** (verified public HTTPS
+  domain), deferred to 034-W / Cutover.
 - **RECEIPT→SYNC = ONE Sentry event:** every receipt logs one structured `Sentry.captureMessage` entry carrying
   channel id / resource id / message number / token-validation result; on a triggered sync the outcome
   (success | no-changes | error) is appended to that same entry. Reuses 064's `@sentry/nextjs` — no second client.
@@ -306,6 +307,56 @@ plan-synthesis wiring. PR #57.
   no-secret→tokenValid:false, malformed→ignore, not_exists→ignore) + `registerWatch.test.ts` (5 cases, fetch mocked +
   `@vesper/db/encryption` decrypt stubbed — NO libsodium module-graph mock; asserts the watch request body + the
   `{id,resourceId,expiration}` mapping). Web vitest glob `{app,lib,components}/**` already covered both — no widening.
+
+---
+
+### GCAL CHANNEL RENEWAL (066 — landed)
+**Owner:** the Cutover operator (C-17 first real channel registration; the worker is inert until then)
+**Relevant-to:** 034-W / Cutover; any chat adding a daily-cron module; any chat touching the integrations channel columns or GCal push
+**Status:** Landed — channel-state migration + renewal worker + channel→user mapping done; runs live only post-Cutover.
+**Detail:** 066 built the daily renewal worker + the channel-state schema 065 had no column for, CLOSING the 065 persistence + mapping gap.
+- **MIGRATION 24 — `20260601000024_gcal_channel_state`:** adds `integrations.channel_id text`, `resource_id text`,
+  `channel_expiration timestamptz` (all NULLABLE — add-nullable pre-launch shape) + partial index
+  `idx_integrations_channel_id ON (channel_id) WHERE channel_id IS NOT NULL` (receiver looks up user by channel_id per
+  push). Suffix **24** (22 RETIRED per allocation doc, 23 taken; 24 is lowest genuinely-free in 14–30). BEGIN/COMMIT,
+  matching `.down.sql` + up-only `supabase/migrations` mirror. **NO `sync_token`** (065 persists no delta), **NO enum value**
+  (sink is Sentry-only, see below) — so the migration is pure reversible column-adds. Drizzle model
+  `packages/db/src/schema/integrations.ts` extended with the 3 camelCase columns + the index (model otherwise still
+  stale vs the real bytea columns — not reconciled here; channel state is read/written by raw SQL, per 063/064).
+- **COMPLETION-LOG SINK = option B (Sentry-only), NOT a completion_log row:** the run is observed via ONE structured
+  `Sentry.captureMessage('gcal-channel-renewal run', {attempted,succeeded,failed})`. Reason: `completion_log.user_id` is
+  NOT NULL + FK, so there is no valid aggregate/run-level row, and per-user rows would need a non-reversible
+  `ALTER TYPE completion_event_enum ADD VALUE`. This SUPERSEDES the build-plan's aggregate-completion_log line. Per-user
+  FAILED renewals are still Sentry-logged individually (`renewal-failed`, carries userId + integrationId).
+- **RENEWAL DECISION = pure helper `selectChannelsToRenew(rows, now)`** (`workers/daily-cron/modules/gcal-channel-renewal.logic.ts`,
+  no I/O): select `status='connected'` AND `channel_expiration` non-null AND `<= now + 24h` (Decision 19; past-expiry
+  included). The SQL is a COARSE prefilter (`provider='google_calendar' AND channel_id IS NOT NULL`); the precise
+  connected+24h decision lives ONLY in the helper so the boundary is unit-tested offline. **Batch isolation:** each user's
+  renewal is try/caught — one failure increments `failed`, Sentry-logs, and NEVER aborts the batch.
+- **RENEWAL PATH:** `registerWatch(userId,{db})` (re-registers — Google has no extend) → `persistChannelState(userId,channel,{db})`
+  writes the new `{id→channel_id, resourceId→resource_id, expiration→channel_expiration}`. Both from `@vesper/ai` (single
+  registration + single persistence path — importable by the worker AND the deferred Cutover call site).
+- **DAILY-CRON SCAFFOLD (Decision 20) — ESTABLISHED this chat:** `workers/daily-cron` did NOT exist; 066 scaffolds the
+  MINIMAL consolidated shell — `wrangler.toml` (single hourly cron `0 * * * *`, `nodejs_compat`), `src/index.ts` dispatches
+  hour-of-UTC → module, `gcal-channel-renewal` registered at the **05:00 UTC** tick. New workspace glob **`workers/*`**
+  added to `pnpm-workspace.yaml`; package `@vesper/daily-cron`. Later daily modules (trial-reminder, dunning-check,
+  hard-delete, reconciliation, bill-reminder, spend-monitor) extend the `HOURLY_DISPATCH` table — they do NOT restructure
+  the shell. DB access = canonical `createDrizzleClient` (Supavisor pooler in worker ctx, Decision 04); real CF-runtime
+  Postgres driver/binding (Hyperdrive) + Sentry transport are operator/Cutover concerns (worker inert pre-Cutover).
+- **HEARTBEAT:** the one `run` summary message per dispatch is the signal the 097a "worker-didn't-run" defense keys on
+  (expected within a 90-min window of the 05:00 UTC tick).
+- **RESOLVE-CHANNEL-USER wired:** `apps/web/app/webhooks/google-calendar/resolveChannelUser.ts` (extracted from the 065
+  route's null seam) does `SELECT user_id FROM integrations WHERE channel_id=$1 AND provider='google_calendar'`; injectable
+  db for offline tests; route shape/token/runtime unchanged. Unresolvable → null → `syncOutcome:'error'` + 200 (fail-soft
+  unchanged from 065).
+- **RUNBOOK:** `docs/RUNBOOKS/GCAL_CHANNEL_RENEWAL.md` (detection query for past-expiry channels; manual re-register via the
+  same registerWatch+persist path; email-affected decision tree; verification incl. confirming the worker fired). Index
+  entry in `RUNBOOKS/README.md` pre-existed (already listed Chat 066) — no index edit.
+- **ENV:** none new (065's `GOOGLE_WEBHOOK_CHANNEL_TOKEN` + `NEXT_PUBLIC_APP_URL` reused).
+- **TESTS:** `gcal-channel-renewal.test.ts` (helper boundary offline: connected+24h/past selected, disconnected/error/null/
+  outside-window excluded, edge inclusive; module with db+registerWatch+persist injected: only within-24h connected
+  attempted, success persists mapped state, single failure isolated + counts correct) + `resolveChannelUser.test.ts`
+  (seeded row→user, no row→null).
 
 ---
 

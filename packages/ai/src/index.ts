@@ -79,3 +79,13 @@ export type { BreakerState } from './synthesizePlan.circuitBreaker';
 // Feeds the Layer-4 calendarEvents array consumed by buildPlanContext.
 export { getTodayEvents } from './integrations/googleCalendar';
 export type { GetTodayEventsOptions } from './integrations/googleCalendar';
+
+// Chat 065 (re-homed by 066): Google Calendar push-channel registration (events.watch).
+// Lives here so the 066 daily-cron renewal worker can import it worker-safely;
+// apps/web/lib/googleCalendar/registerWatch.ts re-exports from here.
+export { registerWatch } from './integrations/registerWatch';
+export type { WatchChannel, RegisterWatchOptions } from './integrations/registerWatch';
+
+// Chat 066: single channel-state persistence path (the write for registerWatch's return).
+export { persistChannelState } from './integrations/persistChannelState';
+export type { ChannelState, PersistChannelStateOptions } from './integrations/persistChannelState';

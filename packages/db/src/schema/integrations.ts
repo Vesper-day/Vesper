@@ -25,6 +25,15 @@ export const integrations = t.pgTable(
     encryptedRefreshToken: t.text('encrypted_refresh_token'),
     tokenExpiresAt: t.timestamp('token_expires_at', { withTimezone: true }),
     scopes: t.text('scopes').array().notNull().default([]),
+    // Google Calendar push-channel state (migration 24, Chat 066). All nullable —
+    // a not-yet-registered integration has no channel. registerWatch returns
+    // { id, resourceId, expiration }; the renewal worker + 065 receiver read these.
+    // NOTE: this model is otherwise stale vs the live table (chat-063/064 write the
+    // integrations row with raw SQL against the real bytea columns, not this model);
+    // these three are added to match migration 24, not to reconcile the pre-existing skew.
+    channelId: t.text('channel_id'),
+    resourceId: t.text('resource_id'),
+    channelExpiration: t.timestamp('channel_expiration', { withTimezone: true }),
     createdAt: t
       .timestamp('created_at', { withTimezone: true })
       .notNull()
@@ -37,6 +46,8 @@ export const integrations = t.pgTable(
   (table) => [
     t.unique('integrations_user_id_provider_unique').on(table.userId, table.provider),
     t.index('idx_integrations_user_id').on(table.userId),
+    // Receiver maps an incoming push → user by channel_id on every webhook (migration 24).
+    t.index('idx_integrations_channel_id').on(table.channelId),
   ],
 );
 

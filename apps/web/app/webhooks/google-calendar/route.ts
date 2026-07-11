@@ -39,28 +39,20 @@
 // existing Chat 064 entry point getTodayEvents (a re-fetch through the existing seam,
 // NOT a true Google delta — no syncToken is persisted anywhere to do a real delta).
 //
-// CHANNEL→USER MAPPING (deferred): mapping a channel id back to a user requires a
-// persisted channel_id→user_id row, which does not exist (channel-state persistence
-// is the 066/Cutover gap). resolveChannelUser therefore returns null in dev; an
-// unresolvable channel logs syncOutcome:'error' but still returns 200 so Google does
-// not retry-storm a permanent config gap. The production mapping is owned by 066.
+// CHANNEL→USER MAPPING (wired by Chat 066): mapping a channel id back to a user reads
+// integrations.channel_id (migration 24, indexed). resolveChannelUser (co-located)
+// does the real lookup; an unresolvable channel (deregistered / not-yet-registered)
+// still logs syncOutcome:'error' and returns 200 so Google does not retry-storm a
+// channel it cannot map. The route shape is otherwise unchanged from 065.
 import * as Sentry from '@sentry/nextjs';
 import { getTodayEvents } from '@vesper/ai';
 import { classifyNotification } from './validateNotification';
+import { resolveChannelUser } from './resolveChannelUser';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 type SyncOutcome = 'success' | 'no-changes' | 'error';
-
-/**
- * Resolve the channel's user. DEFERRED: no channel_id→user_id store exists yet
- * (066/Cutover persistence gap), so this always returns null in dev. Kept as a
- * single seam so 066 can wire the real lookup here without touching the handler.
- */
-async function resolveChannelUser(_channelId: string): Promise<string | null> {
-  return null;
-}
 
 export async function POST(request: Request): Promise<Response> {
   const classification = classifyNotification(
@@ -106,10 +98,11 @@ export async function POST(request: Request): Promise<Response> {
       ? await resolveChannelUser(classification.channelId)
       : null;
     if (!userId) {
-      // Unresolvable channel (deferred mapping / torn-down channel). Do NOT make
-      // Google retry a permanent gap — record and ack.
+      // Unresolvable channel: no integrations row currently holds this channel_id
+      // (deregistered channel, or a not-yet-registered channel pre-Cutover). Do NOT
+      // make Google retry a permanent gap — record and ack.
       syncOutcome = 'error';
-      receipt.syncError = 'channel could not be mapped to a user (mapping deferred to 066)';
+      receipt.syncError = 'channel_id did not match any connected integration';
     } else {
       const events = await getTodayEvents(userId);
       syncOutcome = events.length > 0 ? 'success' : 'no-changes';
