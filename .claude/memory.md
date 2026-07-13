@@ -34,7 +34,7 @@
 ## Stack
 
 - Web: Next.js 15, App Router, TypeScript strict
-- Mobile: Expo SDK 52, React Native, iOS only at V1
+- Mobile: Expo SDK 54 (RN 0.81, React 19.1, New Arch ON — ported from SDK 52 mid-build), iOS only at V1
 - DB: Supabase (Postgres 15) + Drizzle ORM
 - Auth: Supabase Auth (Google OAuth + email magic link; Apple deferred Week 22)
 - AI: Anthropic API (Haiku for gates, Sonnet for plan synthesis)
