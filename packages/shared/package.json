@@ -17,6 +17,10 @@
       "types": "./dist/onboarding/index.d.ts",
       "default": "./src/onboarding/index.ts"
     },
+    "./subscriptionState": {
+      "types": "./dist/subscriptionState.d.ts",
+      "default": "./src/subscriptionState.ts"
+    },
     "./realtime": {
       "types": "./dist/realtime/index.d.ts",
       "default": "./src/realtime/index.ts"
