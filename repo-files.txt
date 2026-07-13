@@ -1334,6 +1334,8 @@ packages/db/migrations/20260601000023_auth_event_trigger.down.sql
 packages/db/migrations/20260601000023_auth_event_trigger.sql
 packages/db/migrations/20260601000024_gcal_channel_state.down.sql
 packages/db/migrations/20260601000024_gcal_channel_state.sql
+packages/db/migrations/20260601000031_subscription_webhook_columns.down.sql
+packages/db/migrations/20260601000031_subscription_webhook_columns.sql
 packages/db/migrations/20260601100001_seed_workout_templates.down.sql
 packages/db/migrations/20260601100001_seed_workout_templates.sql
 packages/db/migrations/20260601100002_seed_recipe_templates.down.sql
@@ -1464,6 +1466,7 @@ supabase/migrations/20260601000020_chat111_schema_checkpoint.sql
 supabase/migrations/20260601000021_notebook_inferences.sql
 supabase/migrations/20260601000023_auth_event_trigger.sql
 supabase/migrations/20260601000024_gcal_channel_state.sql
+supabase/migrations/20260601000031_subscription_webhook_columns.sql
 supabase/migrations/20260601100001_seed_workout_templates.sql
 supabase/migrations/20260601100002_seed_recipe_templates.sql
 tsconfig.json
@@ -1477,3 +1480,11 @@ workers/daily-cron/src/index.ts
 workers/daily-cron/tsconfig.json
 workers/daily-cron/vitest.config.ts
 workers/daily-cron/wrangler.toml
+workers/stripe-webhook/package.json
+workers/stripe-webhook/src/dispatch.test.ts
+workers/stripe-webhook/src/dispatch.ts
+workers/stripe-webhook/src/index.test.ts
+workers/stripe-webhook/src/index.ts
+workers/stripe-webhook/tsconfig.json
+workers/stripe-webhook/vitest.config.ts
+workers/stripe-webhook/wrangler.toml

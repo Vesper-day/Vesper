@@ -1,0 +1,24 @@
+# workers/stripe-webhook — Stripe webhook receiver (Chat 084).
+#
+# Per-worker Cloudflare Worker (NOT part of the consolidated daily-cron shell — that
+# worker is scheduled-only; this one serves an HTTP endpoint). Stripe is configured to
+# POST subscription events to this worker's route; src/index.ts verifies the raw-body
+# signature and dispatches to the §8 state machine.
+#
+# nodejs_compat is required: the Stripe SDK's synchronous webhooks.constructEvent and
+# the postgres-js driver (via @vesper/db) both need Node built-ins (crypto, net).
+#
+# Real deployment is an operator/Cutover step: account_id, the route/custom domain, the
+# Postgres binding / Hyperdrive, and the STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET
+# secrets are set at Cutover. RUNTIME below makes @vesper/db select the Supavisor
+# transaction-mode pooler (Decision 04 / createDrizzleClient) in this worker context.
+name = "vesper-stripe-webhook"
+main = "src/index.ts"
+compatibility_date = "2026-07-10"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+RUNTIME = "worker"
+
+# Secrets (NOT stored here — set via `wrangler secret put` at Cutover):
+#   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_DB_URL
