@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 086 landed (Apple receipt verification — server-side StoreKit 2 JWS x5c-chain verify route + apple subscriptions upsert + subscription_events idempotency — CLOSES the apple-verify 501 stub). Prior: Chat 066 (Google Calendar channel-renewal daily-cron worker + channel-state migration 24 + channel→user mapping — CLOSES the 065 channel-state persistence + mapping gap), Chat 065 (GCal push webhook receiver + authored-but-uninvoked registerWatch — web), Chat 083 (Stripe Checkout + Customer Portal completion + cutover runbook — web billing; PR #77), Chat 085 (Apple StoreKit 2 IAP client — mobile iOS).
+Last updated: after Chat 086a landed (Apple PKI Monitor — standalone weekly Cloudflare Worker that Sentry-alerts when a pinned Apple Root CA is within 180 days of expiry; re-pins 086's G3 DER, guarded by a byte/fingerprint parity test; NO DB). Prior: Chat 086 (Apple receipt verification — server-side StoreKit 2 JWS x5c-chain verify route + apple subscriptions upsert + subscription_events idempotency — CLOSES the apple-verify 501 stub), Chat 066 (Google Calendar channel-renewal daily-cron worker + channel-state migration 24 + channel→user mapping — CLOSES the 065 channel-state persistence + mapping gap), Chat 065 (GCal push webhook receiver + authored-but-uninvoked registerWatch — web), Chat 083 (Stripe Checkout + Customer Portal completion + cutover runbook — web billing; PR #77), Chat 085 (Apple StoreKit 2 IAP client — mobile iOS).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -994,6 +994,20 @@ Program enrollment. "Needs a device" is not "needs a Mac" — distinguish when s
 every vitest unit test that pulls it in, or vite's SSR transform fails parsing RN's Flow source
 (`Expected 'from', got 'typeOf'`). Single-file local runs can hide this — run full `pnpm test` before
 pushing. 076 hit this via store/auth.ts -> pushTokens.ts -> react-native.
+
+---
+
+### APPLE PKI MONITOR (086a — landed)
+**Owner:** any chat editing the Apple root pin set (`apps/web/lib/apple/appleRootCerts.ts`) — especially the Apple-root-rotation chat that populates the `APPLE_ROOT_CA_UPCOMING` slot; the Cutover operator (deploy + real `SENTRY_DSN`)
+**Relevant-to:** any chat touching `apps/web/lib/apple/appleRootCerts.ts`, `getPinnedAppleRoots`, or the apple-verify trust anchors; the Apple-root-rotation chat; the Cutover chat
+**Status:** Landed — standalone weekly monitor worker built + green (offline gate + live Apple-cert smoke). Inert until Cutover deploy. Carries ONE future-error coupling (parity) below.
+**Detail:** 086a built `workers/apple-pki-monitor/` — a STANDALONE weekly Cloudflare Worker (cron `0 12 * * 1`, Mon 12:00 UTC; SCHEDULED handler, NOT folded into `workers/daily-cron`; NO DB — fetch cert + compare dates only) that fires a HIGH-severity Sentry `captureMessage` when a pinned Apple root's live `notAfter` is ≤180 days out.
+- **PARITY COUPLING — WILL FAIL A FUTURE CHAT'S GATE IF IGNORED (the reason this flag exists):** the worker RE-PINS 086's Apple Root CA - G3 DER + sha256 in `WORKER_PINNED_ROOTS` (`workers/apple-pki-monitor/index.ts`) because `apps/web` is a Next.js app with no package boundary a worker can import. `index.test.ts` asserts byte + fingerprint PARITY between that re-pin and 086's `APPLE_ROOT_CA_PINS`. **Any chat that adds or changes a root in `apps/web/lib/apple/appleRootCerts.ts` (e.g. populating the `APPLE_ROOT_CA_UPCOMING` slot during a rotation) MUST add the same root (name, sha256, Apple `url`, base64 DER) to `WORKER_PINNED_ROOTS`, or the worker's parity test fails.** That failure is the intentional sync reminder, not a bug — see `docs/RUNBOOKS/APPLE_PKI_MONITOR.md` step 3.
+- **CROSS-TREE TEST IMPORT:** `index.test.ts` imports `../../apps/web/lib/apple/appleRootCerts` directly (relative, no alias). `appleRootCerts.ts` must stay IMPORT-PURE (zero deps — it currently is) or it drags a module graph into the worker's vitest. Do not add imports to that constant file.
+- **APPLE RESOURCE + PARSER (confirmed live):** fetches `https://www.apple.com/certificateauthority/AppleRootCA-G3.cer` (individual published root download, not a bundle) and parses with `node:crypto` `X509Certificate` — requires `nodejs_compat` (set in `wrangler.toml`). If a `fetch-failed` alert ever fires, Apple may have moved the URL (update `url` in `WORKER_PINNED_ROOTS`).
+- **DEPLOY/TRANSPORT = CUTOVER:** `wrangler.toml` has no `account_id`; real `SENTRY_DSN` + `wrangler deploy` are Cutover steps — the worker is inert (fires nothing) until then. Local `SENTRY_DSN` is the misconfigured `sntryu_` auth token (see LOCAL SENTRY DSN MISCONFIG), so tests MOCK Sentry.
+- **PIN SET SHAPE (unchanged by 086a):** `APPLE_ROOT_CA_PINS` = two slots (G3 populated + empty `APPLE_ROOT_CA_UPCOMING`); `getPinnedAppleRoots()` (`keyCache.ts`) filters empty-`der` slots. The worker's identity guard also alerts (`fingerprint-mismatch`) if the live cert stops matching the pin. NO migration, NO copy of the constant beyond the parity-guarded re-pin.
+- **RUNBOOK:** `docs/RUNBOOKS/APPLE_PKI_MONITOR.md` (alert handler → points at `APPLE_ROOT_CA_ROTATION.md` as the action); index entry in `RUNBOOKS/README.md` pre-existed (Chat 086a) — no index edit.
 
 ---
 
