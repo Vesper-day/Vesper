@@ -65,9 +65,10 @@ describe('verifyAppleTransaction', () => {
     expect(out.subscription.provider).toBe('apple');
   });
 
-  it('replay: ON CONFLICT (no event row) returns state WITHOUT re-transitioning', async () => {
+  it('replay of a PROCESSED event: returns state WITHOUT re-transitioning', async () => {
     const db = mockDb(
       [], // subscription_events insert → conflict, no RETURNING row
+      [{ processed_at: '2026-08-08T00:00:00.000Z' }], // prior event WAS processed
       [ACTIVE_ROW], // getSubscription
     );
     const verifyJws = vi.fn().mockResolvedValue(TXN);
@@ -80,7 +81,34 @@ describe('verifyAppleTransaction', () => {
     );
 
     expect(activate).not.toHaveBeenCalled();
-    expect((db.execute as ReturnType<typeof vi.fn>)).toHaveBeenCalledTimes(2);
+    // insert (conflict) + processed_at check + getSubscription — no upsert, no transition.
+    expect((db.execute as ReturnType<typeof vi.fn>)).toHaveBeenCalledTimes(3);
+    expect(out.subscription.status).toBe('active');
+  });
+
+  it('recorded-but-UNPROCESSED event: re-processes (completes an interrupted activation)', async () => {
+    // A prior attempt recorded the event then died before processed_at was set. The
+    // retry must NOT short-circuit — it must finish activating, or the paid user is
+    // stranded in trial forever.
+    const db = mockDb(
+      [], // subscription_events insert → conflict (row already exists)
+      [{ processed_at: null }], // ...but it was never processed
+      [], // subscriptions upsert
+      [{ status: 'trial' }], // pre-transition status read
+      [], // processed_at update
+      [ACTIVE_ROW], // getSubscription
+    );
+    const verifyJws = vi.fn().mockResolvedValue(TXN);
+    const activate = vi.fn().mockResolvedValue(undefined);
+
+    const out = await verifyAppleTransaction(
+      db,
+      { userId: USER_ID, jwsTransaction: JWS },
+      { verifyJws, activate },
+    );
+
+    expect(activate).toHaveBeenCalledTimes(1);
+    expect(activate).toHaveBeenCalledWith(db, USER_ID);
     expect(out.subscription.status).toBe('active');
   });
 
