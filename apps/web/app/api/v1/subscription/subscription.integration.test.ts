@@ -232,4 +232,46 @@ describeDb('Subscription API (integration)', () => {
     `)) as unknown as Array<{ n: number }>;
     expect(events2[0]!.n).toBe(1);
   });
+
+  // Regression: an event recorded by an interrupted prior attempt (processed_at NULL,
+  // e.g. a transient DB error hit AFTER the event insert committed but BEFORE the
+  // subscription was activated) must NOT be treated as a completed replay — the retry
+  // has to finish the activation, or a paid user is stranded in 'trial' forever.
+  it('re-processes a recorded-but-unprocessed event instead of short-circuiting', async () => {
+    const userId = await seedUser();
+    const uniq = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    const txn = {
+      transactionId: `2${uniq}`,
+      originalTransactionId: `1${uniq}`,
+      productId: 'com.vesper.standard.monthly',
+      purchaseDate: 1_752_000_000_000,
+      expiresDate: 1_754_678_400_000,
+    };
+    const eventId = `${txn.originalTransactionId}_${txn.transactionId}`;
+
+    // Simulate the interrupted attempt: the event row is already committed, unprocessed,
+    // and there is NO subscriptions row yet (activation never happened).
+    await db.execute(sql`
+      INSERT INTO subscription_events (provider, event_id, event_type, user_id, payload)
+      VALUES ('apple', ${eventId}, 'apple_storekit_verify', ${userId}::uuid, '{}'::jsonb)
+    `);
+
+    const out = await verifyAppleTransaction(
+      db,
+      { userId, jwsTransaction: 'jws' },
+      { verifyJws: () => Promise.resolve(txn) },
+    );
+
+    expect(out.subscription.status).toBe('active'); // recovered, not stranded
+    const processed = (await db.execute(sql`
+      SELECT processed_at FROM subscription_events
+      WHERE provider = 'apple' AND event_id = ${eventId}
+    `)) as unknown as Array<{ processed_at: Date | string | null }>;
+    expect(processed[0]!.processed_at).not.toBeNull(); // now marked processed
+    const events = (await db.execute(sql`
+      SELECT count(*)::int AS n FROM subscription_events
+      WHERE provider = 'apple' AND event_id = ${eventId}
+    `)) as unknown as Array<{ n: number }>;
+    expect(events[0]!.n).toBe(1); // no duplicate event row
+  });
 });
