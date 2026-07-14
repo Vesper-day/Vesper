@@ -115,6 +115,12 @@ describeDb('Subscription API (integration)', () => {
 
   afterEach(async () => {
     for (const id of createdUserIds.splice(0)) {
+      // subscription_events.user_id is ON DELETE SET NULL (not CASCADE), so deleting
+      // auth.users orphans the event rows instead of removing them — and their
+      // (provider, event_id) UNIQUE key would then make a later run's first insert
+      // look like a replay. Delete the events explicitly (while user_id is still set)
+      // BEFORE the cascade drops the subscriptions row.
+      await db.execute(sql`DELETE FROM subscription_events WHERE user_id = ${id}::uuid`);
       await db.execute(sql`DELETE FROM auth.users WHERE id = ${id}::uuid`);
     }
   });
@@ -170,9 +176,13 @@ describeDb('Subscription API (integration)', () => {
   // The JWS verify layer is stubbed (no Apple key needed); everything else is live SQL.
   it('verifyAppleTransaction activates an apple subscription and is idempotent on replay', async () => {
     const userId = await seedUser();
+    // Unique transaction ids per run so the (provider, event_id) UNIQUE key never
+    // collides with an event row an earlier run may have orphaned. The SAME object is
+    // reused for the replay below, so the event_id is stable WITHIN a run (idempotency).
+    const uniq = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
     const txn = {
-      transactionId: '2000000000000009',
-      originalTransactionId: '1000000000000009',
+      transactionId: `2${uniq}`,
+      originalTransactionId: `1${uniq}`,
       productId: 'com.vesper.standard.monthly',
       purchaseDate: 1_752_000_000_000,
       expiresDate: 1_754_678_400_000,
@@ -184,6 +194,11 @@ describeDb('Subscription API (integration)', () => {
       { userId, jwsTransaction: 'jws' },
       { verifyJws },
     );
+    // Assert the PERSISTED row (DB truth) as well as the returned shape.
+    const persisted = (await db.execute(sql`
+      SELECT status FROM subscriptions WHERE user_id = ${userId}::uuid
+    `)) as unknown as Array<{ status: string }>;
+    expect(persisted[0]!.status).toBe('active');
     expect(first.subscription.status).toBe('active');
     expect(first.subscription.provider).toBe('apple');
 

@@ -213,15 +213,18 @@ export async function verifyAppleTransaction(
   //    legal trial→active edge; on CONFLICT update the apple fields + periods, NULL the
   //    stripe identifiers (provider switch), and leave status untouched so an
   //    already-active row stays active for the guard in step 4.
-  const periodStart = toDate(txn.purchaseDate);
-  const periodEnd = toDate(txn.expiresDate);
+  // Bind timestamps as ISO strings + cast ::timestamptz (postgres.js cannot serialize
+  // a raw JS Date through the Drizzle sql`` param path; mirrors the persistChannelState
+  // / google-calendar raw-SQL precedent). NULL binds through the cast unchanged.
+  const periodStart = epochMsToIso(txn.purchaseDate);
+  const periodEnd = epochMsToIso(txn.expiresDate);
   await db.execute(sql`
     INSERT INTO subscriptions
       (user_id, provider, status, apple_original_transaction_id, apple_product_id,
        current_period_start, current_period_end)
     VALUES
       (${userId}::uuid, 'apple', 'trial', ${txn.originalTransactionId},
-       ${txn.productId}, ${periodStart}, ${periodEnd})
+       ${txn.productId}, ${periodStart}::timestamptz, ${periodEnd}::timestamptz)
     ON CONFLICT (user_id) DO UPDATE SET
       provider = 'apple',
       apple_original_transaction_id = EXCLUDED.apple_original_transaction_id,
@@ -269,10 +272,10 @@ export async function verifyAppleTransaction(
 
 // --- helpers -----------------------------------------------------------------
 
-/** Apple epoch-milliseconds → Date (or null when the field is absent). */
-function toDate(ms: number | null | undefined): Date | null {
+/** Apple epoch-milliseconds → ISO-8601 string (or null when the field is absent). */
+function epochMsToIso(ms: number | null | undefined): string | null {
   if (ms === null || ms === undefined) return null;
-  return new Date(ms);
+  return new Date(ms).toISOString();
 }
 
 function toIso(value: string | Date | null): string | null {
