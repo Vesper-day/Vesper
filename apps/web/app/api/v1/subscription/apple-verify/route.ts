@@ -1,72 +1,38 @@
-// POST /api/v1/subscription/apple-verify (§9) — 501 STUB this chat.
+// POST /api/v1/subscription/apple-verify (§9, §8) — verify a StoreKit 2 signed
+// transaction and activate the Apple subscription. Mobile-only conversion path.
 //
-// The full StoreKit 2 JWS verification + subscription upsert lands chat 086
-// (PHASE_4_BUILD_PLAN L1125,L1132); this chat ships only the route shell so the
-// path exists and the request Zod is in place for 086 to reuse. It returns the §9
-// error envelope { error: { code, message } } with code NOT_IMPLEMENTED at HTTP
-// 501 — NOT a 200 — so a client (and the type system downstream) sees the
-// not-yet-implemented contract explicitly rather than a silent success.
+// Lifted from the chat-030 501 stub: the full StoreKit 2 JWS verification +
+// subscriptions upsert now lands here. Success is a fixed 200 (the §9 subscription
+// state), so this uses createRoute (auth via the injected `user` + version-gate +
+// §9 error map + X-Request-Id) — the stub could not, because it returned 501.
 //
-// createRoute is unusable (it emits a fixed 200), so this uses the manual
-// auth/version-gate/error wrapper. The body is validated even though the handler
-// stubs out, so 086 inherits the request contract { jwsTransaction } verbatim.
-import * as Sentry from '@sentry/nextjs';
-import {
-  ApiError,
-  ErrorCode,
-  errorResponse,
-  validateSession,
-  checkAppVersion,
-} from '@vesper/shared';
-import { AppleVerifyRequestSchema } from '../schemas';
-
-const REQUEST_ID_HEADER = 'X-Request-Id';
+// The JWS is verified via ../../../../lib/apple/jws (x5c-chain verification against a
+// PINNED Apple root — NOT a JWKS lookup, and NO per-call Apple network fetch). The
+// subscription upsert + transition live in the pure ../operations builder so the unit
+// test can inject mocks. runtime='nodejs' — node:crypto + jose need Node, not Edge.
+//
+// The server does NOT finish the StoreKit transaction; the client finishes it on a
+// verified 200 so an unverified purchase is never dropped from the StoreKit queue.
+import { ApiError, ErrorCode, createRoute } from '@vesper/shared';
+import { createDrizzleClient } from '@vesper/db';
+import { verifyAppleTransaction } from '../operations';
+import { AppleVerifyRequestSchema, type SubscriptionResponse } from '../schemas';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: Request): Promise<Response> {
-  const requestId = crypto.randomUUID();
-  let userId: string | undefined;
-
-  try {
-    checkAppVersion(request);
-    const user = await validateSession(request);
-    userId = user.id;
-
-    const raw: unknown = await request.json().catch(() => null);
-    const parsed = AppleVerifyRequestSchema.safeParse(raw);
-    if (!parsed.success) {
-      throw new ApiError(
-        ErrorCode.INVALID_REQUEST,
-        'Request body must be { jwsTransaction: string }.',
-      );
-    }
-
-    // Not implemented until chat 086 (StoreKit 2 verification).
-    const response = errorResponse(
-      ErrorCode.NOT_IMPLEMENTED,
-      'Apple receipt verification is not yet available.',
-      501,
+export const POST = createRoute<SubscriptionResponse>(async ({ request, user }) => {
+  const raw: unknown = await request.json().catch(() => null);
+  const parsed = AppleVerifyRequestSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new ApiError(
+      ErrorCode.INVALID_REQUEST,
+      'Request body must be { jwsTransaction: string }.',
     );
-    response.headers.set(REQUEST_ID_HEADER, requestId);
-    return response;
-  } catch (err) {
-    if (err instanceof ApiError) {
-      const response = errorResponse(err.code, err.message, err.httpStatus);
-      response.headers.set(REQUEST_ID_HEADER, requestId);
-      return response;
-    }
-    Sentry.captureException(err, {
-      tags: { requestId },
-      extra: { method: request.method, path: '/api/v1/subscription/apple-verify', userId },
-    });
-    const response = errorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      'Internal server error',
-      500,
-    );
-    response.headers.set(REQUEST_ID_HEADER, requestId);
-    return response;
   }
-}
+
+  return verifyAppleTransaction(createDrizzleClient(), {
+    userId: user.id,
+    jwsTransaction: parsed.data.jwsTransaction,
+  });
+});
