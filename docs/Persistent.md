@@ -110,20 +110,11 @@ updated file to project knowledge.
 
 ---
 
-### DEV AUTH BYPASS IN MOBILE SIGN-IN (Expo Go render-check scaffolding)
-**Owner:** Apple Developer Program enrollment chat (must delete this) + any mobile auth/sign-in chat
-**Relevant-to:** the chat that begins Apple Developer Program / dev-build work; any chat touching `apps/mobile/app/(auth)/sign-in.tsx`
-**Status:** CLOSED — bypass no longer present (verified Chat 084 gate). `git grep DEV-BYPASS` returns nothing repo-wide; `apps/mobile/app/(auth)/sign-in.tsx` has no `__DEV__` block and last changed in Chat 011; working tree clean. Was never committed and is gone from the working tree, so the "Apple-dev chat must delete it" / "revert if it appears in a commit" / `git add -A` staging-hazard instructions are all SPENT. Do NOT carry this caveat into future CC prompts. Detail retained below for history only.
-**Detail:** A `__DEV__`-guarded "DEV: Skip sign-in" button was added to `apps/mobile/app/(auth)/sign-in.tsx` to reach the post-auth mobile screens (013/053/054/063/090b) in Expo Go for an on-device RENDER check after the SDK 52→54 bump. It sets a mock authenticated session via the existing `setSession` setter (NO `store/auth.ts` edit) — mock data only, no network/auth call, stripped from production by `__DEV__`. It exists because NO real sign-in completes in Expo Go: Google's `makeRedirectUri` emits an `exp://<LAN-IP>:8081/--/auth/callback` redirect that mismatches the `vesper://auth/callback` allow-list entry (and the `matchesDeepLinkPath` validator would reject `exp://` anyway); magic link needs the OS to honor the `vesper://` scheme; native Apple needs the `usesAppleSignIn` entitlement. All three require a dev build (expo-dev-client), blocked on Apple Developer Program enrollment + EAS (no Mac). **Removal:** the Apple-dev-build chat MUST delete this — grep `DEV-BYPASS` in `sign-in.tsx`, remove the whole `{__DEV__ && ( … )}` block plus its two comment fences. **Uncommitted:** lives as a local working-tree change only — NOT committed/pushed. If it ever appears in a commit, revert it.
-**git add -A hazard:** until removed, this uncommitted change will be staged by any `git add -A` — every chat must add selectively (see REPO WORKING-TREE LITTER + git add -A HAZARD flag).
-
----
-
 ### EXPO GO SDK 52-vs-54 RENDER BLOCK (053) — RESOLVED / render-verified
 **Owner:** Operator env / SDK-bump owner
 **Relevant-to:** closed; reference for any later mobile on-device verification
 **Status:** Closed — on-device render verified on Expo SDK 54 (Expo Go, physical iPhone)
-**Detail:** SDK 52→54 bump (PRs #62/#63) + barrel split (PR #64) unblocked on-device render; bundle builds clean (2657 modules). On-device Expo Go walk completed via the DEV auth bypass (see DEV AUTH BYPASS flag). RENDER RESULTS (all pass — no redboxes; data/error states expected under bypass + unreachable API):
+**Detail:** SDK 52→54 bump (PRs #62/#63) + barrel split (PR #64) unblocked on-device render; bundle builds clean (2657 modules). On-device Expo Go walk completed via a since-removed `__DEV__` sign-in bypass. RENDER RESULTS (all pass — no redboxes; data/error states expected under bypass + unreachable API):
 - 011 sign-in — pass (renders pre-bypass)
 - 013 shell — pass (tab bar Plan/Tasks/Calendar/Settings, routed in)
 - 054 plan — pass; minimal/near-stub appearance — RE-CHECK appearance once real data + plan synthesis reachable
@@ -894,14 +885,6 @@ VITEST UPSTASH ENV — `apps/web/vitest.config.ts` does not load `.env.local`; i
 **Relevant-to:** All @vesper/web chats (🔵)
 **Status:** Open — pre-existing, do not fix
 **Detail:** Root pnpm.overrides pins `@types/react` 18.3.28 monorepo-wide (React runtime 19) to silence a mobile type-check skew; load-bearing for apps/web. This pin was the deliberately-fragile item flagged to "revisit on a React/Expo bump" — that bump HAPPENED (SDK 52→54, React 18→19.1) and the pin HELD: mobile + web type-check/build stayed green at 18.3.28 through 53 and 54, no forced move (no new react-skew failure). The "revisit on bump" framing is spent; the pin survives 19.x runtime and STAYS until the web skew is fixed independently. Live note: `next build` for @vesper/web can still trip ONLY in generated `.next/types/validator.ts` (bigint→ReactNode) for untouched layout.tsx — pre-existing, intermittent (did not surface in the 081 run), do NOT absorb. expo-doctor under SDK 54 now warns it wants @types/react ~19.1.10 — NON-blocking, intentionally ignored (moving it re-opens the web skew).
-
----
-
-### @vesper/shared TSC moduleResolution GOTCHA — STALE under SDK 54
-**Owner:** No owner — note only
-**Relevant-to:** Historical (pre-SDK-54)
-**Status:** Stale — kept for history
-**Detail:** Pre-SDK-54, @vesper/shared subpath types could fail to resolve under mobile's node-classic moduleResolution (surfaced 059b / 077), forcing the web-subpath / mobile-bare-barrel asymmetry. SDK 54's expo/tsconfig.base sets moduleResolution: bundler + customConditions: ["react-native"], so mobile now resolves `@vesper/shared/<subpath>` types. Confirmed in 081 (mobile type-check green importing ./queries and ./realtime). No longer a live constraint; do not cite it to justify bare-barrel mobile imports.
 
 ---
 
