@@ -194,8 +194,15 @@ export async function verifyAppleTransaction(
   // (provider, event_id) UNIQUE constraint fires the idempotency path on replay.
   const eventId = `${txn.originalTransactionId}_${txn.transactionId}`;
 
-  // 2. Idempotency FIRST: record the event. ON CONFLICT ⇒ this exact transaction was
-  //    already verified ⇒ return current state WITHOUT re-transitioning.
+  // 2. Idempotency: record the event. ON CONFLICT ⇒ this exact transaction was already
+  //    recorded by a prior attempt. But "recorded" is NOT the same as "processed": the
+  //    event row is committed here BEFORE the upsert + transition below, so an attempt
+  //    that died mid-flow (e.g. a transient DB error at step 3/4) leaves the row with
+  //    processed_at IS NULL. Only a row that reached step 5 (processed_at SET) is a TRUE
+  //    replay we may short-circuit; a recorded-but-unprocessed row MUST fall through and
+  //    re-process, or a transient failure would strand a paid user in 'trial' forever
+  //    (every retry short-circuiting on the orphaned event). Re-processing is safe: the
+  //    upsert is idempotent on user_id and the transition is guarded on already-active.
   const inserted = (await db.execute(sql`
     INSERT INTO subscription_events (provider, event_id, event_type, user_id, payload)
     VALUES ('apple', ${eventId}, 'apple_storekit_verify', ${userId}::uuid,
@@ -205,7 +212,16 @@ export async function verifyAppleTransaction(
   `)) as unknown as Array<{ id: string }>;
 
   if (inserted.length === 0) {
-    return getSubscription(db, userId);
+    const prior = (await db.execute(sql`
+      SELECT processed_at FROM subscription_events
+      WHERE provider = 'apple' AND event_id = ${eventId}
+      LIMIT 1
+    `)) as unknown as Array<{ processed_at: Date | string | null }>;
+    // Fully processed already ⇒ true replay: return state without re-transitioning.
+    // Not yet processed ⇒ fall through and complete the interrupted activation.
+    if (prior[0]?.processed_at != null) {
+      return getSubscription(db, userId);
+    }
   }
 
   // 3. UPSERT the subscriptions row (provider='apple', CHECK-compliant: apple id set,
