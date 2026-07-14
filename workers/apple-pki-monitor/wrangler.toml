@@ -1,0 +1,24 @@
+# workers/apple-pki-monitor — standalone weekly Apple PKI expiry monitor (Chat 086a).
+#
+# STANDALONE scheduled worker (NOT folded into the consolidated workers/daily-cron shell —
+# that worker routes the product's daily-tick modules by UTC hour; this is an independent ops
+# watchdog on its own weekly cron). SCHEDULED-only: index.ts's default export is a `scheduled`
+# handler, not the HTTP `fetch` handler that workers/stripe-webhook uses.
+#
+# nodejs_compat is required: index.ts parses the fetched cert with node:crypto's
+# X509Certificate (the same parser apps/web/lib/apple uses).
+#
+# NO DB: this worker only fetches Apple's published root cert over HTTP and compares dates —
+# there is no Postgres binding and no [vars] RUNTIME pooler selection.
+#
+# Real deployment is an operator/Cutover step: account_id and the SENTRY_DSN secret are set at
+# Cutover — this worker is inert until then (it fires alerts into Sentry only once deployed).
+name = "vesper-apple-pki-monitor"
+main = "index.ts"
+compatibility_date = "2026-07-10"
+compatibility_flags = ["nodejs_compat"]
+
+# Weekly tick: every Monday 12:00 UTC. Fetches Apple's live root cert(s) and alerts on any
+# pinned root within 180 days of expiry.
+[triggers]
+crons = ["0 12 * * 1"]
