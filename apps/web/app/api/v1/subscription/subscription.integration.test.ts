@@ -16,6 +16,7 @@ import {
   getSubscription,
   createCheckoutSession,
   createPortalSession,
+  verifyAppleTransaction,
 } from './operations';
 
 // --- Pure validation suite (ungated, no DB) ----------------------------------
@@ -162,5 +163,58 @@ describeDb('Subscription API (integration)', () => {
     await expect(createPortalSession(stripe, db, userId)).rejects.toMatchObject({
       code: 'CONFLICT',
     });
+  });
+
+  // apple-verify DB smoke: exercises the live provider='apple' CHECK branch, the
+  // user_id UPSERT, the real transitionToActive, and (provider, event_id) idempotency.
+  // The JWS verify layer is stubbed (no Apple key needed); everything else is live SQL.
+  it('verifyAppleTransaction activates an apple subscription and is idempotent on replay', async () => {
+    const userId = await seedUser();
+    const txn = {
+      transactionId: '2000000000000009',
+      originalTransactionId: '1000000000000009',
+      productId: 'com.vesper.standard.monthly',
+      purchaseDate: 1_752_000_000_000,
+      expiresDate: 1_754_678_400_000,
+    };
+    const verifyJws = () => Promise.resolve(txn);
+
+    const first = await verifyAppleTransaction(
+      db,
+      { userId, jwsTransaction: 'jws' },
+      { verifyJws },
+    );
+    expect(first.subscription.status).toBe('active');
+    expect(first.subscription.provider).toBe('apple');
+
+    const rows = (await db.execute(sql`
+      SELECT provider, status, apple_original_transaction_id, apple_product_id,
+             stripe_customer_id
+      FROM subscriptions WHERE user_id = ${userId}::uuid
+    `)) as unknown as Array<Record<string, unknown>>;
+    expect(rows[0]!.provider).toBe('apple');
+    expect(rows[0]!.status).toBe('active');
+    expect(rows[0]!.apple_original_transaction_id).toBe(txn.originalTransactionId);
+    expect(rows[0]!.apple_product_id).toBe(txn.productId);
+    expect(rows[0]!.stripe_customer_id).toBeNull(); // CHECK: apple rows carry no stripe id
+
+    const events = (await db.execute(sql`
+      SELECT count(*)::int AS n FROM subscription_events
+      WHERE provider = 'apple' AND user_id = ${userId}::uuid
+    `)) as unknown as Array<{ n: number }>;
+    expect(events[0]!.n).toBe(1);
+
+    // Replay the same transaction → idempotent: still active, still exactly one event.
+    const second = await verifyAppleTransaction(
+      db,
+      { userId, jwsTransaction: 'jws' },
+      { verifyJws },
+    );
+    expect(second.subscription.status).toBe('active');
+    const events2 = (await db.execute(sql`
+      SELECT count(*)::int AS n FROM subscription_events
+      WHERE provider = 'apple' AND user_id = ${userId}::uuid
+    `)) as unknown as Array<{ n: number }>;
+    expect(events2[0]!.n).toBe(1);
   });
 });
