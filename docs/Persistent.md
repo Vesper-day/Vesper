@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 086 landed (Apple receipt verification — server-side StoreKit 2 JWS x5c-chain verify route + apple subscriptions upsert + subscription_events idempotency — CLOSES the apple-verify 501 stub). Prior: Chat 066 (Google Calendar channel-renewal daily-cron worker + channel-state migration 24 + channel→user mapping — CLOSES the 065 channel-state persistence + mapping gap), Chat 065 (GCal push webhook receiver + authored-but-uninvoked registerWatch — web), Chat 083 (Stripe Checkout + Customer Portal completion + cutover runbook — web billing; PR #77), Chat 085 (Apple StoreKit 2 IAP client — mobile iOS).
+Last updated: after Chat 086a landed (Apple PKI Monitor — standalone weekly Cloudflare Worker that Sentry-alerts when a pinned Apple Root CA is within 180 days of expiry; re-pins 086's G3 DER, guarded by a byte/fingerprint parity test; NO DB). Prior: Chat 086 (Apple receipt verification — server-side StoreKit 2 JWS x5c-chain verify route + apple subscriptions upsert + subscription_events idempotency — CLOSES the apple-verify 501 stub), Chat 066 (Google Calendar channel-renewal daily-cron worker + channel-state migration 24 + channel→user mapping — CLOSES the 065 channel-state persistence + mapping gap), Chat 065 (GCal push webhook receiver + authored-but-uninvoked registerWatch — web), Chat 083 (Stripe Checkout + Customer Portal completion + cutover runbook — web billing; PR #77), Chat 085 (Apple StoreKit 2 IAP client — mobile iOS).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -110,20 +110,11 @@ updated file to project knowledge.
 
 ---
 
-### DEV AUTH BYPASS IN MOBILE SIGN-IN (Expo Go render-check scaffolding)
-**Owner:** Apple Developer Program enrollment chat (must delete this) + any mobile auth/sign-in chat
-**Relevant-to:** the chat that begins Apple Developer Program / dev-build work; any chat touching `apps/mobile/app/(auth)/sign-in.tsx`
-**Status:** CLOSED — bypass no longer present (verified Chat 084 gate). `git grep DEV-BYPASS` returns nothing repo-wide; `apps/mobile/app/(auth)/sign-in.tsx` has no `__DEV__` block and last changed in Chat 011; working tree clean. Was never committed and is gone from the working tree, so the "Apple-dev chat must delete it" / "revert if it appears in a commit" / `git add -A` staging-hazard instructions are all SPENT. Do NOT carry this caveat into future CC prompts. Detail retained below for history only.
-**Detail:** A `__DEV__`-guarded "DEV: Skip sign-in" button was added to `apps/mobile/app/(auth)/sign-in.tsx` to reach the post-auth mobile screens (013/053/054/063/090b) in Expo Go for an on-device RENDER check after the SDK 52→54 bump. It sets a mock authenticated session via the existing `setSession` setter (NO `store/auth.ts` edit) — mock data only, no network/auth call, stripped from production by `__DEV__`. It exists because NO real sign-in completes in Expo Go: Google's `makeRedirectUri` emits an `exp://<LAN-IP>:8081/--/auth/callback` redirect that mismatches the `vesper://auth/callback` allow-list entry (and the `matchesDeepLinkPath` validator would reject `exp://` anyway); magic link needs the OS to honor the `vesper://` scheme; native Apple needs the `usesAppleSignIn` entitlement. All three require a dev build (expo-dev-client), blocked on Apple Developer Program enrollment + EAS (no Mac). **Removal:** the Apple-dev-build chat MUST delete this — grep `DEV-BYPASS` in `sign-in.tsx`, remove the whole `{__DEV__ && ( … )}` block plus its two comment fences. **Uncommitted:** lives as a local working-tree change only — NOT committed/pushed. If it ever appears in a commit, revert it.
-**git add -A hazard:** until removed, this uncommitted change will be staged by any `git add -A` — every chat must add selectively (see REPO WORKING-TREE LITTER + git add -A HAZARD flag).
-
----
-
-### EXPO GO SDK 52-vs-54 RENDER BLOCK (053) — RESOLVED / render-verified
+### EXPO GO SDK 52-vs-54 RENDER BLOCK (053) — render walk RECORDED, operator-UNCONFIRMED
 **Owner:** Operator env / SDK-bump owner
-**Relevant-to:** closed; reference for any later mobile on-device verification
-**Status:** Closed — on-device render verified on Expo SDK 54 (Expo Go, physical iPhone)
-**Detail:** SDK 52→54 bump (PRs #62/#63) + barrel split (PR #64) unblocked on-device render; bundle builds clean (2657 modules). On-device Expo Go walk completed via the DEV auth bypass (see DEV AUTH BYPASS flag). RENDER RESULTS (all pass — no redboxes; data/error states expected under bypass + unreachable API):
+**Relevant-to:** any later mobile on-device verification; see the "EXPO GO SDK RENDER — VISUAL render pending" flag (the conservative truth)
+**Status:** Open — a per-screen render walk was RECORDED (below), but the operator has NOT confirmed seeing screens render; treat on-device render as UNVERIFIED until the pending visual check is done. Contradicts nothing once read as "recorded, not verified."
+**Detail:** SDK 52→54 bump (PRs #62/#63) + barrel split (PR #64) unblocked on-device render; bundle builds clean (2657 modules). An on-device Expo Go walk was RECORDED via a since-removed `__DEV__` sign-in bypass, but is operator-UNCONFIRMED (see Status). RECORDED RESULTS (reported pass — no redboxes; data/error states expected under bypass + unreachable API):
 - 011 sign-in — pass (renders pre-bypass)
 - 013 shell — pass (tab bar Plan/Tasks/Calendar/Settings, routed in)
 - 054 plan — pass; minimal/near-stub appearance — RE-CHECK appearance once real data + plan synthesis reachable
@@ -897,14 +888,6 @@ VITEST UPSTASH ENV — `apps/web/vitest.config.ts` does not load `.env.local`; i
 
 ---
 
-### @vesper/shared TSC moduleResolution GOTCHA — STALE under SDK 54
-**Owner:** No owner — note only
-**Relevant-to:** Historical (pre-SDK-54)
-**Status:** Stale — kept for history
-**Detail:** Pre-SDK-54, @vesper/shared subpath types could fail to resolve under mobile's node-classic moduleResolution (surfaced 059b / 077), forcing the web-subpath / mobile-bare-barrel asymmetry. SDK 54's expo/tsconfig.base sets moduleResolution: bundler + customConditions: ["react-native"], so mobile now resolves `@vesper/shared/<subpath>` types. Confirmed in 081 (mobile type-check green importing ./queries and ./realtime). No longer a live constraint; do not cite it to justify bare-barrel mobile imports.
-
----
-
 ### SUPABASE ADVISOR WARNINGS
 **Owner:** Future repo-wide forward migration chat (TBD)
 **Relevant-to:** Any chat running Supabase advisor / RLS work
@@ -994,6 +977,20 @@ Program enrollment. "Needs a device" is not "needs a Mac" — distinguish when s
 every vitest unit test that pulls it in, or vite's SSR transform fails parsing RN's Flow source
 (`Expected 'from', got 'typeOf'`). Single-file local runs can hide this — run full `pnpm test` before
 pushing. 076 hit this via store/auth.ts -> pushTokens.ts -> react-native.
+
+---
+
+### APPLE PKI MONITOR (086a — landed)
+**Owner:** any chat editing the Apple root pin set (`apps/web/lib/apple/appleRootCerts.ts`) — especially the Apple-root-rotation chat that populates the `APPLE_ROOT_CA_UPCOMING` slot; the Cutover operator (deploy + real `SENTRY_DSN`)
+**Relevant-to:** any chat touching `apps/web/lib/apple/appleRootCerts.ts`, `getPinnedAppleRoots`, or the apple-verify trust anchors; the Apple-root-rotation chat; the Cutover chat
+**Status:** Landed — standalone weekly monitor worker built + green (offline gate + live Apple-cert smoke). Inert until Cutover deploy. Carries ONE future-error coupling (parity) below.
+**Detail:** 086a built `workers/apple-pki-monitor/` — a STANDALONE weekly Cloudflare Worker (cron `0 12 * * 1`, Mon 12:00 UTC; SCHEDULED handler, NOT folded into `workers/daily-cron`; NO DB — fetch cert + compare dates only) that fires a HIGH-severity Sentry `captureMessage` when a pinned Apple root's live `notAfter` is ≤180 days out.
+- **PARITY COUPLING — WILL FAIL A FUTURE CHAT'S GATE IF IGNORED (the reason this flag exists):** the worker RE-PINS 086's Apple Root CA - G3 DER + sha256 in `WORKER_PINNED_ROOTS` (`workers/apple-pki-monitor/index.ts`) because `apps/web` is a Next.js app with no package boundary a worker can import. `index.test.ts` asserts byte + fingerprint PARITY between that re-pin and 086's `APPLE_ROOT_CA_PINS`. **Any chat that adds or changes a root in `apps/web/lib/apple/appleRootCerts.ts` (e.g. populating the `APPLE_ROOT_CA_UPCOMING` slot during a rotation) MUST add the same root (name, sha256, Apple `url`, base64 DER) to `WORKER_PINNED_ROOTS`, or the worker's parity test fails.** That failure is the intentional sync reminder, not a bug — see `docs/RUNBOOKS/APPLE_PKI_MONITOR.md` step 3.
+- **CROSS-TREE TEST IMPORT:** `index.test.ts` imports `../../apps/web/lib/apple/appleRootCerts` directly (relative, no alias). `appleRootCerts.ts` must stay IMPORT-PURE (zero deps — it currently is) or it drags a module graph into the worker's vitest. Do not add imports to that constant file.
+- **APPLE RESOURCE + PARSER (confirmed live):** fetches `https://www.apple.com/certificateauthority/AppleRootCA-G3.cer` (individual published root download, not a bundle) and parses with `node:crypto` `X509Certificate` — requires `nodejs_compat` (set in `wrangler.toml`). If a `fetch-failed` alert ever fires, Apple may have moved the URL (update `url` in `WORKER_PINNED_ROOTS`).
+- **DEPLOY/TRANSPORT = CUTOVER:** `wrangler.toml` has no `account_id`; real `SENTRY_DSN` + `wrangler deploy` are Cutover steps — the worker is inert (fires nothing) until then. Local `SENTRY_DSN` is the misconfigured `sntryu_` auth token (see LOCAL SENTRY DSN MISCONFIG), so tests MOCK Sentry.
+- **PIN SET SHAPE (unchanged by 086a):** `APPLE_ROOT_CA_PINS` = two slots (G3 populated + empty `APPLE_ROOT_CA_UPCOMING`); `getPinnedAppleRoots()` (`keyCache.ts`) filters empty-`der` slots. The worker's identity guard also alerts (`fingerprint-mismatch`) if the live cert stops matching the pin. NO migration, NO copy of the constant beyond the parity-guarded re-pin.
+- **RUNBOOK:** `docs/RUNBOOKS/APPLE_PKI_MONITOR.md` (alert handler → points at `APPLE_ROOT_CA_ROTATION.md` as the action); index entry in `RUNBOOKS/README.md` pre-existed (Chat 086a) — no index edit.
 
 ---
 

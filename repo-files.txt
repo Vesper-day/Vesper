@@ -1190,6 +1190,7 @@ docs/REEL_REFERENCE_SHEETS/REEL8_VELOUR-candle_warmdark-REGISTER-MATCH.jpg
 docs/REEL_REFERENCE_SHEETS/REEL9_color_60-30-10-rule.jpg
 docs/RETENTION_POLICY.md
 docs/RUNBOOKS/APNS_KEY_ROTATION.md
+docs/RUNBOOKS/APPLE_PKI_MONITOR.md
 docs/RUNBOOKS/APPLE_ROOT_CA_ROTATION.md
 docs/RUNBOOKS/BACKUP_RESTORE_DRILL.md
 docs/RUNBOOKS/GCAL_CHANNEL_RENEWAL.md
@@ -1478,6 +1479,14 @@ supabase/migrations/20260601100002_seed_recipe_templates.sql
 tsconfig.json
 turbo.json
 vitest.config.ts
+workers/apple-pki-monitor/index.test.ts
+workers/apple-pki-monitor/index.ts
+workers/apple-pki-monitor/package.json
+workers/apple-pki-monitor/selectExpiringRoots.logic.test.ts
+workers/apple-pki-monitor/selectExpiringRoots.logic.ts
+workers/apple-pki-monitor/tsconfig.json
+workers/apple-pki-monitor/vitest.config.ts
+workers/apple-pki-monitor/wrangler.toml
 workers/daily-cron/modules/gcal-channel-renewal.logic.ts
 workers/daily-cron/modules/gcal-channel-renewal.test.ts
 workers/daily-cron/modules/gcal-channel-renewal.ts
