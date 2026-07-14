@@ -67,7 +67,7 @@ const SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@vesper/ui', '@vesper/shared'],
+  transpilePackages: ['@vesper/ui', '@vesper/shared', '@vesper/apple'],
   typedRoutes: true,
   // Turbopack (next dev): resolve libsodium-wrappers to its CJS entry.
   turbopack: {

@@ -1,7 +1,7 @@
 // @vitest-environment node
 //
-// Pure StoreKit 2 JWS-verification tests. A dev-signed sample transaction is the
-// fixture — NO Apple Developer account / key / production transaction is needed.
+// Pure Apple JWS-verification tests. A dev-signed sample transaction is the fixture —
+// NO Apple Developer account / key / production transaction is needed.
 //
 // The fixture chain (root → intermediate → leaf, all EC P-256) was generated once
 // with openssl; `LEAF_PK8_PEM` is the leaf private key used to SIGN the sample JWS.
@@ -10,6 +10,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { X509Certificate, createHash } from 'node:crypto';
 import { CompactSign, importPKCS8 } from 'jose';
 import {
+  verifyAppleJws,
   verifyAppleTransactionJws,
   AppleJwsVerificationError,
 } from './jws';
@@ -91,6 +92,41 @@ describe('verifyAppleTransactionJws', () => {
     await expect(
       verifyAppleTransactionJws(jws, { trustedRoots: [TEST_ROOT], now: NOW }),
     ).rejects.toThrow(/x5c/);
+  });
+
+  it('rejects a verified-but-non-transaction payload (missing required fields)', async () => {
+    // A valid chain + signature, but the payload is an ASSN-envelope shape (no
+    // transactionId/originalTransactionId/productId) — the transaction assertion fires.
+    const jws = await signSampleJws({ notificationType: 'DID_RENEW', signedDate: 1 });
+    await expect(
+      verifyAppleTransactionJws(jws, { trustedRoots: [TEST_ROOT], now: NOW }),
+    ).rejects.toThrow(/missing required fields/);
+  });
+});
+
+describe('verifyAppleJws (generic, no shape assertion)', () => {
+  it('returns the decoded payload for a non-transaction (ASSN-envelope) shape', async () => {
+    const envelope = {
+      notificationType: 'DID_RENEW',
+      signedDate: 1_752_000_000_000,
+      data: { signedTransactionInfo: 'inner.jws.here' },
+    };
+    const jws = await signSampleJws(envelope);
+    const out = await verifyAppleJws(jws, { trustedRoots: [TEST_ROOT], now: NOW });
+    expect(out.notificationType).toBe('DID_RENEW');
+    expect((out.data as { signedTransactionInfo: string }).signedTransactionInfo).toBe(
+      'inner.jws.here',
+    );
+  });
+
+  it('rejects a tampered JWS with a typed error (same chain guarantees as the txn form)', async () => {
+    const jws = await signSampleJws({ notificationType: 'EXPIRED' });
+    const parts = jws.split('.');
+    const sig = parts[2]!;
+    parts[2] = sig.slice(0, -2) + (sig.endsWith('AA') ? 'BB' : 'AA');
+    await expect(
+      verifyAppleJws(parts.join('.'), { trustedRoots: [TEST_ROOT], now: NOW }),
+    ).rejects.toBeInstanceOf(AppleJwsVerificationError);
   });
 });
 
