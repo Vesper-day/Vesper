@@ -110,11 +110,11 @@ updated file to project knowledge.
 
 ---
 
-### EXPO GO SDK 52-vs-54 RENDER BLOCK (053) — RESOLVED / render-verified
+### EXPO GO SDK 52-vs-54 RENDER BLOCK (053) — render walk RECORDED, operator-UNCONFIRMED
 **Owner:** Operator env / SDK-bump owner
-**Relevant-to:** closed; reference for any later mobile on-device verification
-**Status:** Closed — on-device render verified on Expo SDK 54 (Expo Go, physical iPhone)
-**Detail:** SDK 52→54 bump (PRs #62/#63) + barrel split (PR #64) unblocked on-device render; bundle builds clean (2657 modules). On-device Expo Go walk completed via a since-removed `__DEV__` sign-in bypass. RENDER RESULTS (all pass — no redboxes; data/error states expected under bypass + unreachable API):
+**Relevant-to:** any later mobile on-device verification; see the "EXPO GO SDK RENDER — VISUAL render pending" flag (the conservative truth)
+**Status:** Open — a per-screen render walk was RECORDED (below), but the operator has NOT confirmed seeing screens render; treat on-device render as UNVERIFIED until the pending visual check is done. Contradicts nothing once read as "recorded, not verified."
+**Detail:** SDK 52→54 bump (PRs #62/#63) + barrel split (PR #64) unblocked on-device render; bundle builds clean (2657 modules). An on-device Expo Go walk was RECORDED via a since-removed `__DEV__` sign-in bypass, but is operator-UNCONFIRMED (see Status). RECORDED RESULTS (reported pass — no redboxes; data/error states expected under bypass + unreachable API):
 - 011 sign-in — pass (renders pre-bypass)
 - 013 shell — pass (tab bar Plan/Tasks/Calendar/Settings, routed in)
 - 054 plan — pass; minimal/near-stub appearance — RE-CHECK appearance once real data + plan synthesis reachable
