@@ -1,6 +1,6 @@
 # PERSISTENT — Cross-Chat Open Flags
 
-Last updated: after Chat 066 landed (Google Calendar channel-renewal daily-cron worker + channel-state migration 24 + channel→user mapping — CLOSES the 065 channel-state persistence + mapping gap). Prior: Chat 065 (GCal push webhook receiver + authored-but-uninvoked registerWatch — web), Chat 083 (Stripe Checkout + Customer Portal completion + cutover runbook — web billing; PR #77), Chat 085 (Apple StoreKit 2 IAP client — mobile iOS).
+Last updated: after Chat 086 landed (Apple receipt verification — server-side StoreKit 2 JWS x5c-chain verify route + apple subscriptions upsert + subscription_events idempotency — CLOSES the apple-verify 501 stub). Prior: Chat 066 (Google Calendar channel-renewal daily-cron worker + channel-state migration 24 + channel→user mapping — CLOSES the 065 channel-state persistence + mapping gap), Chat 065 (GCal push webhook receiver + authored-but-uninvoked registerWatch — web), Chat 083 (Stripe Checkout + Customer Portal completion + cutover runbook — web billing; PR #77), Chat 085 (Apple StoreKit 2 IAP client — mobile iOS).
 
 Read this file when writing any Claude Code prompt. Include only flags where
 the current chat appears in the Relevant-to column. Do not paste the full file
@@ -668,12 +668,20 @@ trigger/schema checks) must run through the Postgres Node client already in the 
 
 ---
 
-### APPLE-VERIFY 501 STUB
-**Owner:** 086
-**Relevant-to:** 086
-**Status:** Open
-**Detail:** `/api/v1/subscription/apple-verify` ships as a 501 (ErrorCode.NOT_IMPLEMENTED)
-stub from 030; Zod request shape already colocated. Full JWS verification lands 086.
+### APPLE-VERIFY 501 STUB — CLOSED (086)
+**Owner:** 086 (done)
+**Relevant-to:** Any chat touching the apple-verify route, subscription state, Apple PKI rotation, or the mobile subscription surface; the Cutover chat
+**Status:** CLOSED — server-side StoreKit 2 verify landed 086
+**Detail:** `/api/v1/subscription/apple-verify` is now a full implementation (was a 501 NOT_IMPLEMENTED stub from 030). Durable facts:
+- **JWS verify is x5c-CHAIN, NOT JWKS.** `apps/web/lib/apple/jws.ts` reads the leaf→intermediate→root chain from the JWS `x5c` protected header, requires the chain to terminate in a PINNED Apple root (the traveling root is NOT trusted), then verifies the JWS signature with the leaf public key via `jose`. Deliberately does NOT fetch `appleid.apple.com/auth/keys` (that JWKS is for Sign In with Apple identity tokens, chats 010/011 — wrong endpoint here). The chain is self-contained ⇒ **NO per-transaction network call to Apple.**
+- **keyCache.ts caches the PARSED pinned root(s) only** — `apps/web/lib/apple/keyCache.ts` is a parse-memo of the inline base64 DER constants, NOT the build-plan's "1-hour cache for Apple's intermediate certificates." No JWKS, no network fetch, no TTL. (§8 authoritative over the build-plan wording.)
+- **Pin set = inline base64 DER constants** in `apps/web/lib/apple/appleRootCerts.ts` (chose inline constant over a committed .cer asset). Holds TWO slots: current **Apple Root CA - G3** (populated) + an **upcoming-root** slot (empty `der`, filtered out by the accessor) so a PKI rotation is a data-only deploy, never an emergency. Rotation procedure: `docs/RUNBOOKS/APPLE_ROOT_CA_ROTATION.md` (indexed in RUNBOOKS/README.md, Chat 086).
+- **event_id form for a StoreKit TRANSACTION** = `originalTransactionId + '_' + transactionId` (the §8 App Store Server Notification form — `origTxnId_notificationType_signedDate` — does not apply; a transaction has no notificationType/signedDate). Stable across re-posts ⇒ `subscription_events (provider, event_id) UNIQUE` fires the idempotency path on replay (`ON CONFLICT DO NOTHING` ⇒ return current state, no re-transition).
+- **subscriptions UPSERT** is raw parameterized SQL (the Drizzle model is KNOWN-STALE), `provider='apple'`, CHECK-compliant (apple_original_transaction_id set, all stripe ids NULLed on a provider switch), keyed `ON CONFLICT (user_id)`. Transition via `transitionToActive` from `@vesper/shared/subscriptionState`; an **already-in-target guard** pre-reads status and SKIPS the transition when already `active` (its legal sources are trial/past_due/read_only/archived, NOT active) so a replay/re-verify can never 5xx. Server does NOT finish the StoreKit transaction — the client finishes on a verified 200.
+- **jose** (`^5.9.0`) added to `apps/web/package.json` for `compactVerify`/`importX509` (was NOT previously present).
+- **Production E2E stays Cutover-blocked**: real signed transactions need the Apple Developer Program + an EAS dev build (expo-iap native module inert in Expo Go). The offline gate uses a dev-signed self-generated EC chain fixture — no Apple account/key needed.
+- **Raw-SQL timestamp bind gotcha** (surfaced by the 086 DB smoke): postgres.js cannot serialize a JS `Date` through the Drizzle `sql\`\`` param path (`TypeError: ... Received an instance of Date`). Bind timestamps as ISO strings + cast `${iso}::timestamptz` (mirrors the persistChannelState / googleCalendar precedent). Applies to any chat writing timestamptz columns via raw parameterized SQL.
+- **subscription_events test-isolation gotcha** (surfaced by the 086 DB smoke): `subscription_events.user_id` is `ON DELETE SET NULL`, NOT CASCADE — deleting `auth.users` ORPHANS the event rows rather than removing them, and their `(provider, event_id)` UNIQUE key then makes a later run's FIRST insert look like a replay (`ON CONFLICT DO NOTHING` → empty RETURNING → early return, no subscriptions row). Any DB-gated test touching subscription_events must delete the events explicitly in cleanup AND use unique event_ids per run.
 
 ---
 

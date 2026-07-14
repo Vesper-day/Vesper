@@ -1018,6 +1018,7 @@ apps/web/app/api/v1/referral/schemas.ts
 apps/web/app/api/v1/referral/track/route.ts
 apps/web/app/api/v1/referral/track/track.integration.test.ts
 apps/web/app/api/v1/referral/track/trackReferral.ts
+apps/web/app/api/v1/subscription/apple-verify/route.test.ts
 apps/web/app/api/v1/subscription/apple-verify/route.ts
 apps/web/app/api/v1/subscription/checkout/route.ts
 apps/web/app/api/v1/subscription/operations.ts
@@ -1097,6 +1098,10 @@ apps/web/hooks/usePlanQuery.ts
 apps/web/hooks/usePlanRealtime.ts
 apps/web/instrumentation.ts
 apps/web/lib/api.ts
+apps/web/lib/apple/appleRootCerts.ts
+apps/web/lib/apple/jws.test.ts
+apps/web/lib/apple/jws.ts
+apps/web/lib/apple/keyCache.ts
 apps/web/lib/auth/apple-sign-in.ts
 apps/web/lib/auth/onAuthStateChange.ts
 apps/web/lib/auth/safeRedirect.test.ts
@@ -1185,6 +1190,7 @@ docs/REEL_REFERENCE_SHEETS/REEL8_VELOUR-candle_warmdark-REGISTER-MATCH.jpg
 docs/REEL_REFERENCE_SHEETS/REEL9_color_60-30-10-rule.jpg
 docs/RETENTION_POLICY.md
 docs/RUNBOOKS/APNS_KEY_ROTATION.md
+docs/RUNBOOKS/APPLE_ROOT_CA_ROTATION.md
 docs/RUNBOOKS/BACKUP_RESTORE_DRILL.md
 docs/RUNBOOKS/GCAL_CHANNEL_RENEWAL.md
 docs/RUNBOOKS/INCIDENT_RESPONSE.md

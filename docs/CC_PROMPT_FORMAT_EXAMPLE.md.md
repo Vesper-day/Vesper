@@ -26,7 +26,10 @@ the deliverable wrapper and the construction RULES; THIS file specifies the
      — `NEW FILE N — path` + one-line description + inline unit-test asserts under each.
    - `== CONSTRAINTS RECAP ==`
    - `== AFTER YOU BUILD ==`
-     — the STOP / hand-me-two-things / wait / then-commit gate.
+     — the self-run offline gate, then a HARD CHECKPOINT: the agent runs pnpm test/type-check/lint/build
+       itself (3-min per-test cap, fix-and-rerun on hang/fail), STOPS at offline-green, hands the operator
+       the DB-gated smoke and waits; only on smoke-pass + "proceed" does it commit (Persistent append ->
+       git add -A -> repo-files.txt -> commit -> push -> PR).
 
 4. **Voice: plain declarative build instructions.** No `[doc:]` source tags, no terse
    mode, no objection-first, no "I don't know is valid" — none of the chat behavioral
@@ -159,21 +162,23 @@ at packages/db/src/client.ts via a tiny Node script, never psql. pnpm build is j
 NEW errors vs main" — do not chase the pre-existing @types/react 18-vs-19 skew.
 
 == AFTER YOU BUILD ==
-As your final step: STOP. Author the four mobile files + their unit tests (and the PUT /profile
-schema/handler extension ONLY if you determined the route is partial), run at most ONE fast
-offline sanity check (one mobile unit test alone, OR a type-check of the new modules — not
-both, not a loop), then hand me TWO things and STOP: (a) the chat-specific verification commands
-relevant to exactly what you changed, and (b) explicitly the full workspace gate to run from the
-repo root — pnpm test, pnpm type-check, pnpm lint, plus the PUT /profile DB smoke
-(VESPER_DB_TESTS=1 with local Supabase running). Do NOT git add, commit, push, or open a PR. Do
-NOT loop type-check/lint/test in your terminal. Do NOT author a resolution doc. Wait for me to
-run the commands and report back. If I report failures, fix and re-hand. ONLY after I confirm
-everything is green: run the full gate ONCE yourself (pnpm test, pnpm type-check, pnpm lint from
-the repo root), fixing any regression INCLUDING in files you only modified (if you edited
-store/auth.ts, run the suites covering every file you touched, not just files you created;
-pnpm build judged as no NEW errors vs main). Commit only when green: git add -A ->
-git ls-files > repo-files.txt -> git add repo-files.txt -> commit with a descriptive message ->
-push the branch -> open a PR via the GitHub MCP tool (gh is not available on this Windows
-machine). Then give me a short conclusion statement in chat: the flags this chat created and any
-non-blocking notes, for me to fold into PERSISTENT.
+Author the four mobile files + their unit tests (and the PUT /profile schema/handler extension ONLY if
+you determined the route is partial). Then run the full offline gate YOURSELF from the repo root —
+pnpm test, pnpm type-check, pnpm lint, pnpm build — plus the chat-specific offline tests. Run each test
+under a 3-minute cap; if a test hangs past the cap or fails, stop it, inspect, fix, and rerun before
+treating the gate as green (fix-driven reruns only, no blind looping). Run the suites covering every
+file you TOUCH, not just files you created (if you edited store/auth.ts, run auth.test.ts too). pnpm
+build is judged as no NEW errors vs main — do not chase the @types/react 18-vs-19 skew.
+When the offline gate is green, STOP. Do NOT commit, do NOT push, do NOT open a PR yet. Hand me the
+DB-gated verify smoke command against local Supabase (VESPER_DB_TESTS=1 with Docker + supabase start)
+and WAIT — this is a HARD CHECKPOINT. Paste only the command(s) I run myself, then stop and wait for me
+to paste results back.
+  - If the smoke fails: fix, re-run the offline gate, and present the smoke command again. Still no commit.
+  - If the smoke passes and I say proceed: THEN do the commit sequence — append any future-relevant flags
+    this chat surfaced to docs/Persistent.md in the existing entry shape (### TITLE / **Owner** /
+    **Relevant-to** / **Status** / **Detail**, and bump "Last updated:"; flags created/closed, cross-chat
+    determinations, stubs opened/closed — not one-off build trivia) -> git add -A -> git ls-files >
+    repo-files.txt -> git add repo-files.txt -> commit with a descriptive message -> push the branch ->
+    open a PR via the GitHub MCP tool (gh is not available on this Windows machine). Report the PR URL.
+    Do NOT author a resolution doc.
 ```
