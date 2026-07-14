@@ -1,0 +1,27 @@
+# workers/apple-assn — Apple App Store Server Notifications V2 receiver (Chat 087, part 1).
+#
+# HTTP `fetch` worker (NOT scheduled — there are NO cron triggers here; the consolidated
+# daily-cron shell is scheduled-only and this one serves an HTTP endpoint). Apple's App
+# Store Connect "App Store Server Notifications V2" URL is configured to POST
+# `{ signedPayload }` to this worker's route; src/index.ts verifies the outer envelope +
+# inner transaction JWS against the pinned Apple Root CA - G3 and dispatches to the §8
+# state machine.
+#
+# nodejs_compat is required: the @vesper/apple x5c verify (node:crypto X509Certificate +
+# jose) and the postgres-js driver (via @vesper/db) both need Node built-ins.
+#
+# Real deployment is an operator/Cutover step: account_id, the route/custom domain, the
+# Postgres binding / Hyperdrive, the SUPABASE_DB_URL secret, and the App Store Connect
+# webhook URL are all set at Cutover. There is NO Apple webhook shared secret — the JWS
+# signature (chain-to-pinned-root) IS the trust anchor. RUNTIME below makes @vesper/db
+# select the Supavisor transaction-mode pooler (Decision 04 / createDrizzleClient).
+name = "vesper-apple-assn"
+main = "src/index.ts"
+compatibility_date = "2026-07-10"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+RUNTIME = "worker"
+
+# Secrets (NOT stored here — set via `wrangler secret put` at Cutover):
+#   SUPABASE_DB_URL, SENTRY_DSN

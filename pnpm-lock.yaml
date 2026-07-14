@@ -207,6 +207,9 @@ importers:
       '@vesper/ai':
         specifier: workspace:*
         version: link:../../packages/ai
+      '@vesper/apple':
+        specifier: workspace:*
+        version: link:../../packages/apple
       '@vesper/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -345,6 +348,22 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@20.19.41)(jsdom@25.0.1)(lightningcss@1.32.0)(terser@5.47.1)
 
+  packages/apple:
+    dependencies:
+      jose:
+        specifier: ^5.9.0
+        version: 5.10.0
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.41
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.41)(jsdom@25.0.1)(lightningcss@1.32.0)(terser@5.47.1)
+
   packages/db:
     dependencies:
       drizzle-orm:
@@ -437,11 +456,36 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
-  workers/apple-pki-monitor:
+  workers/apple-assn:
     dependencies:
       '@sentry/nextjs':
         specifier: ^8.0.0
         version: 8.55.2(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(next@15.5.18(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(webpack@5.106.2(lightningcss@1.32.0))
+      '@vesper/apple':
+        specifier: workspace:*
+        version: link:../../packages/apple
+      '@vesper/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@vesper/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.41
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.41)(jsdom@25.0.1)(lightningcss@1.32.0)(terser@5.47.1)
+
+  workers/apple-pki-monitor:
+    dependencies:
+      '@sentry/nextjs':
+        specifier: ^8.0.0
+        version: 8.55.2(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.1))(next@15.5.18(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(webpack@5.106.2(lightningcss@1.32.0))
     devDependencies:
       '@types/node':
         specifier: ^20.0.0

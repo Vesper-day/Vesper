@@ -23,6 +23,7 @@
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
     "@vesper/ai": "workspace:*",
+    "@vesper/apple": "workspace:*",
     "@vesper/db": "workspace:*",
     "@vesper/shared": "workspace:*",
     "@vesper/ui": "workspace:*",
