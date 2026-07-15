@@ -5,8 +5,15 @@
 // STUBBED (injected verifiers — no Apple key / no real signature needed); EVERYTHING
 // else is live SQL: the (provider, event_id) idempotency record, the
 // apple_original_transaction_id user resolution, the real §8 transitions
-// (transitionToActive / transitionToReadOnly), the period-window update, the canceled_at
-// write, and the delayed_jobs reconcile enqueue.
+// (transitionToActive / transitionToPastDue / transitionToReadOnly), the period-window
+// update, the cancel_at_period_end flag write, the canceled_at set/clear, and the
+// delayed_jobs reconcile enqueue.
+//
+// Chat 087 covered the part-1 types; Chat 088 EXTENDS this file with real-row assertions
+// for the part-2 mutating types: DID_FAIL_TO_RENEW → past_due, GRACE_PERIOD_EXPIRED →
+// read_only, RENEWAL_EXTENDED → period update, DID_CHANGE_RENEWAL_STATUS →
+// cancel_at_period_end flip, REFUND_REVERSED → active + canceled_at cleared, and the
+// TEST probe (audited, subscriptions untouched).
 //
 // CLEANUP — subscription_events.user_id is ON DELETE SET NULL (NOT CASCADE): deleting
 // auth.users orphans the event rows rather than removing them, and their
@@ -210,6 +217,151 @@ describeDb('apple-assn worker (integration)', () => {
       new Date(newExpires).toISOString(),
     );
     expect(await reconcileCount(userId)).toBe(1);
+  });
+
+  // --- Chat 088 (part 2) — the new transition / period / flag types -----------------
+
+  it('DID_FAIL_TO_RENEW transitions an active apple sub to past_due (§8) — idempotent on replay', async () => {
+    const userId = await seedUser();
+    const otxn = uniqOtxn();
+    await seedAppleSub(userId, otxn, 'active');
+    const { verify, eventId } = stubVerify('DID_FAIL_TO_RENEW', otxn, 1_752_100_000_000);
+
+    const res = await handleAppleAssn(post(), { db, verify });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'ok' });
+    expect(await statusOf(userId)).toBe('past_due');
+    expect(await eventCount(eventId)).toBe(1);
+    expect(await reconcileCount(userId)).toBe(1);
+
+    // Replay the SAME composite event_id → true replay: no second transition/reconcile.
+    const res2 = await handleAppleAssn(post(), { db, verify });
+    expect(await res2.json()).toMatchObject({ outcome: 'duplicate' });
+    expect(await statusOf(userId)).toBe('past_due');
+    expect(await eventCount(eventId)).toBe(1);
+    expect(await reconcileCount(userId)).toBe(1);
+  });
+
+  it('GRACE_PERIOD_EXPIRED transitions a past_due apple sub to read_only', async () => {
+    const userId = await seedUser();
+    const otxn = uniqOtxn();
+    await seedAppleSub(userId, otxn, 'past_due');
+    const { verify } = stubVerify('GRACE_PERIOD_EXPIRED', otxn, 1_752_100_000_000);
+
+    const res = await handleAppleAssn(post(), { db, verify });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'ok' });
+    expect(await statusOf(userId)).toBe('read_only');
+    expect(await reconcileCount(userId)).toBe(1);
+  });
+
+  it('RENEWAL_EXTENDED pushes current_period_end out without changing status', async () => {
+    const userId = await seedUser();
+    const otxn = uniqOtxn();
+    await seedAppleSub(userId, otxn, 'active');
+    const extended = 1_765_000_000_000;
+    const { verify } = stubVerify(
+      'RENEWAL_EXTENDED',
+      otxn,
+      1_752_100_000_000,
+      undefined,
+      extended,
+    );
+
+    const res = await handleAppleAssn(post(), { db, verify });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'renew' });
+    expect(await statusOf(userId)).toBe('active'); // unchanged
+
+    const rows = (await db.execute(sql`
+      SELECT current_period_end FROM subscriptions WHERE user_id = ${userId}::uuid
+    `)) as unknown as Array<{ current_period_end: Date | string }>;
+    expect(new Date(rows[0]!.current_period_end).toISOString()).toBe(
+      new Date(extended).toISOString(),
+    );
+    expect(await reconcileCount(userId)).toBe(1); // reconcile on a period-update mutation
+  });
+
+  it('DID_CHANGE_RENEWAL_STATUS flips cancel_at_period_end both ways, status untouched', async () => {
+    const userId = await seedUser();
+    const otxn = uniqOtxn();
+    await seedAppleSub(userId, otxn, 'active');
+
+    const flag = async (): Promise<boolean> => {
+      const rows = (await db.execute(sql`
+        SELECT cancel_at_period_end FROM subscriptions WHERE user_id = ${userId}::uuid
+      `)) as unknown as Array<{ cancel_at_period_end: boolean }>;
+      return rows[0]!.cancel_at_period_end;
+    };
+    expect(await flag()).toBe(false); // column default
+
+    const off = stubVerify(
+      'DID_CHANGE_RENEWAL_STATUS',
+      otxn,
+      1_752_100_000_000,
+      'AUTO_RENEW_DISABLED',
+    );
+    const res = await handleAppleAssn(post(), { db, verify: off.verify });
+    expect(await res.json()).toMatchObject({ outcome: 'renewal-status' });
+    expect(await flag()).toBe(true);
+    expect(await statusOf(userId)).toBe('active'); // NO status transition
+    expect(await reconcileCount(userId)).toBe(1); // reconcile on a flag-update mutation
+
+    // Re-enable: a DISTINCT signedDate ⇒ a distinct composite event_id (not a replay).
+    const on = stubVerify(
+      'DID_CHANGE_RENEWAL_STATUS',
+      otxn,
+      1_752_200_000_000,
+      'AUTO_RENEW_ENABLED',
+    );
+    const res2 = await handleAppleAssn(post(), { db, verify: on.verify });
+    expect(await res2.json()).toMatchObject({ outcome: 'renewal-status' });
+    expect(await flag()).toBe(false);
+    expect(await statusOf(userId)).toBe('active');
+    expect(await reconcileCount(userId)).toBe(2);
+  });
+
+  it('REFUND_REVERSED restores a read_only apple sub to active and CLEARS canceled_at', async () => {
+    const userId = await seedUser();
+    const otxn = uniqOtxn();
+    await seedAppleSub(userId, otxn, 'active');
+
+    // First the REFUND that set canceled_at + drove read_only...
+    const refund = stubVerify('REFUND', otxn, 1_752_100_000_000);
+    await handleAppleAssn(post(), { db, verify: refund.verify });
+    expect(await statusOf(userId)).toBe('read_only');
+
+    const canceledAt = async (): Promise<Date | string | null> => {
+      const rows = (await db.execute(sql`
+        SELECT canceled_at FROM subscriptions WHERE user_id = ${userId}::uuid
+      `)) as unknown as Array<{ canceled_at: Date | string | null }>;
+      return rows[0]!.canceled_at;
+    };
+    expect(await canceledAt()).not.toBeNull();
+
+    // ...then Apple reverses it. read_only IS a legal source for transitionToActive
+    // (081 SOURCES_ACTIVE), so this is a real transition, not an audit-only degrade.
+    const reversed = stubVerify('REFUND_REVERSED', otxn, 1_752_200_000_000);
+    const res = await handleAppleAssn(post(), { db, verify: reversed.verify });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'ok' });
+    expect(await statusOf(userId)).toBe('active');
+    expect(await canceledAt()).toBeNull();
+    expect(await reconcileCount(userId)).toBe(2); // one per mutation
+  });
+
+  it('TEST records the probe event and returns 200 without touching subscriptions', async () => {
+    const userId = await seedUser();
+    const otxn = uniqOtxn();
+    await seedAppleSub(userId, otxn, 'active');
+    const { verify, eventId } = stubVerify('TEST', otxn, 1_752_100_000_000);
+
+    const res = await handleAppleAssn(post(), { db, verify });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'test' });
+    expect(await eventCount(eventId)).toBe(1); // audited...
+    expect(await statusOf(userId)).toBe('active'); // ...but no transition
+    expect(await reconcileCount(userId)).toBe(0); // and NO reconcile enqueued
   });
 
   it('an ASSN with no matching apple_original_transaction_id records a null-user event (no-user)', async () => {
