@@ -1,12 +1,33 @@
-// workers/apple-assn — Apple App Store Server Notifications V2 receiver (Chat 087, part 1).
+// workers/apple-assn — Apple App Store Server Notifications V2 receiver (Chat 087 part 1,
+// EXTENDED by Chat 088 part 2 — the SAME worker, not a fork).
 //
 // HTTP `fetch` worker (NOT scheduled/cron, NOT part of the consolidated daily-cron
 // shell — that worker is scheduled-only; an HTTP webhook is its own worker, mirroring
 // the 084 workers/stripe-webhook sibling). Apple POSTs `{ signedPayload }`; this worker
 // verifies the outer ASSN V2 envelope JWS AND the inner signed transaction JWS against
 // the pinned Apple Root CA - G3, idempotently records the event, row-locks the
-// subscription via the §8 state machine, dispatches FIVE notification types
-// (SUBSCRIBED, DID_RENEW, EXPIRED, REVOKE, REFUND), and enqueues a 5-minute reconcile.
+// subscription via the §8 state machine, dispatches every handled notification type, and
+// enqueues a 5-minute reconcile on every real mutation.
+//
+// HANDLED TYPES — part 1 (five): SUBSCRIBED, DID_RENEW, EXPIRED, REVOKE, REFUND.
+// Part 2 (ten + TEST): DID_FAIL_TO_RENEW, GRACE_PERIOD_EXPIRED, RENEWAL_EXTENDED,
+// DID_CHANGE_RENEWAL_STATUS, REFUND_REVERSED, PRICE_INCREASE, OFFER_REDEEMED,
+// REFUND_DECLINED, DID_CHANGE_RENEWAL_PREF, TEST. The (notificationType, subtype) →
+// action decision lives ENTIRELY in ./dispatch.ts (pure, offline-tested); this file only
+// EXECUTES the descriptor. Unknown types remain audit-only 200.
+//
+// TEST IS A FAST PATH — App Store Connect rejects a slow webhook URL, so a TEST probe
+// audit-logs and returns immediately: NO user lookup, NO row lock, NO transition, NO
+// reconcile enqueue.
+//
+// MUTATION KINDS — a "real mutation" is a status transition OR a period-window update
+// (DID_RENEW / RENEWAL_EXTENDED) OR a cancel_at_period_end flag write
+// (DID_CHANGE_RENEWAL_STATUS). ALL THREE advance last_event_at and enqueue the reconcile.
+//
+// SCOPE FLAG — DID_CHANGE_RENEWAL_PREF is audit-only here. TECHNICAL_SPEC §Payments links
+// it to a referral_credits → 'applied' write; referral_credits is outside this worker's
+// subscription-state scope and is deliberately NOT written here (left unowned — see
+// ./dispatch.ts).
 //
 // JWS VERIFY REUSE — the security-critical x5c-chain verify is imported from the shared
 // @vesper/apple package (extracted from apps/web/lib/apple in THIS chat), so apps/web
@@ -33,6 +54,7 @@
 import { createDrizzleClient, sql, type Database } from '@vesper/db';
 import {
   transitionToActive as realTransitionToActive,
+  transitionToPastDue as realTransitionToPastDue,
   transitionToReadOnly as realTransitionToReadOnly,
   IllegalSubscriptionTransitionError,
 } from '@vesper/shared/subscriptionState';
@@ -68,14 +90,19 @@ interface AssnV2DecodedPayload {
   [key: string]: unknown;
 }
 
-/** The two state-machine fns this worker dispatches to (injectable for tests). */
+/**
+ * The state-machine fns this worker dispatches to (injectable for tests). Chat 088 adds
+ * transitionToPastDue for the §8 DID_FAIL_TO_RENEW mapping.
+ */
 export interface TransitionFns {
   transitionToActive(db: Database, userId: string): Promise<void>;
+  transitionToPastDue(db: Database, userId: string): Promise<void>;
   transitionToReadOnly(db: Database, userId: string): Promise<void>;
 }
 
 const DEFAULT_FNS: TransitionFns = {
   transitionToActive: realTransitionToActive,
+  transitionToPastDue: realTransitionToPastDue,
   transitionToReadOnly: realTransitionToReadOnly,
 };
 
@@ -118,6 +145,34 @@ function ok(outcome: string): Response {
   });
 }
 
+/**
+ * Durably record the inbound notification (the FIRST half of the record-then-check-
+ * processed_at idempotency shape — committed BEFORE any transition). Returns the
+ * RETURNING rows: non-empty ⇒ a fresh insert; EMPTY ⇒ (provider, event_id) already
+ * present, and the caller re-reads processed_at to tell a true replay from an
+ * interrupted attempt. `userId` is null for a no-user event and for the TEST probe.
+ */
+function recordEvent(
+  db: Database,
+  eventId: string,
+  notificationType: string,
+  userId: string | null,
+  auditPayload: string,
+): Promise<Array<{ id: string }>> {
+  return db.execute(sql`
+    INSERT INTO subscription_events (provider, event_id, event_type, user_id, payload)
+    VALUES (
+      'apple'::payment_source_enum,
+      ${eventId},
+      ${notificationType},
+      ${userId}::uuid,
+      ${auditPayload}::jsonb
+    )
+    ON CONFLICT (provider, event_id) DO NOTHING
+    RETURNING id
+  `) as unknown as Promise<Array<{ id: string }>>;
+}
+
 async function markProcessed(db: Database, eventId: string): Promise<void> {
   await db.execute(sql`
     UPDATE subscription_events
@@ -149,13 +204,16 @@ function epochMsToIso(ms: number | null | undefined): string | null {
  * HTTP Response the worker sends back to Apple.
  *
  * Flow: parse `{ signedPayload }` → verify the OUTER envelope JWS (400 on bad sig, no
- * DB) → verify the INNER signedTransactionInfo JWS (400 on bad sig, no DB) → resolve
- * userId + current row via the apple_original_transaction_id lookup → idempotency
- * record (086 shape: record-then-check-processed_at) → no-user / audit-only /
- * monotonic-stale short-circuits → DID_RENEW period-window update → transition in its
- * own SELECT … FOR UPDATE txn (already-in-target guard; illegal-source → audit 200) →
- * advance last_event_at (+ canceled_at on REFUND) → enqueue the 5-minute reconcile →
- * mark processed → 200. Only a genuinely-unexpected error → Sentry + 500 (Apple retries).
+ * DB) → verify the INNER signedTransactionInfo JWS (400 on bad sig, no DB) → map the
+ * type to a descriptor (pure, ./dispatch.ts) → TEST fast path (audit + 200, nothing
+ * else) → resolve userId + current row via the apple_original_transaction_id lookup →
+ * idempotency record (086 shape: record-then-check-processed_at) → no-user / audit-only
+ * / monotonic-stale short-circuits → period-window update (DID_RENEW / RENEWAL_EXTENDED)
+ * → cancel_at_period_end flag write (DID_CHANGE_RENEWAL_STATUS) → transition in its own
+ * SELECT … FOR UPDATE txn (already-in-target guard; illegal-source → audit 200) →
+ * advance last_event_at (+ canceled_at on REFUND / cleared on REFUND_REVERSED) → enqueue
+ * the 5-minute reconcile → mark processed → 200. Only a genuinely-unexpected error →
+ * Sentry + 500 (Apple retries).
  */
 export async function handleAppleAssn(
   request: Request,
@@ -215,7 +273,25 @@ export async function handleAppleAssn(
     ? `${txn.originalTransactionId}_${notificationType}_${signedDate ?? 'na'}`
     : `${envelope.notificationUUID ?? signedDate ?? 'na'}_${notificationType}`;
 
+  // Resolve the action BEFORE any I/O — the mapping is pure (./dispatch.ts).
+  const descriptor: AssnTransitionDescriptor = mapNotificationToTransition(
+    notificationType,
+    subtype,
+  );
+  const auditPayload = JSON.stringify({ notification: envelope, transaction: txn });
+
   try {
+    // TEST — App Store Connect's reachability probe. FAST PATH: audit-log the event and
+    // return 200 immediately. NO user lookup, NO SELECT … FOR UPDATE, NO transition, NO
+    // reconcile enqueue — App Store Connect rejects a webhook URL that answers slowly,
+    // and a probe carries no subscription state to act on. Two statements, both
+    // idempotent (the ON CONFLICT insert + a markProcessed that re-marks harmlessly).
+    if (descriptor.kind === 'test') {
+      await recordEvent(db, eventId, notificationType, null, auditPayload);
+      await markProcessed(db, eventId);
+      return ok('test');
+    }
+
     // Resolve userId + current locked-read fields via the apple_original_transaction_id
     // row (subscription_events.user_id is nullable for Apple events that arrive before
     // the client apple-verify path has created the row). Raw SQL — never the stale model.
@@ -237,19 +313,7 @@ export async function handleAppleAssn(
     // died mid-flow ⇒ fall through and RE-PROCESS (idempotent writes + guarded
     // transition). A bare DO NOTHING → 200 (084's Stripe shape) would strand a
     // mid-flow-interrupted Apple event as a permanent false-replay.
-    const auditPayload = JSON.stringify({ notification: envelope, transaction: txn });
-    const inserted = (await db.execute(sql`
-      INSERT INTO subscription_events (provider, event_id, event_type, user_id, payload)
-      VALUES (
-        'apple'::payment_source_enum,
-        ${eventId},
-        ${notificationType},
-        ${userId}::uuid,
-        ${auditPayload}::jsonb
-      )
-      ON CONFLICT (provider, event_id) DO NOTHING
-      RETURNING id
-    `)) as unknown as Array<{ id: string }>;
+    const inserted = await recordEvent(db, eventId, notificationType, userId, auditPayload);
 
     if (inserted.length === 0) {
       const prior = (await db.execute(sql`
@@ -263,11 +327,6 @@ export async function handleAppleAssn(
       // recorded-but-unprocessed ⇒ a prior attempt died mid-flow ⇒ re-process.
     }
 
-    const descriptor: AssnTransitionDescriptor = mapNotificationToTransition(
-      notificationType,
-      subtype,
-    );
-
     // Unresolvable user (no apple_original_transaction_id row yet — the ASSN arrived
     // before the client apple-verify path created the row): durably audited above,
     // nothing to transition → 200. The 5-min reconcile + later events converge state.
@@ -276,8 +335,9 @@ export async function handleAppleAssn(
       return ok('no-user');
     }
 
-    // Audit-only type (DID_FAIL_TO_RENEW — a part-2 type — or an unknown type): recorded,
-    // no transition, no period write → 200.
+    // Audit-only type (PRICE_INCREASE / OFFER_REDEEMED / REFUND_DECLINED /
+    // DID_CHANGE_RENEWAL_PREF / a subtype-less DID_CHANGE_RENEWAL_STATUS, or an unknown
+    // type): recorded, no transition, no period or flag write → 200.
     if (!isMutation(descriptor)) {
       await markProcessed(db, eventId);
       return ok('no-transition');
@@ -293,8 +353,11 @@ export async function handleAppleAssn(
       }
     }
 
-    // DID_RENEW — advance the period window from the inner transaction only, NO status
-    // transition. A real mutation → advances last_event_at + enqueues the reconcile.
+    // DID_RENEW / RENEWAL_EXTENDED — advance the period window from the inner
+    // transaction only, NO status transition. Both carry the authoritative new window on
+    // the inner signed transaction (RENEWAL_EXTENDED pushes expiresDate out), so both
+    // take this identical write. A real mutation → advances last_event_at + enqueues the
+    // reconcile.
     if (descriptor.updatePeriod) {
       const periodStart = epochMsToIso(txn?.purchaseDate);
       const periodEnd = epochMsToIso(txn?.expiresDate);
@@ -311,8 +374,26 @@ export async function handleAppleAssn(
       return ok('renew');
     }
 
-    // A transitioning type (SUBSCRIBED → active; EXPIRED/REVOKE/REFUND → read_only).
-    const target = descriptor.kind; // 'active' | 'read_only'
+    // DID_CHANGE_RENEWAL_STATUS — flip cancel_at_period_end only (true ⇐
+    // AUTO_RENEW_DISABLED, false ⇐ AUTO_RENEW_ENABLED), NO status transition: the
+    // subscription remains active through the period already paid for, and its eventual
+    // lapse arrives as its own EXPIRED. This IS a real mutation, so it advances
+    // last_event_at and enqueues the reconcile exactly like the period-window path.
+    if (descriptor.setCancelAtPeriodEnd !== null) {
+      await db.execute(sql`
+        UPDATE subscriptions
+        SET cancel_at_period_end = ${descriptor.setCancelAtPeriodEnd}, updated_at = now()
+        WHERE user_id = ${userId}::uuid
+      `);
+      await advanceLastEventAt(db, userId, signedDate);
+      await enqueueReconcile(db, userId);
+      await markProcessed(db, eventId);
+      return ok('renewal-status');
+    }
+
+    // A transitioning type (SUBSCRIBED / REFUND_REVERSED → active; DID_FAIL_TO_RENEW →
+    // past_due; EXPIRED/REVOKE/REFUND/GRACE_PERIOD_EXPIRED → read_only).
+    const target = descriptor.kind; // 'active' | 'past_due' | 'read_only'
 
     // Already-in-target guard: pre-read the status and SKIP when current == target.
     // transitionToActive is NOT legal from 'active' (a SUBSCRIBED replay/re-verify) and
@@ -331,6 +412,7 @@ export async function handleAppleAssn(
     // illegal delivery for days). A non-transition error (infra) propagates → 5xx.
     try {
       if (target === 'active') await fns.transitionToActive(db, userId);
+      else if (target === 'past_due') await fns.transitionToPastDue(db, userId);
       else await fns.transitionToReadOnly(db, userId);
     } catch (err) {
       if (err instanceof IllegalSubscriptionTransitionError) {
@@ -340,16 +422,24 @@ export async function handleAppleAssn(
       throw err;
     }
 
-    // Advance last_event_at (ordering-guard basis for the next delivery) + canceled_at
-    // on REFUND. The frozen fn(db, userId) owns its own txn and cannot take these extra
-    // writes, so they run as raw UPDATEs immediately after; the 24h grace absorbs the
-    // small non-atomic window.
+    // Advance last_event_at (ordering-guard basis for the next delivery), then the
+    // canceled_at side-writes: SET on REFUND, CLEARED on REFUND_REVERSED (the refund
+    // that set it was undone, so the field must not outlive it). The frozen
+    // fn(db, userId) owns its own txn and cannot take these extra writes, so they run as
+    // raw UPDATEs immediately after; the 24h grace absorbs the small non-atomic window.
     await advanceLastEventAt(db, userId, signedDate);
     if (descriptor.setCanceledAt) {
       const canceledIso = epochMsToIso(signedDate) ?? new Date().toISOString();
       await db.execute(sql`
         UPDATE subscriptions
         SET canceled_at = ${canceledIso}::timestamptz, updated_at = now()
+        WHERE user_id = ${userId}::uuid
+      `);
+    }
+    if (descriptor.clearCanceledAt) {
+      await db.execute(sql`
+        UPDATE subscriptions
+        SET canceled_at = NULL, updated_at = now()
         WHERE user_id = ${userId}::uuid
       `);
     }
