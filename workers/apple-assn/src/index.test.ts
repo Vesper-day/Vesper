@@ -2,12 +2,16 @@
 //
 // ASSN V2 worker tests — fetch + JWS-verify + Sentry + DB all MOCKED (no real JWS, no
 // live Supabase). Drives the pure `handleAppleAssn` with injected deps (mirrors the 084
-// worker + 086 apple-verify builder tests), asserting per the five §8 types:
-//   * a signed-payload fixture → both verifiers called, idempotent insert, the correct
-//     transition invoked ONCE, reconcile enqueued;
-//   * DID_RENEW → period update, NO transition, reconcile enqueued;
-//   * replay (processed_at SET) → 200, no re-process, no transition;
-//   * recorded-but-unprocessed → re-processes (completes an interrupted attempt);
+// worker + 086 apple-verify builder tests). Chat 087 covered the five §8 part-1 types;
+// Chat 088 EXTENDS this file with the ten part-2 types + TEST. Asserted here:
+//   * a signed-payload fixture per type → both verifiers called, idempotent insert, the
+//     correct transition invoked ONCE, reconcile enqueued — OR audit-only;
+//   * DID_RENEW / RENEWAL_EXTENDED → period update, NO transition, reconcile enqueued;
+//   * DID_CHANGE_RENEWAL_STATUS → cancel_at_period_end flip, NO transition, reconcile;
+//   * TEST (a simulated App Store Connect verification request) → 200 fast, audit insert
+//     + markProcessed ONLY: no lookup, no row lock, no transition, no reconcile;
+//   * replay (same composite event_id, processed_at SET) → 200, no re-process;
+//   * recorded-but-unprocessed (processed_at NULL) → re-processes an interrupted attempt;
 //   * bad outer / inner signature → 400, ZERO DB writes;
 //   * non-POST → 405;
 //   * illegal-source mapped transition → 200 audit (never a 5xx);
@@ -72,11 +76,18 @@ function mockVerify(env: Record<string, unknown> = envelope('SUBSCRIBED'), txn: 
 function mockTransitions(): {
   transitions: TransitionFns;
   transitionToActive: ReturnType<typeof vi.fn>;
+  transitionToPastDue: ReturnType<typeof vi.fn>;
   transitionToReadOnly: ReturnType<typeof vi.fn>;
 } {
   const transitionToActive = vi.fn().mockResolvedValue(undefined);
+  const transitionToPastDue = vi.fn().mockResolvedValue(undefined);
   const transitionToReadOnly = vi.fn().mockResolvedValue(undefined);
-  return { transitions: { transitionToActive, transitionToReadOnly }, transitionToActive, transitionToReadOnly };
+  return {
+    transitions: { transitionToActive, transitionToPastDue, transitionToReadOnly },
+    transitionToActive,
+    transitionToPastDue,
+    transitionToReadOnly,
+  };
 }
 
 describe('handleAppleAssn — the five §8 part-1 types', () => {
@@ -182,6 +193,270 @@ describe('handleAppleAssn — the five §8 part-1 types', () => {
   });
 });
 
+describe('handleAppleAssn — the ten part-2 types + TEST', () => {
+  it('DID_FAIL_TO_RENEW → transitionToPastDue once (§8), reconcile enqueued', async () => {
+    const db = mockDb(
+      [{ user_id: USER_ID, status: 'active', last_event_at: null }],
+      [{ id: 'evt_p1' }],
+      [], // advance
+      [], // reconcile
+      [], // markProcessed
+    );
+    const { verify } = mockVerify(envelope('DID_FAIL_TO_RENEW'));
+    const { transitions, transitionToPastDue, transitionToActive, transitionToReadOnly } =
+      mockTransitions();
+
+    const res = await handleAppleAssn(post(), { db, verify, transitions });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'ok' });
+    expect(transitionToPastDue).toHaveBeenCalledTimes(1);
+    expect(transitionToPastDue).toHaveBeenCalledWith(db, USER_ID);
+    expect(transitionToActive).not.toHaveBeenCalled();
+    expect(transitionToReadOnly).not.toHaveBeenCalled();
+    expect(calls(db)).toBe(5); // lookup + insert + advance + reconcile + markProcessed
+  });
+
+  it('GRACE_PERIOD_EXPIRED → transitionToReadOnly once', async () => {
+    const db = mockDb(
+      [{ user_id: USER_ID, status: 'past_due', last_event_at: null }],
+      [{ id: 'evt_p2' }],
+      [], [], [],
+    );
+    const { verify } = mockVerify(envelope('GRACE_PERIOD_EXPIRED'));
+    const { transitions, transitionToReadOnly, transitionToPastDue } = mockTransitions();
+
+    const res = await handleAppleAssn(post(), { db, verify, transitions });
+
+    expect(res.status).toBe(200);
+    expect(transitionToReadOnly).toHaveBeenCalledTimes(1);
+    expect(transitionToPastDue).not.toHaveBeenCalled();
+    expect(calls(db)).toBe(5);
+  });
+
+  it('GRACE_PERIOD_EXPIRED while ALREADY read_only → already-in-target, no transition', async () => {
+    const db = mockDb(
+      [{ user_id: USER_ID, status: 'read_only', last_event_at: null }],
+      [{ id: 'evt_p3' }],
+      [], // markProcessed
+    );
+    const { verify } = mockVerify(envelope('GRACE_PERIOD_EXPIRED'));
+    const { transitions, transitionToReadOnly } = mockTransitions();
+
+    const res = await handleAppleAssn(post(), { db, verify, transitions });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'already-in-target' });
+    expect(transitionToReadOnly).not.toHaveBeenCalled();
+    expect(calls(db)).toBe(3);
+  });
+
+  it('RENEWAL_EXTENDED → period update + reconcile enqueued, NO status transition', async () => {
+    const db = mockDb(
+      [{ user_id: USER_ID, status: 'active', last_event_at: null }],
+      [{ id: 'evt_p4' }],
+      [], // period UPDATE
+      [], // advance
+      [], // reconcile
+      [], // markProcessed
+    );
+    const { verify, verifyTransaction } = mockVerify(envelope('RENEWAL_EXTENDED'));
+    const { transitions, transitionToActive, transitionToPastDue, transitionToReadOnly } =
+      mockTransitions();
+
+    const res = await handleAppleAssn(post(), { db, verify, transitions });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'renew' });
+    expect(verifyTransaction).toHaveBeenCalledTimes(1); // the INNER txn carries the window
+    expect(transitionToActive).not.toHaveBeenCalled();
+    expect(transitionToPastDue).not.toHaveBeenCalled();
+    expect(transitionToReadOnly).not.toHaveBeenCalled();
+    expect(calls(db)).toBe(6); // lookup + insert + period + advance + reconcile + markProcessed
+  });
+
+  it('DID_CHANGE_RENEWAL_STATUS/AUTO_RENEW_DISABLED → cancel_at_period_end=true + reconcile, no transition', async () => {
+    const db = mockDb(
+      [{ user_id: USER_ID, status: 'active', last_event_at: null }],
+      [{ id: 'evt_p5' }],
+      [], // cancel_at_period_end UPDATE
+      [], // advance
+      [], // reconcile
+      [], // markProcessed
+    );
+    const { verify } = mockVerify(envelope('DID_CHANGE_RENEWAL_STATUS', 'AUTO_RENEW_DISABLED'));
+    const { transitions, transitionToActive, transitionToReadOnly } = mockTransitions();
+
+    const res = await handleAppleAssn(post(), { db, verify, transitions });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'renewal-status' });
+    expect(transitionToActive).not.toHaveBeenCalled();
+    expect(transitionToReadOnly).not.toHaveBeenCalled();
+    expect(calls(db)).toBe(6); // lookup + insert + flag + advance + reconcile + markProcessed
+  });
+
+  it('DID_CHANGE_RENEWAL_STATUS/AUTO_RENEW_ENABLED → cancel_at_period_end=false + reconcile', async () => {
+    const db = mockDb(
+      [{ user_id: USER_ID, status: 'active', last_event_at: null }],
+      [{ id: 'evt_p6' }],
+      [], [], [], [],
+    );
+    const { verify } = mockVerify(envelope('DID_CHANGE_RENEWAL_STATUS', 'AUTO_RENEW_ENABLED'));
+    const { transitions, transitionToActive } = mockTransitions();
+
+    const res = await handleAppleAssn(post(), { db, verify, transitions });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'renewal-status' });
+    expect(transitionToActive).not.toHaveBeenCalled();
+    expect(calls(db)).toBe(6);
+  });
+
+  it('REFUND_REVERSED → transitionToActive once + canceled_at CLEARED (read_only is a legal source)', async () => {
+    const db = mockDb(
+      [{ user_id: USER_ID, status: 'read_only', last_event_at: null }],
+      [{ id: 'evt_p7' }],
+      [], // advance
+      [], // canceled_at = NULL UPDATE
+      [], // reconcile
+      [], // markProcessed
+    );
+    const { verify } = mockVerify(envelope('REFUND_REVERSED'));
+    const { transitions, transitionToActive, transitionToReadOnly } = mockTransitions();
+
+    const res = await handleAppleAssn(post(), { db, verify, transitions });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'ok' });
+    expect(transitionToActive).toHaveBeenCalledTimes(1);
+    expect(transitionToActive).toHaveBeenCalledWith(db, USER_ID);
+    expect(transitionToReadOnly).not.toHaveBeenCalled();
+    expect(calls(db)).toBe(6); // lookup + insert + advance + clear-canceled + reconcile + markProcessed
+  });
+
+  it.each(['PRICE_INCREASE', 'OFFER_REDEEMED', 'REFUND_DECLINED', 'DID_CHANGE_RENEWAL_PREF'])(
+    '%s → 200 audit-only: no transition, no period/flag write',
+    async (notificationType) => {
+      const db = mockDb(
+        [{ user_id: USER_ID, status: 'active', last_event_at: null }],
+        [{ id: 'evt_audit' }],
+        [], // markProcessed
+      );
+      const { verify } = mockVerify(envelope(notificationType));
+      const { transitions, transitionToActive, transitionToPastDue, transitionToReadOnly } =
+        mockTransitions();
+
+      const res = await handleAppleAssn(post(), { db, verify, transitions });
+
+      expect(res.status).toBe(200);
+      expect(await res.json()).toMatchObject({ outcome: 'no-transition' });
+      expect(transitionToActive).not.toHaveBeenCalled();
+      expect(transitionToPastDue).not.toHaveBeenCalled();
+      expect(transitionToReadOnly).not.toHaveBeenCalled();
+      expect(calls(db)).toBe(3); // lookup + insert + markProcessed — NO reconcile
+    },
+  );
+
+  it('TEST (a simulated App Store Connect verification request) → 200 fast, audit-only, NO DB transition', async () => {
+    // App Store Connect's probe: no inner signedTransactionInfo, no subscription state.
+    const db = mockDb(
+      [{ id: 'evt_test' }], // recordEvent (null user_id)
+      [], // markProcessed
+    );
+    const verifyEnvelope = vi.fn().mockResolvedValue({
+      notificationType: 'TEST',
+      notificationUUID: 'astc-probe-uuid',
+      signedDate: SIGNED_DATE,
+      data: {},
+    });
+    const verifyTransaction = vi.fn();
+    const { transitions, transitionToActive, transitionToPastDue, transitionToReadOnly } =
+      mockTransitions();
+
+    const res = await handleAppleAssn(post(), {
+      db,
+      verify: { verifyEnvelope, verifyTransaction },
+      transitions,
+    });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'test' });
+    expect(transitionToActive).not.toHaveBeenCalled();
+    expect(transitionToPastDue).not.toHaveBeenCalled();
+    expect(transitionToReadOnly).not.toHaveBeenCalled();
+    // The fast path: audit insert + markProcessed ONLY — no user lookup, no row lock,
+    // no reconcile enqueue.
+    expect(calls(db)).toBe(2);
+  });
+
+  it('TEST carrying an inner txn still takes the fast path (no lookup, no reconcile)', async () => {
+    const db = mockDb([{ id: 'evt_test2' }], []);
+    const { verify } = mockVerify(envelope('TEST'));
+    const { transitions, transitionToActive } = mockTransitions();
+
+    const res = await handleAppleAssn(post(), { db, verify, transitions });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'test' });
+    expect(transitionToActive).not.toHaveBeenCalled();
+    expect(calls(db)).toBe(2);
+  });
+
+  it('a replayed part-2 event (same composite event_id, processed_at SET) → 200, no re-process', async () => {
+    const db = mockDb(
+      [{ user_id: USER_ID, status: 'past_due', last_event_at: null }], // lookup
+      [], // insert → conflict on (provider, event_id)
+      [{ processed_at: '2026-08-08T00:00:00.000Z' }], // already fully processed
+    );
+    const { verify } = mockVerify(envelope('DID_FAIL_TO_RENEW'));
+    const { transitions, transitionToPastDue } = mockTransitions();
+
+    const res = await handleAppleAssn(post(), { db, verify, transitions });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'duplicate' });
+    expect(transitionToPastDue).not.toHaveBeenCalled();
+    expect(calls(db)).toBe(3);
+  });
+
+  it('an INTERRUPTED part-2 event (same event_id, processed_at NULL) → re-processes', async () => {
+    const db = mockDb(
+      [{ user_id: USER_ID, status: 'active', last_event_at: null }], // lookup
+      [], // insert → conflict
+      [{ processed_at: null }], // ...never processed
+      [], // flag UPDATE
+      [], // advance
+      [], // reconcile
+      [], // markProcessed
+    );
+    const { verify } = mockVerify(envelope('DID_CHANGE_RENEWAL_STATUS', 'AUTO_RENEW_DISABLED'));
+    const { transitions } = mockTransitions();
+
+    const res = await handleAppleAssn(post(), { db, verify, transitions });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: 'renewal-status' });
+    expect(calls(db)).toBe(7);
+  });
+
+  it('bad signature on a part-2 type → 400, ZERO DB touch', async () => {
+    const db = mockDb();
+    const verifyEnvelope = vi.fn().mockRejectedValue(new Error('tampered'));
+    const { transitions, transitionToPastDue } = mockTransitions();
+
+    const res = await handleAppleAssn(post(), {
+      db,
+      verify: { verifyEnvelope, verifyTransaction: vi.fn() },
+      transitions,
+    });
+
+    expect(res.status).toBe(400);
+    expect(transitionToPastDue).not.toHaveBeenCalled();
+    expect(calls(db)).toBe(0);
+  });
+});
+
 describe('handleAppleAssn — idempotency + guards', () => {
   it('replay of a PROCESSED event → 200, no re-process, no transition', async () => {
     const db = mockDb(
@@ -253,13 +528,13 @@ describe('handleAppleAssn — idempotency + guards', () => {
     expect(calls(db)).toBe(3);
   });
 
-  it('DID_FAIL_TO_RENEW (part-2 type) → 200 audit-only, no transition', async () => {
+  it('an audit-only type (PRICE_INCREASE) → 200 audit-only, no transition', async () => {
     const db = mockDb(
       [{ user_id: USER_ID, status: 'active', last_event_at: null }],
       [{ id: 'evt_8' }],
       [], // markProcessed
     );
-    const { verify } = mockVerify(envelope('DID_FAIL_TO_RENEW'));
+    const { verify } = mockVerify(envelope('PRICE_INCREASE'));
     const { transitions, transitionToActive, transitionToReadOnly } = mockTransitions();
 
     const res = await handleAppleAssn(post(), { db, verify, transitions });
@@ -283,6 +558,7 @@ describe('handleAppleAssn — idempotency + guards', () => {
       .mockRejectedValue(new IllegalSubscriptionTransitionError('archived', 'read_only'));
     const transitions: TransitionFns = {
       transitionToActive: vi.fn(),
+      transitionToPastDue: vi.fn(),
       transitionToReadOnly,
     };
 
