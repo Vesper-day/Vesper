@@ -32,6 +32,8 @@ import { BlockTimeline } from '@/components/plan/BlockTimeline';
 import { PlanSkeleton } from '@/components/plan/PlanSkeleton';
 import { PlanEmpty } from '@/components/plan/PlanEmpty';
 import { selectEmptyStateVariant } from '@/components/plan/planViewHelpers';
+import { OverCommitPrompt } from '@/components/plan/OverCommitPrompt';
+import type { OverCommitItem } from '@/components/plan/overCommitResolution';
 import { SundayPrompt } from '@/components/weekly-planning/SundayPrompt';
 
 // The browser IANA zone is the client proxy for the day boundary. The
@@ -45,6 +47,20 @@ function browserTimeZone(): string {
 // surface (the daily check-in), not this read-only view — so the CTA posts a
 // neutral default. FLAG: revisit when the check-in feeds a real score here.
 const DEFAULT_ENERGY_SCORE = 5;
+
+// Over-commit conflicts (Chat 056). The reflow engine (packages/ai taskReflow.ts) only
+// runs when a new calendar event displaces a scheduled task chunk, and chat 067 owns
+// that calendar-sync trigger by design (067-FIRST clears overlapping blocks to
+// `rescheduled`, THEN 056-SECOND reflows the displacement). 067 is not built, so nothing
+// can produce a conflict yet and the prompt self-hides on an empty list. This constant
+// is the mount-side half of that seam; 067 replaces it with the engine's unplaceable set.
+const NO_OVER_COMMIT_ITEMS: OverCommitItem[] = [];
+
+// The chat-027 PATCH needs `planUpdatedAt` as its OCC token, but the §9 GET
+// PlanResponse does not expose it (FLAG, Chat 056) — so the prompt's confirm stays
+// inert rather than firing a blind PATCH that would 409. Threading the token is part of
+// the same 067 wiring that supplies the items.
+const NO_OCC_TOKEN = null;
 
 interface GenerationState {
   active: boolean;
@@ -196,6 +212,9 @@ export default function PlanPage(): React.JSX.Element {
     <main className="mx-auto max-w-3xl px-4 py-6">
       {/* Sunday weekly-planning nudge (Chat 057). Self-hides off-Sunday / when dismissed. */}
       <SundayPrompt />
+
+      {/* The single over-commit prompt (Chat 056). Self-hides with no conflicting items. */}
+      <OverCommitPrompt items={NO_OVER_COMMIT_ITEMS} planUpdatedAt={NO_OCC_TOKEN} />
 
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-cream">Daily plan</h1>

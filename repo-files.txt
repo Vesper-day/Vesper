@@ -827,8 +827,11 @@ apps/mobile/components/BiometricGate.tsx
 apps/mobile/components/UpdateGateModal.tsx
 apps/mobile/components/plan/BlockCard.tsx
 apps/mobile/components/plan/BlockTimeline.tsx
+apps/mobile/components/plan/OverCommitPrompt.tsx
 apps/mobile/components/plan/PlanEmpty.tsx
 apps/mobile/components/plan/PlanSkeleton.tsx
+apps/mobile/components/plan/overCommitHelpers.test.ts
+apps/mobile/components/plan/overCommitHelpers.ts
 apps/mobile/components/plan/planViewHelpers.test.ts
 apps/mobile/components/plan/planViewHelpers.ts
 apps/mobile/components/plan/types.ts
@@ -1059,8 +1062,11 @@ apps/web/app/webhooks/google-calendar/validateNotification.ts
 apps/web/components.json
 apps/web/components/plan/BlockCard.tsx
 apps/web/components/plan/BlockTimeline.tsx
+apps/web/components/plan/OverCommitPrompt.tsx
 apps/web/components/plan/PlanEmpty.tsx
 apps/web/components/plan/PlanSkeleton.tsx
+apps/web/components/plan/overCommitResolution.test.ts
+apps/web/components/plan/overCommitResolution.ts
 apps/web/components/plan/planViewHelpers.test.ts
 apps/web/components/plan/planViewHelpers.ts
 apps/web/components/tasks/TaskCard.tsx
@@ -1278,6 +1284,8 @@ packages/ai/src/prompts/voiceGateReview.ts
 packages/ai/src/prompts/weekly-review.ts
 packages/ai/src/scheduling/taskPlacement.test.ts
 packages/ai/src/scheduling/taskPlacement.ts
+packages/ai/src/scheduling/taskReflow.test.ts
+packages/ai/src/scheduling/taskReflow.ts
 packages/ai/src/selectRecipeTemplate.ts
 packages/ai/src/selectWorkoutTemplate.ts
 packages/ai/src/streamText.ts

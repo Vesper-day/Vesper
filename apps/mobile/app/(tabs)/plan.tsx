@@ -41,6 +41,8 @@ import {
   localDateInTimeZone,
 } from '../../components/plan/planViewHelpers';
 import { SundayPrompt } from '../../components/weekly-planning/SundayPrompt';
+import { OverCommitPrompt } from '../../components/plan/OverCommitPrompt';
+import type { OverCommitItem } from '../../components/plan/overCommitHelpers';
 
 // Raw token hex (verbatim from @vesper/ui tokens.ts) for the RefreshControl color props,
 // which take a color value, not a NativeWind class (the tasks.tsx convention).
@@ -60,6 +62,19 @@ function deviceTimeZone(): string {
 const DEFAULT_ENERGY_SCORE = 5;
 
 const TOAST_MS = 2000;
+
+// Over-commit conflicts (Chat 056), parity with the web 039 host. The reflow engine
+// (packages/ai taskReflow.ts) only runs when a new calendar event displaces a scheduled
+// task chunk, and chat 067 owns that calendar-sync trigger by design (067-FIRST clears
+// overlapping blocks to `rescheduled`, THEN 056-SECOND reflows the displacement). 067 is
+// not built, so nothing can produce a conflict yet and the prompt self-hides on an empty
+// list. 067 replaces this with the engine's unplaceable set.
+const NO_OVER_COMMIT_ITEMS: OverCommitItem[] = [];
+
+// The chat-027 PATCH needs `planUpdatedAt` as its OCC token, but the §9 GET
+// PlanResponse does not expose it (FLAG, Chat 056) — so the prompt's confirm stays inert
+// rather than firing a blind PATCH that would 409.
+const NO_OCC_TOKEN = null;
 
 interface GenerationState {
   active: boolean;
@@ -264,6 +279,9 @@ export default function PlanScreen(): React.JSX.Element {
         >
           {/* Sunday weekly-planning nudge (Chat 057). Self-hides off-Sunday / when dismissed. */}
           <SundayPrompt />
+
+          {/* The single over-commit prompt (Chat 056). Self-hides with no conflicting items. */}
+          <OverCommitPrompt items={NO_OVER_COMMIT_ITEMS} planUpdatedAt={NO_OCC_TOKEN} />
 
           <View className="mb-4 flex-row items-center justify-between">
             <Text className="text-2xl font-semibold text-cream">Daily plan</Text>
