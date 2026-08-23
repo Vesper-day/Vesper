@@ -121,7 +121,12 @@ export interface CommitPlanParams {
   /** IANA timezone — block "HH:MM" local times convert to timestamptz in-DB. */
   timezone: string;
   planDate: string;
-  energyScore: number;
+  /**
+   * The user's logged energy (1..10) for the day, or null when unknown. Daily
+   * generation always supplies a score; the Chat-058 weekly batch-write persists
+   * seven days with no per-day energy, so it passes null (energy_score is NULLABLE).
+   */
+  energyScore: number | null;
   plan: DailyPlan;
   /** A plan already existed for (user, date): increment + replace blocks. */
   isRegeneration: boolean;

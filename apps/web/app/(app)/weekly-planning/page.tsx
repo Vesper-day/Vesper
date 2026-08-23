@@ -34,6 +34,10 @@ import {
   type PriorityRow,
 } from '@/lib/weekly-planning/buildPrioritiesSubmission';
 import { addDays, comingMonday, weekWindow } from '@/lib/weekly-planning/week';
+import { Step4ModuleAdjustments } from './Step4ModuleAdjustments';
+import { Step5ReviewGrid } from './Step5ReviewGrid';
+import type { WeekConstraints } from '@/lib/weekly-planning/weekConstraints';
+import { WEEK_REVIEW_ACCEPTED_LINE } from '@vesper/shared/copy';
 
 // --- Local response types (no @vesper/shared barrel) ------------------------
 
@@ -66,7 +70,9 @@ interface CalendarInstance {
   recurring: boolean;
 }
 
-type Step = 'review' | 'priorities' | 'events' | 'done';
+// Steps 1-3 (Chat 057) + Steps 4-5 (Chat 058): module adjustments, then the
+// seven-day generation + review grid, then the accepted "week is set" state.
+type Step = 'review' | 'priorities' | 'events' | 'adjust' | 'review-week' | 'done';
 
 const MAX_ROWS = 5;
 const MIN_ROWS = 3;
@@ -81,6 +87,8 @@ export default function WeeklyPlanningPage(): React.JSX.Element {
   const window = useMemo(() => weekWindow(targetMonday), [targetMonday]);
 
   const [step, setStep] = useState<Step>('review');
+  // Step-4 transient constraints, carried into the Step-5 generation.
+  const [constraints, setConstraints] = useState<WeekConstraints | null>(null);
 
   // --- Reads ---------------------------------------------------------------
   const reviewQuery = useQuery({
@@ -121,12 +129,30 @@ export default function WeeklyPlanningPage(): React.JSX.Element {
       )}
 
       {step === 'events' && (
-        <EventsStep window={window} targetMonday={targetMonday} onConfirm={() => setStep('done')} />
+        <EventsStep window={window} targetMonday={targetMonday} onConfirm={() => setStep('adjust')} />
+      )}
+
+      {step === 'adjust' && (
+        <Step4ModuleAdjustments
+          targetMonday={targetMonday}
+          onBuild={(c) => {
+            setConstraints(c);
+            setStep('review-week');
+          }}
+        />
+      )}
+
+      {step === 'review-week' && constraints && (
+        <Step5ReviewGrid
+          targetMonday={targetMonday}
+          constraints={constraints}
+          onAccepted={() => setStep('done')}
+        />
       )}
 
       {step === 'done' && (
         <Card className="p-6">
-          <ButlerLine>The week is set. I&apos;ll take it from here.</ButlerLine>
+          <ButlerLine>{WEEK_REVIEW_ACCEPTED_LINE}</ButlerLine>
           <div className="mt-4">
             <Link
               href="/plan"
