@@ -12,6 +12,7 @@ export * from './cost/tracker';
 export * from './prompts/types';
 
 export * from './prompts/dailyPlanSynthesis';
+export * from './prompts/weeklyTemplateSynthesis';
 export * from './prompts/weekly-review';
 export * from './prompts/template-selection';
 export * from './prompts/nl-command';
@@ -74,6 +75,29 @@ export type { DailyPlanChunk } from './synthesizePlan';
 export { APOLOGY_LINE } from './synthesizePlan';
 export { readBreakerState } from './synthesizePlan.circuitBreaker';
 export type { BreakerState } from './synthesizePlan.circuitBreaker';
+
+// Chat 058: weekly-template synthesis (7-day plan generation with priority threading).
+export {
+  synthesizeWeeklyTemplate,
+  applyWeeklyConstraints,
+  buildWeeklyContext,
+  dateForDayIndex,
+  addDaysUtc,
+  WeeklyTemplateSchema,
+  WeeklyDaySchema,
+  WeeklyConstraintsSchema,
+  EMPTY_WEEKLY_CONSTRAINTS,
+  DAYS_IN_WEEK,
+} from './weeklyTemplate';
+export type {
+  WeeklyTemplate,
+  WeeklyDay,
+  WeeklyConstraints,
+  WeeklyPausedModule,
+  WeeklyFixedNote,
+  SynthesizeWeeklyTemplateParams,
+  WeeklyTemplateResult,
+} from './weeklyTemplate';
 
 // Chat 064: Google Calendar today-sync (token refresh + event classification).
 // Feeds the Layer-4 calendarEvents array consumed by buildPlanContext.
