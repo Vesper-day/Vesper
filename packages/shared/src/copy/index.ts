@@ -85,3 +85,82 @@ export function overCommitItemLine(title: string, minutes: number): string {
 
 /** Stable id for this entry, so 044 can key/consolidate it later. */
 export const OVER_COMMIT_COPY_ID = 'tasks.over_commit_prompt' as const;
+
+// ---------------------------------------------------------------------------
+// Weekly-planning Steps 4 & 5 (Chat 058) — the Sunday session.
+// ---------------------------------------------------------------------------
+//
+// PRD §3.3 Step 4 (module adjustments) and Step 5 (plan generation + review). These
+// lines are the butler's framing for the two closing steps of the Sunday session and
+// are consumed by BOTH the web and mobile surfaces from the SAME client-safe
+// `@vesper/shared/copy` subpath (never the bare @vesper/shared barrel, which pulls
+// @vesper/db -> postgres into a client bundle).
+//
+// VOICE GATE (Chat 058 determination, unchanged from Chat 056/057): NOT gated. The
+// live gate (packages/ai voiceGate.ts / gatePlanStrings) is a runtime call over
+// GENERATED block.title + block.note only; static UI copy has no gate call to route
+// through, and 057's weekly-planning lines were likewise hand-authored to the gate's
+// rules, not routed through it. These lines are authored to the gate's Tier-A/Tier-B
+// rules by hand and asserted against them in copy.test.ts. NO SCOREKEEPING: they set
+// up the week's shape and ask for adjustments; they never count, rank, or praise.
+
+// --- Step 4: module adjustments ---------------------------------------------
+
+/** The step-4 heading: the butler invites one-off changes for the coming week. */
+export const WEEK_ADJUST_HEADING = 'Adjustments for the week';
+
+/** The step-4 intro: states these changes apply to this week only. */
+export const WEEK_ADJUST_INTRO =
+  'Note anything one-off for the coming week. These hold for this week alone and leave your usual setup untouched.';
+
+/** Label for pausing a module on chosen days (travel days, etc.). */
+export const WEEK_ADJUST_PAUSE_MODULE_LABEL = 'Pause a module on chosen days';
+
+/** Label for flagging a recovery day where no workout is scheduled. */
+export const WEEK_ADJUST_RECOVERY_LABEL = 'Recovery day, no workout';
+
+/** Label for noting a fixed personal event on a day (a dinner out, etc.). */
+export const WEEK_ADJUST_FIXED_NOTE_LABEL = 'Note a fixed plan';
+
+/** The step-4 continue action: advances to plan generation and review. */
+export const WEEK_ADJUST_CONTINUE_LABEL = 'Build the week';
+
+/** Stable id for the step-4 copy group (Chat 044 consolidation). */
+export const WEEK_ADJUST_COPY_ID = 'weekly_planning.module_adjustments' as const;
+
+// --- Step 5: plan generation and review -------------------------------------
+
+/** The step-5 heading over the seven-day review grid. */
+export const WEEK_REVIEW_HEADING = 'The week ahead';
+
+/** The step-5 intro: the week is drafted; the user reviews and adjusts. */
+export const WEEK_REVIEW_INTRO =
+  'Here is the week as I would set it. Review each day, adjust any block, and accept when it reads right.';
+
+/** Shown while the seven-day synthesis is running. */
+export const WEEK_REVIEW_GENERATING_LINE = 'Drafting the seven days.';
+
+/** Shown when synthesis fell back to the safe template rather than a fresh draft. */
+export const WEEK_REVIEW_FALLBACK_LINE =
+  'Working from your usual routine this week. Adjust anything that does not fit.';
+
+/** The accept action: batch-writes the week and returns to the day view. */
+export const WEEK_REVIEW_ACCEPT_LABEL = 'Accept the week';
+
+/** Per-block adjust action within a day. */
+export const WEEK_REVIEW_ADJUST_BLOCK_LABEL = 'Adjust';
+
+/** The closing line once the week is accepted and loaded (advances to the day view). */
+export const WEEK_REVIEW_ACCEPTED_LINE = 'The week is set. I will take it from here.';
+
+/** Stable id for the step-5 copy group (Chat 044 consolidation). */
+export const WEEK_REVIEW_COPY_ID = 'weekly_planning.plan_review' as const;
+
+/**
+ * One day's label in the review grid: its weekday name and date.
+ *
+ * Rendered example: `weekDayLabel('Monday', 'Aug 24')` -> `"Monday, Aug 24"`
+ */
+export function weekDayLabel(weekday: string, date: string): string {
+  return `${weekday}, ${date}`;
+}

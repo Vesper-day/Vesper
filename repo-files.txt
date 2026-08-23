@@ -859,6 +859,8 @@ apps/mobile/components/ui/index.ts
 apps/mobile/components/ui/motion.test.tsx
 apps/mobile/components/ui/motion.tsx
 apps/mobile/components/ui/utils.ts
+apps/mobile/components/weekly-planning/Step4ModuleAdjustments.tsx
+apps/mobile/components/weekly-planning/Step5ReviewGrid.tsx
 apps/mobile/components/weekly-planning/SundayPrompt.tsx
 apps/mobile/expo-env.d.ts
 apps/mobile/global.css
@@ -916,6 +918,10 @@ apps/mobile/lib/subscriptionVerify.ts
 apps/mobile/lib/supabase.ts
 apps/mobile/lib/tasks.test.ts
 apps/mobile/lib/tasks.ts
+apps/mobile/lib/weekConstraints.test.ts
+apps/mobile/lib/weekConstraints.ts
+apps/mobile/lib/weekReview.test.ts
+apps/mobile/lib/weekReview.ts
 apps/mobile/lib/weeklyPlanning.test.ts
 apps/mobile/lib/weeklyPlanning.ts
 apps/mobile/metro.config.js
@@ -941,6 +947,8 @@ apps/web/app/(app)/settings/integrations/page.tsx
 apps/web/app/(app)/settings/page.tsx
 apps/web/app/(app)/tasks/page.tsx
 apps/web/app/(app)/week/page.tsx
+apps/web/app/(app)/weekly-planning/Step4ModuleAdjustments.tsx
+apps/web/app/(app)/weekly-planning/Step5ReviewGrid.tsx
 apps/web/app/(app)/weekly-planning/page.tsx
 apps/web/app/(auth)/layout.tsx
 apps/web/app/(auth)/sign-in/page.tsx
@@ -1003,6 +1011,9 @@ apps/web/app/api/v1/plans/generate/route.ts
 apps/web/app/api/v1/plans/operations.ts
 apps/web/app/api/v1/plans/plans.integration.test.ts
 apps/web/app/api/v1/plans/today/route.ts
+apps/web/app/api/v1/plans/week/accept/route.ts
+apps/web/app/api/v1/plans/week/generate/route.ts
+apps/web/app/api/v1/plans/week/operations.ts
 apps/web/app/api/v1/profile/modules/[moduleId]/route.ts
 apps/web/app/api/v1/profile/modules/[moduleId]/toggleModule.ts
 apps/web/app/api/v1/profile/operations.ts
@@ -1129,6 +1140,10 @@ apps/web/lib/utils.ts
 apps/web/lib/weekly-planning/buildPrioritiesSubmission.test.ts
 apps/web/lib/weekly-planning/buildPrioritiesSubmission.ts
 apps/web/lib/weekly-planning/week.ts
+apps/web/lib/weekly-planning/weekConstraints.test.ts
+apps/web/lib/weekly-planning/weekConstraints.ts
+apps/web/lib/weekly-planning/weekReview.test.ts
+apps/web/lib/weekly-planning/weekReview.ts
 apps/web/middleware.ts
 apps/web/next-env.d.ts
 apps/web/next.config.ts
@@ -1282,6 +1297,7 @@ packages/ai/src/prompts/template-selection.ts
 packages/ai/src/prompts/types.ts
 packages/ai/src/prompts/voiceGateReview.ts
 packages/ai/src/prompts/weekly-review.ts
+packages/ai/src/prompts/weeklyTemplateSynthesis.ts
 packages/ai/src/scheduling/taskPlacement.test.ts
 packages/ai/src/scheduling/taskPlacement.ts
 packages/ai/src/scheduling/taskReflow.test.ts
@@ -1297,6 +1313,8 @@ packages/ai/src/synthesizePlan.simplifiedContext.ts
 packages/ai/src/synthesizePlan.ts
 packages/ai/src/voiceGate.regex.ts
 packages/ai/src/voiceGate.ts
+packages/ai/src/weeklyTemplate.test.ts
+packages/ai/src/weeklyTemplate.ts
 packages/ai/tsconfig.json
 packages/ai/vitest.config.ts
 packages/apple/package.json
