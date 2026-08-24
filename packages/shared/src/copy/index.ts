@@ -164,3 +164,94 @@ export const WEEK_REVIEW_COPY_ID = 'weekly_planning.plan_review' as const;
 export function weekDayLabel(weekday: string, date: string): string {
   return `${weekday}, ${date}`;
 }
+
+// ---------------------------------------------------------------------------
+// Nutrition module (Chat ADD-B) — the Modules-tab nutrition page.
+// ---------------------------------------------------------------------------
+//
+// PRD §6.3: the nutrition module ships at method-B functional-breadth scaffold depth —
+// a daily food-log surface, a food-search surface over the recipe corpus, and an AI
+// recipe-modify surface. Micronutrient / vitamin breakdown, RDA progress, calorie
+// internals, and external food-nutrient DB wiring are DEFERRED; the page names them and
+// reserves a slot, and this copy states that plainly without implying they are present.
+//
+// Authored here (not inlined in two components) so the web page and the mobile screen
+// render the SAME strings from the SAME client-safe `@vesper/shared/copy` subpath (never
+// the bare @vesper/shared barrel, which pulls @vesper/db -> postgres into a client
+// bundle).
+//
+// VOICE GATE (ADD-B determination, unchanged from Chat 056/057/058): NOT gated. The live
+// gate (packages/ai voiceGate.ts) is a runtime Anthropic call over GENERATED block
+// strings only; static UI copy has no gate call to route through. These lines are
+// authored to the gate's Tier-A / Tier-B rules by hand and asserted against them in
+// copy.test.ts. NO SCOREKEEPING: the food-log records what was eaten and never counts,
+// ranks, praises, or frames the day as progress against a target.
+
+/** The nutrition page heading. */
+export const NUTRITION_HEADING = 'Nutrition';
+
+/** The nutrition page intro: what the three surfaces below do. */
+export const NUTRITION_INTRO =
+  'Log what you eat, search the recipe library, and ask for a recipe to be adjusted.';
+
+/** Shown when the nutrition module is off (the page self-gates on its singular key). */
+export const NUTRITION_MODULE_OFF_LINE =
+  'The Nutrition module is off. Enable it in your profile to log meals and search recipes.';
+
+// --- Food-log surface -------------------------------------------------------
+
+/** Heading over the day's food-log list. */
+export const NUTRITION_FOOD_LOG_HEADING = "Today's food log";
+
+/** Empty state for the day's food-log list. */
+export const NUTRITION_FOOD_LOG_EMPTY = 'Nothing logged today. Add an item below.';
+
+/** Label on the add-item action. */
+export const NUTRITION_FOOD_LOG_ADD_LABEL = 'Log an item';
+
+/** Placeholder for the free-text item-name field. */
+export const NUTRITION_FOOD_LOG_ITEM_PLACEHOLDER = 'e.g. Porridge with berries';
+
+/** Placeholder for the optional portion-note field. */
+export const NUTRITION_FOOD_LOG_QUANTITY_PLACEHOLDER = 'Portion, optional. e.g. 1 bowl';
+
+// --- Food-search surface ----------------------------------------------------
+
+/** Heading over the recipe-corpus search. */
+export const NUTRITION_SEARCH_HEADING = 'Search recipes';
+
+/** Help line under the search field. */
+export const NUTRITION_SEARCH_HELP = 'Find a recipe by name and log it to your day.';
+
+/** Placeholder for the search field. */
+export const NUTRITION_SEARCH_PLACEHOLDER = 'Search by name';
+
+/** Shown when a search returns nothing. */
+export const NUTRITION_SEARCH_EMPTY = 'No recipes match that name.';
+
+// --- AI recipe-modify surface -----------------------------------------------
+
+/** Heading over the recipe-modify surface. */
+export const NUTRITION_MODIFY_HEADING = 'Adjust a recipe';
+
+/** Help line: what the modify surface does. */
+export const NUTRITION_MODIFY_HELP =
+  'Name a recipe and the change you want, and I will revise it for you.';
+
+/** Placeholder for the recipe-name field. */
+export const NUTRITION_MODIFY_RECIPE_PLACEHOLDER = 'Recipe name';
+
+/** Placeholder for the requested-change field. */
+export const NUTRITION_MODIFY_REQUEST_PLACEHOLDER = 'e.g. make it vegetarian';
+
+/** Label on the submit action. */
+export const NUTRITION_MODIFY_SUBMIT_LABEL = 'Adjust the recipe';
+
+// --- Deferred deep-engine slot ----------------------------------------------
+
+/** Names the deferred deep-engine surfaces the page reserves a slot for (PRD §6.3). */
+export const NUTRITION_DEFERRED_SLOT_LINE =
+  'Calorie and nutrient breakdowns are not part of this view yet.';
+
+/** Stable id for the nutrition copy group (Chat 044 consolidation). */
+export const NUTRITION_COPY_ID = 'nutrition.module_page' as const;

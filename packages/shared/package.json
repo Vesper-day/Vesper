@@ -28,6 +28,10 @@
     "./copy": {
       "types": "./dist/copy/index.d.ts",
       "default": "./src/copy/index.ts"
+    },
+    "./nutrition": {
+      "types": "./dist/nutrition/index.d.ts",
+      "default": "./src/nutrition/index.ts"
     }
   },
   "scripts": {
