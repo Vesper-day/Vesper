@@ -1,3 +1,5 @@
+> **⛔ DEPRECATED — SUPERSEDED by the clean-posture design-track overhaul.** This kickoff drives an **AI-image generation pipeline** (operator-generated warm-dark manor stills / atmospheric imagery for the immersive `-V` surfaces). The clean-posture overhaul ships **no AI-generated imagery**, so this asset-manifest pipeline is **retired.** Do not run it or produce an `ASSET_MANIFEST.md` from it. Content preserved for reference only. Current authority: `docs/DESIGN_STRATEGY.md` (clean-posture banner) and `docs/PHASE_4_BUILD_PLAN.md` → Addendum → "Design-Track Overhaul."
+
 Starting an OFF-RECORD asset chat — the Vesper Visual Asset Manifest + Operator Generation Playbook.
 This is NOT a numbered Phase-4 build-plan chat, NOT a Claude Code prompt, and produces NO code. Do not
 assign or confirm a chat number or a model. The build plan does not schedule this work; it is an

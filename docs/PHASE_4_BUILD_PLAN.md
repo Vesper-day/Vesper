@@ -1164,6 +1164,8 @@ Block 5 takes the user from sign-up to landing on a fully populated day view. Th
 
 *Block 5 · EO 16 · 🔵 🟢 🎩 · Skills: caveman, stop-slop · — · Window Y (Fwin F5) · CD-flags: —*
 
+> **DESIGN-TRACK OVERHAUL RE-SCOPE — see Addendum → "Design-Track Overhaul."** This not-yet-run `-V` half runs on the **Fable model** (design-track carve-out from the single-model rule) and targets the **clean / shippable** posture: restrained tokens, standard motion, conventional layout — **no AI-generated imagery, no cinematic or immersive-scroll motion.** The Screen-1 "four-second sequential reveal" is re-scoped to a **restrained standard entrance** (Considered-band token, reduced-motion → instant); any immersive/cinematic wording in the Goal/Output/Impl-notes below is superseded by that posture. Fable authors the styled component code directly (Option 1: no Figma, no image pipeline). 106/107/107a token + primitive values are unchanged.
+
 **Load at session start:** PRD §3.1 (Onboarding Flow, Screens 1–3); LAYER_4_EXPERIENCE_IDENTITY.md (Onboarding Flow section, Screens 1, 2, 3); the design system tokens and primitives from chats 107 and 107a; chats 010, 011 (existing auth surfaces being repositioned, as visual reference only); chat 017 (voice gate) for the welcome/honorific copy.
 
 **Goal:** Build the static, design-locked visual surfaces for onboarding screens 1–3 against the design system: the welcome screen with its four-second sequential reveal animation, the authentication screen repositioned within the onboarding flow (visual reposition of the chats 010/011 surface; no new auth wiring), and the honorific selection screen. Output is durable visual, wired to mocked state and reveal timing only — persistence and the state machine are deferred to 032-W.
@@ -1204,6 +1206,8 @@ Block 5 takes the user from sign-up to landing on a fully populated day view. Th
 
 *Block 5 · EO 17 · 🔵 🟢 · Skills: — · — · Window Y (Fwin F6) · CD-flags: —*
 
+> **DESIGN-TRACK OVERHAUL RE-SCOPE — see Addendum → "Design-Track Overhaul."** This not-yet-run `-V` half runs on the **Fable model** (design-track carve-out) and targets the **clean / shippable** posture: restrained tokens, standard motion, conventional layout — no AI-generated imagery, no cinematic/immersive-scroll motion. Fable authors the styled component code directly (Option 1). 106/107/107a token + primitive values are unchanged.
+
 **Load at session start:** PRD §3.1 (Screen 4); LAYER_4_EXPERIENCE_IDENTITY.md (Screen 4); the archetype enum values; the design system tokens and primitives from 107/107a.
 
 **Goal:** Build the static archetype selection screen against the design system: six tab-style tiles (Nine-to-Five Professional, Remote Worker, Student, Athlete-Focused, Founder Mode, Mixed) with their selected/unselected visual states. Selection is visual only at this stage — the persistence and branch routing are deferred to 033-W.
@@ -1238,6 +1242,8 @@ Block 5 takes the user from sign-up to landing on a fully populated day view. Th
 ### Chat 034-V — Onboarding Screens 5 and 6: Calendar-Connect / Walkthrough / Location (Static)
 
 *Block 5 · EO 18 · 🔵 🟢 · Skills: — · — · Window Y (Fwin F7) · CD-flags: —*
+
+> **DESIGN-TRACK OVERHAUL RE-SCOPE — see Addendum → "Design-Track Overhaul."** This not-yet-run `-V` half runs on the **Fable model** (design-track carve-out) and targets the **clean / shippable** posture: restrained tokens, standard motion, conventional layout — no AI-generated imagery, no cinematic/immersive-scroll motion. Fable authors the styled component code directly (Option 1). 106/107/107a token + primitive values are unchanged.
 
 **Load at session start:** PRD §3.1 (Screens 5A, 5B, 6); LAYER_4_EXPERIENCE_IDENTITY.md (corresponding screens); the design system tokens and primitives from 107/107a; chat 017 (voice gate) for the location rationale copy.
 
@@ -1276,6 +1282,10 @@ Block 5 takes the user from sign-up to landing on a fully populated day view. Th
 ### Chat 035-V — Onboarding Screens 7 through 11: Preferences, Modules, Trial (Forms, Mocked)
 
 *Block 5 · EO 19 · 🔵 🟢 🎩 · Skills: caveman, stop-slop · — · Window Y (Fwin F8) · CD-flags: —*
+
+> **DESIGN-TRACK OVERHAUL RE-SCOPE — see Addendum → "Design-Track Overhaul."** This not-yet-run `-V` half runs on the **Fable model** (design-track carve-out) and targets the **clean / shippable** posture: restrained tokens, standard motion, conventional layout — no AI-generated imagery, no cinematic/immersive-scroll motion. Fable authors the styled component code directly (Option 1). 106/107/107a token + primitive values are unchanged.
+>
+> **Surface retarget (ADD-A + method-B scaffolds).** The module-toggle screen (Screen 9) and the per-module quick-preference forms (Screen 10) this half styles now feed the **Modules tab** introduced by ADD-A (a scrollable rounded-card list; each module card routes to its own full page) and the **method-B module scaffolds** (ADD-B nutrition, ADD-C fitness). Style the new Modules-tab list + the scaffold module pages' onboarding-preference entry, **not** the superseded settings-tab module mounts. Deep-engine surfaces (nutrition micronutrient/RDA/calorie; fitness strength-rank/percentile) are **deferred** — do not style preference fields for them.
 
 **Load at session start:** PRD §3.1 (Screens 7–11); LAYER_4_EXPERIENCE_IDENTITY.md (corresponding screens); PRD §6 (each module's onboarding preferences); LAYER_2_PRODUCT_SCOPE.md (Pillar 2 default state per module); the 111-corrected notification-preferences shape (this half reflects it); the design system tokens and primitives from 107/107a; chat 017 (voice gate) for the screen copy.
 
@@ -1317,6 +1327,8 @@ Block 5 takes the user from sign-up to landing on a fully populated day view. Th
 ### Chat 036-V — First-Plan Cinematic Loading + Reveal + Tour (Mock Plan)
 
 *Block 5 · EO 20 · 🔵 🟢 🎩 · Skills: caveman, stop-slop · — · Window Y (Fwin F9) · CD-flags: —*
+
+> **DESIGN-TRACK OVERHAUL RE-SCOPE — see Addendum → "Design-Track Overhaul."** This not-yet-run `-V` half runs on the **Fable model** (design-track carve-out) and targets the **clean / shippable** posture: restrained tokens, standard motion, conventional layout — **no AI-generated imagery, no cinematic or immersive-scroll motion.** The "first-plan cinematic loading + reveal" is re-scoped to a **calm, standard loading + sequential-fade reveal** (Considered-band tokens, reduced-motion → instant) — no candle-flame/ember cinematic, no immersive choreography; the title "cinematic" and any cinematic wording below are superseded. Fable authors the styled component code directly (Option 1). 106/107/107a token + primitive values are unchanged.
 
 **Load at session start:** PRD §3.1 (first plan and tour); LAYER_4_EXPERIENCE_IDENTITY.md (Screen 12 and feature tour); the design system tokens and primitives from 107/107a; chat 017 (voice gate) for the loading and tour copy.
 
@@ -1440,6 +1452,8 @@ Block 6 builds the core daily surface of the application: the Supabase Realtime 
 
 *Block 6 · EO 21 · 🔵 🟢 · Skills: — · — · Window Y (Fwin F10) · CD-flags: —*
 
+> **DESIGN-TRACK OVERHAUL RE-SCOPE — see Addendum → "Design-Track Overhaul."** This not-yet-run `-V` half runs on the **Fable model** (design-track carve-out) and targets the **clean / shippable** posture: restrained tokens, standard motion, conventional layout — no AI-generated imagery, no cinematic/immersive-scroll motion. The fitness and nutrition block-detail layouts here must stay consistent with the **method-B module scaffolds** (ADD-C fitness, ADD-B nutrition): scaffold-breadth surfaces only; do not add detail chrome for the deferred deep engines (micronutrient/RDA/calorie; strength-rank/percentile). Fable authors the styled component code directly (Option 1). 106/107/107a token + primitive values are unchanged.
+
 **Load at session start:** PRD §4 and §6 (each module's block-detail content); the committed `BlockDetailsSchema` (the `block_details` JSONB Zod discriminated union from chat 006); the design system and component library from 107/107a (earlier in the same design-cluster window); `docs/DESIGN_STRATEGY.md` from chat 106.
 
 **Goal:** Build the expanded block-detail layouts for each of the ten `block_type` values (work, fitness, nutrition, sleep, errands, medication, finance, focus, commute, custom) as static, design-locked surfaces composed from the 107a primitives and typed against the committed `BlockDetailsSchema`. This is the visual half: each layout renders against mocked or schema-shaped sample data, with no retrieval wiring — the binding to real retrieved block data is deferred to 041-W. As a design-cluster-window chat (Fwin F10) it depends only on already-built foundations plus the design system and runs while the build track builds the backend spine in parallel.
@@ -1518,6 +1532,8 @@ Block 6 builds the core daily surface of the application: the Supabase Realtime 
 
 *Block 6 · EO 22 · 🔵 🟢 🟡 🎩 · Skills: caveman, stop-slop · — · Window Y (Fwin F11) · CD-flags: —*
 
+> **DESIGN-TRACK OVERHAUL RE-SCOPE — see Addendum → "Design-Track Overhaul."** This not-yet-run `-V` half runs on the **Fable model** (design-track carve-out) and targets the **clean / shippable** posture: restrained tokens, standard motion, conventional layout — no AI-generated imagery, no cinematic/immersive-scroll motion. Fable authors the styled component code directly (Option 1). 106/107/107a token + primitive values are unchanged.
+
 **Load at session start:** LAYER_4_EXPERIENCE_IDENTITY.md (Voice section, Line Rotation, Line Library — the authored eighty-line library); the design system and component library from 107/107a; `docs/DESIGN_STRATEGY.md` from chat 106; chat 017 (voice gate) for the line-library copy.
 
 **Goal:** Build the visual half of the ambient butler line — the static line library transcribed from Layer 4, the local (context + recency) rotation engine, and the rendered ambient-line component on both surfaces — composed from 107a primitives, with `[HONORIFIC]` placeholders left unresolved. Honorific-aware selection against the real `users.honorific` value is deferred to 044-W. This is a design-cluster-window chat (Fwin F11) depending only on the design system and the authored library.
@@ -1576,6 +1592,8 @@ Block 6 builds the core daily surface of the application: the Supabase Realtime 
 ### Chat 046-V — Vesper-Hour Static Surfaces, Week View, Morning Brief, Energy Slider, Quiet Hours (Visual / Static)
 
 *Block 6 · EO 23 · 🔵 🟢 🎩 · Skills: caveman, stop-slop · — · Window Y (Fwin F12) · CD-flags: —*
+
+> **DESIGN-TRACK OVERHAUL RE-SCOPE — see Addendum → "Design-Track Overhaul."** This not-yet-run `-V` half runs on the **Fable model** (design-track carve-out) and targets the **clean / shippable** posture: restrained tokens, standard motion, conventional layout — no AI-generated imagery, no cinematic/immersive-scroll motion. Fable authors the styled component code directly (Option 1). 106/107/107a token + primitive values are unchanged.
 
 **Load at session start:** PRD §3.2 and §3.3 (the full daily journey beyond the day view); LAYER_4_EXPERIENCE_IDENTITY.md (evening summary, morning brief, Vesper-hour voice); the design system and component library from 107/107a; `docs/DESIGN_STRATEGY.md` from chat 106; chat 017 (voice gate) for the surface copy.
 
@@ -1921,6 +1939,8 @@ Block 7 implements the seven modules — fitness, nutrition, sleep, medication, 
 
 *Block 7 · EO 54 · 🔵 🟢 · Skills: — · ⚠️ · Window N · CD-flags: F2 C*
 
+> **⚠ SUPERSEDED (mount location only) by ADD-A — Modules-Tab Navigation Refactor (Addendum, end of this document).** This chat mounts the medications surface as a tab/settings screen (`apps/mobile/app/(tabs)/medications.tsx`, web `apps/web/app/(app)/medications/page.tsx`). ADD-A re-homes it to the Modules-tab pattern (a rounded-rectangle card in the Modules list that routes to a full medications management page). The CRUD, API route, strict RLS, audit trigger, notification/quiet-hours logic, and PostHog posture below are **unchanged** — only the navigation entry and mount location move. **Consult ADD-A (SOURCE OF TRUTH for current module surface locations + mount pattern) before touching this surface;** do not default to the paths named here.
+
 **Load at session start:** PRD §6.5 (Medications); TECHNICAL_SPEC.md §3.9 (`medications` table); chat 005 (audit trigger); the F2 determination recorded by chat 111 (the `medications` quiet-hours / fire-on-time default).
 
 **Goal:** Build the medications module with the strictest RLS verified, the audit trigger firing on every CRUD verified end-to-end, the `times[]` picker for daily dose times, local-notification scheduling via expo-notifications, quiet-hours respect with a per-medication override, and PostHog posture handled correctly on the medications surface.
@@ -1940,6 +1960,8 @@ Block 7 implements the seven modules — fitness, nutrition, sleep, medication, 
 ### Chat 061 — Finance and Bills Module
 
 *Block 7 · EO 55 · 🎩 🔵 🟢 · Skills: caveman, stop-slop · — · Window N · CD-flags: —*
+
+> **⚠ SUPERSEDED (mount location only) by ADD-A — Modules-Tab Navigation Refactor (Addendum, end of this document).** This chat mounts the bills surface as a tab/settings screen (`apps/mobile/app/(tabs)/bills.tsx`, web `apps/web/app/(app)/bills/page.tsx`). ADD-A re-homes it to the Modules-tab pattern (a rounded-rectangle card in the Modules list that routes to a full bills management page). The CRUD, API route, RLS, audit trigger, default-OFF behavior, and voice-gated copy below are **unchanged** — only the navigation entry and mount location move. **Consult ADD-A (SOURCE OF TRUTH for current module surface locations + mount pattern) before touching this surface;** do not default to the paths named here.
 
 **Load at session start:** PRD §6.7 (Finance); TECHNICAL_SPEC.md §3.11 (`bills` table).
 
@@ -2558,6 +2580,8 @@ Block 11 is one of the highest-stakes blocks in Phase 4 because errors here tran
 
 *Block 11 · EO 25 · 🔵 🟢 🎩 · Skills: caveman, stop-slop · — · Window Y (Fwin F14) · CD-flags: —*
 
+> **DESIGN-TRACK OVERHAUL RE-SCOPE — see Addendum → "Design-Track Overhaul."** This not-yet-run `-V` half runs on the **Fable model** (design-track carve-out) and targets the **clean / shippable** posture: restrained tokens, standard motion, conventional layout — no AI-generated imagery, no cinematic/immersive-scroll motion. Fable authors the styled component code directly (Option 1). 106/107/107a token + primitive values are unchanged.
+
 **Load at session start:** LAYER_4_EXPERIENCE_IDENTITY.md (subscription lifecycle copy library); LAYER_5_BUSINESS_MONETIZATION.md (each state's UX); PRD §3.4 (subscription touchpoints); chats 107/107a (the design system and component library these surfaces compose from).
 
 **Goal:** Build the user-facing UI surfaces for every subscription lifecycle state as static, design-locked surfaces composed from the 107a primitives: the trial-end screen with Continue and End options, the day-5 mid-trial payment-method capture surface, the day-6 soft prompt, the past-due banner, the read-only banner polish, the archived welcome-back state, and the settings billing section. This is the visual half: every surface renders against mocked or schema-shaped sample state (the trial-end ledger, banner states, and billing section), with no purchase-flow or state-machine wiring — the binding to the real state machine and the Stripe/Apple flows is deferred to 089-W. As a design-cluster-window chat (Fwin F14) it depends only on already-built foundations plus the design system per the Part 1 window note, and runs while the build track builds the payments backend spine in parallel [doc:PHASE_4_BUILD_PLAN_part1.md].
@@ -2729,6 +2753,8 @@ Block 12 builds the public-facing surfaces of the application: the Resend email 
 
 *Block 12 · EO 15 · 🔵 🎩 · Skills: caveman, stop-slop · ⚠️ · Window Y (Fwin F4) · CD-flags: —*
 
+> **DESIGN-TRACK OVERHAUL RE-SCOPE — see Addendum → "Design-Track Overhaul."** This not-yet-run `-V` half runs on the **Fable model** (design-track carve-out) and targets the **clean / shippable** posture. **The Three.js / React Three Fiber cinematic-scroll hero is DROPPED.** Build a clean, credible marketing hero from standard web layout + the 107 design tokens (a static or lightly-animated hero using restrained CSS motion; the existing reduced-motion cream→espresso gradient fallback becomes the baseline direction, not a fallback), plus the five locked sections. **No AI-generated imagery, no `HeroThreeScene`, no GSAP/Lenis scroll engine, no Draco/glTF/shader pipeline.** This removes the Three.js mobile-performance risk that carried the ⚠️ flag; the flag now reflects only "highest-stakes first-impression surface." The `-W` binding to POST /waitlist is unchanged. Fable authors the styled component code directly (Option 1). 106/107/107a token + primitive values are unchanged. **Recon note:** 093-V has **not** shipped (marketing page is still the `<h1>Vesper</h1>` stub; no `HeroThreeScene`; no three/gsap/lenis installed), so this is a clean forward build with no removal follow-up — see Addendum → Design-Track Overhaul → "Landed-work status."
+
 **Load at session start:** LAYER_4_EXPERIENCE_IDENTITY.md (Marketing Visual Language, landing page composition); LAYER_6_LAUNCH_GROWTH.md (landing page conversion strategy); OPEN_SOURCE_INVENTORY.md (Three.js, R3F); chats 107/107a (the design system and component library these surfaces compose from); chat 014 (CSP configuration / precompiled-shader strategy).
 
 **Goal:** Build the public waitlist landing page at `apps/web/app/(marketing)/page.tsx` with five sections in the Layer 4 composition — hero with the Three.js cinematic scroll experience, "What Vesper does," modules, "How it works," and pricing plus signup — as a static, design-locked surface running on **canned templates with no account**. The page is fully responsive; performance on mobile devices is the constraint that drives every implementation decision because the target audience checks the link from their phone. This is the visual half: the signup form renders and validates client-side against the committed waitlist contract, but the binding of its POST to the real chat-031 waitlist API is deferred to 093-W. As a design-cluster-window chat (Fwin F4) it depends only on already-built foundations plus the design system per the Part 1 window note, and runs while the build track builds the backend spine in parallel [doc:PHASE_4_BUILD_PLAN_part1.md].
@@ -2799,6 +2825,8 @@ Block 12 builds the public-facing surfaces of the application: the Resend email 
 ### Chat 095-V — Referral Landing Page (Visual / Static)
 
 *Block 12 · EO 26 · 🔵 🎩 · Skills: caveman, stop-slop · — · Window Y (Fwin F15) · CD-flags: —*
+
+> **DESIGN-TRACK OVERHAUL RE-SCOPE — see Addendum → "Design-Track Overhaul."** This not-yet-run `-V` half runs on the **Fable model** (design-track carve-out) and targets the **clean / shippable** posture: restrained tokens, standard motion, conventional layout — no AI-generated imagery, no cinematic/immersive-scroll motion. Fable authors the styled component code directly (Option 1). 106/107/107a token + primitive values are unchanged.
 
 **Load at session start:** LAYER_6_LAUNCH_GROWTH.md (referral program); LAYER_4_EXPERIENCE_IDENTITY.md (referral copy); chats 107/107a (design system and component library).
 
@@ -3570,3 +3598,187 @@ Concatenate by appending each part's body to the running document in that exact 
 **Known carried discrepancy from part 9 — do NOT "fix" it during assembly.** Chat 093-W has no master-table row; its EO is left "—" and it is build-track per Stage 2 §5 (not a master-table row) [doc:PHASE_4_BUILD_PLAN_part9a.md]. The File-Split Plan's "21 entries" figure for part 9 is a pre-fold/pre-split count that disagrees with the master-table-rendered count; this is flagged, not reconciled [doc:PHASE_4_BUILD_PLAN_part1.md]. The assembler must preserve both as-is. The remaining carried discrepancies are catalogued in the Closing Notes above and are likewise to be preserved, not patched.
 
 End of Phase 4 Build Plan.
+
+---
+---
+
+# ADDENDUM — LATER-ADDED CORRECTIVE CHATS (no EO; run out-of-sequence)
+
+**Nature.** The chats in this addendum are **later-added corrective sessions**, appended after the canonical Parts 1–10 assembly. They are **NOT rows in the master reordered-sequence table** and carry **no EO** — they run **immediately, out of the topological sequence**, because they repair a navigation/scope decision made after the master table was frozen. The master table above is **untouched**: no EO was inserted, renumbered, or shifted for these chats. Each addendum entry follows the Part 1 per-chat template (Load / Goal / Output / Implementation notes / Dependencies / End-of-session checks) **minus the EO/master-table row**, and adds two corrective-only lines: a **SUPERSEDES** line and a **SOURCE OF TRUTH** line.
+
+**ID scheme.** Addendum chats use an **`ADD-` prefix** (`ADD-A`, `ADD-B`, `ADD-C`, `ADD-D`) so they cannot collide with any integer chat ID in the master table (existing numeric IDs, the intentionally-deleted 068–070, and the ≥106 new-chat range are all integer-shaped; `ADD-*` is not). The prefix also reads at a glance as a later-added corrective chat rather than a sequenced one. The Design-Track Overhaul that follows the three chats is a **doc-level re-scope**, not a chat, and takes no ID.
+
+**Authority.** Because the original module chats (060, 061, 062) and the app-shell/tab-bar chat (013) may be **partially stale on surface locations** after this change, **any future chat that touches a module surface, the mobile tab bar, or module backend wiring MUST read this addendum FIRST** as the authoritative reference for current surface locations + the mount pattern, and MUST NOT default to the paths named in the original chats. This authority is also encoded as a standing note in `CLAUDE.md`.
+
+**Model.** ADD-A / ADD-B / ADD-C are **build-track** sessions and run on the **single build model** (per the Part 1 legend — per-chat model assignments are removed). They are **not** design-track `-V` halves and do **not** run on Fable; they compose from the **already-committed, already-clean 107/107a design system** (unchanged). **ADD-D is the exception: it is a design-track chat that runs on the FABLE model** (per the design-track carve-out), polishing the already-shipped design surfaces to the finished bar under the token-freeze contract. The Fable pass (ADD-D plus the re-scoped `-V` halves) refines the high-visibility surfaces per the Design-Track Overhaul **priority order** below.
+
+---
+
+### Chat ADD-A — Modules-Tab Navigation Refactor (Addendum / Corrective)
+
+*Addendum · no EO (runs immediately, out of sequence) · 🟢 🔵 · Skills: — · ⚠️ · Window N · CD-flags: —*
+
+**SUPERSEDES:** the settings-tab shell defined in chat **013** (`apps/mobile/app/(tabs)/_layout.tsx` — "tab navigator with Plan, Tasks, Calendar, Settings tabs") and the module **mount pattern** used by chats **060** (`apps/mobile/app/(tabs)/medications.tsx`, web `apps/web/app/(app)/medications/page.tsx`) and **061** (`apps/mobile/app/(tabs)/bills.tsx`, web `apps/web/app/(app)/bills/page.tsx`), and the settings-tab home for module-adjacent settings (`apps/mobile/app/(tabs)/settings/{index,integrations,privacy}`, web `apps/web/app/(app)/settings`). The 060/061 CRUD/API/RLS/audit/notification bodies are unchanged — only the tab bar, the navigation entries, and the mount locations move.
+
+**SOURCE OF TRUTH:** this chat (ADD-A) is the **authoritative reference for current module surface locations + the mount pattern**. Any later module-touching chat consults ADD-A before the original chat bodies.
+
+**Load at session start:** chat 013 (mobile shell — the `(tabs)/_layout.tsx` tab navigator being rebuilt); chat 012 (web shell — the `(app)` route group + settings surfaces being re-homed); the landed **107/107a** design system + component library (`@vesper/ui` tokens, `Card`, `Button`, list primitives — compose, do not re-derive); the landed **060** (medications) and **061** (bills) surfaces being re-homed; the built plan/tasks/calendar surfaces (039/040, 054-W, 052-W/053) that keep their tabs; PRD **§3.5** (Application Navigation and the Modules Tab); `docs/DESIGN_STRATEGY.md` (clean posture).
+
+**Goal:** Rebuild the mobile tab bar and introduce the Modules tab. (1) Change the mobile tab bar from **plan / tasks / calendar / settings** to **plan / MODULES / tasks / calendar**, with **Modules second-from-left**. (2) Rename the "settings" tab to **"Modules."** Its content is **not lost**: the Modules tab is a **vertically scrollable list of rounded-rectangle cards, one per module** (scroll for the rest), and **every card routes to its own full page**. Actual settings (integrations/GCal, billing/subscription, privacy/biometric, referral, account) move into a **"Settings" rounded-rectangle card at the bottom of the Modules list** that opens the existing settings surfaces as their own page/sub-stack (no settings surface is deleted — they are re-parented under the bottom Settings card). (3) **Re-home** the landed medications (060) and bills (061) surfaces from their settings/tab mounts to the Modules-tab card→full-page pattern. (4) **Define the mount contract** every module page follows so errands (062, unbuilt) and every future module chat mount into it.
+
+**Output:**
+- Rebuilt `apps/mobile/app/(tabs)/_layout.tsx` — the four-tab bar **plan / Modules / tasks / calendar** (Modules second-from-left); the prior "settings" tab is renamed and re-pointed to the Modules list route
+- `apps/mobile/app/(tabs)/modules/index.tsx` (and web `apps/web/app/(app)/modules/page.tsx`) — the **Modules list**: a vertically scrollable column of rounded-rectangle cards composed from the `@vesper/ui` `Card` primitive, one card per module, each routing (`router.push`) to that module's full page; a **"Settings" card pinned at the bottom** routing into the re-homed settings sub-stack
+- The **module mount contract** (documented in-file and referenced by this addendum): **reminder-list modules** (medications, bills, errands) → a **full management page** (list + add/edit; entries continue to surface via their existing notification/schedule mechanism and as plan blocks, unchanged); **generative modules** (fitness, nutrition, sleep) → a **richer module page** (V1 method-B scaffold breadth only — deep features deferred). Both card types **route somewhere**; no card is a dead toggle
+- Re-homed **medications** surface: the 060 page moves under `.../modules/medications` (mobile) / `apps/web/app/(app)/modules/medications/page.tsx` (web); the 060 CRUD/API/RLS/audit/notification logic is imported/re-parented, **not rewritten**
+- Re-homed **bills** surface: the 061 page moves under `.../modules/bills`; 061 logic re-parented, not rewritten
+- Re-homed **settings** sub-stack under the bottom Settings card: integrations/GCal, billing/subscription, privacy/biometric, referral, account — each opening the existing settings surface as its own page (routes re-parented from `(tabs)/settings/*` and `(app)/settings/*` into the Modules→Settings sub-stack)
+- Web parity: the `(app)` navigation exposes the same Modules surface and card→page routing
+
+**Implementation notes:** This is a **corrective navigation refactor**, not new feature logic — the module CRUD/API/RLS/audit/notification bodies from 060/061 are preserved and re-parented. The Modules list and every module page compose from the **committed 107/107a primitives** (the clean design system); no token or primitive value changes. The bottom **Settings card** is the mechanism that prevents settings-content loss: renaming the tab to "Modules" does not remove settings — it demotes the settings *entry point* to a card at the bottom of the Modules list that opens the same surfaces. The **mount contract** is the durable output: it is what errands (062) and future module chats read from ADD-A so they do not re-invent a mount. Mobile talks only through `/api/v1/` (CLAUDE.md architecture rule) — this refactor adds **no new data path**, only navigation + surface relocation. The ⚠️ flag reflects that a tab-bar + route-tree relocation touches every module surface at once and must not silently drop a settings sub-surface or a notification registration during the move. The **design-track Fable pass** styles the Modules tab + top-priority module pages per the Design-Track Overhaul priority order; ADD-A builds the structure + composition against the already-clean system so the surfaces read as finished even before that pass.
+
+**Dependencies:** Already-built foundations only — chat 013 (mobile shell/tab bar), chat 012 (web shell/settings surfaces), the landed 107/107a design system, the landed 060 (medications) and 061 (bills) surfaces, and the built plan/tasks/calendar tabs (039/040, 054-W, 052-W/053). No dependency on any unbuilt master-table chat. Errands (062) and future module chats depend on **this** chat's mount contract, not the reverse.
+
+**End-of-session checks:** The mobile tab bar shows **plan / Modules / tasks / calendar** with Modules second-from-left. The Modules tab renders a scrollable rounded-card list; **every card routes to a full page** (no dead card). The medications (060) and bills (061) surfaces open from their Modules cards with their CRUD, notifications, RLS, and audit behavior intact (re-homed, not rewritten). The bottom **Settings** card opens integrations/GCal, billing/subscription, privacy/biometric, referral, and account — **no settings surface is missing**. The mount contract is documented in-file and this addendum is the stated source of truth for it. `pnpm build` / `pnpm lint` clean; no token or 107/107a primitive value changed.
+
+---
+
+### Chat ADD-B — Nutrition Module Scaffold (Method B) (Addendum / Corrective)
+
+*Addendum · no EO (runs immediately, out of sequence) · 🔵 🟢 🤖 🎩 · Skills: caveman, stop-slop · — · Window N · CD-flags: —*
+
+**SUPERSEDES:** nothing structurally in chat **050** (nutrition selection/recipe-UI/hydration ships as built) — ADD-B **extends** the nutrition surface into the ADD-A Modules-tab full page at **method-B breadth** and explicitly **defers** the deep nutrition engine. It supersedes any assumption that the nutrition module page ships micronutrient/RDA/calorie depth at V1.
+
+**SOURCE OF TRUTH:** for the current nutrition module surface location + mount pattern, **ADD-A** governs; ADD-B governs the nutrition page's **V1 scaffold breadth** and its **named deferrals**.
+
+**Load at session start:** **ADD-A** (Modules-tab mount contract + current nutrition surface location); PRD **§6.3** (Nutrition — method-B scaffold note); chat **050** (nutrition selection, recipe detail UI, hydration — reuse verbatim); the **existing AI command infra** to reuse (chat 045 NL input + command pipeline, chat 023 AI op scaffolds, `@vesper/ai`); chat **047/048** (recipe seed corpus / `recipe_templates`); TECHNICAL_SPEC **§3 → "Method-B Module Scaffold Tables"** (`food_log_entries`); the 107/107a design system.
+
+**Goal:** Build the nutrition module page as a **method-B functional-breadth scaffold** on the ADD-A Modules-tab pattern: (1) a **daily food-log surface** (log foods eaten today; entries persist to the `food_log_entries` scaffold table and read back for the day), (2) a **food-search surface** (search the recipe/food corpus to pick items to log — reads `recipe_templates` and the log; no external food-nutrient DB), and (3) an **AI recipe-modify surface** that **reuses the existing AI command infra** (e.g., "make this dairy-free," "halve the portions") rather than a new model path. The page is real, navigable, and demoable **without** the deep engine.
+
+**Output:**
+- The nutrition module full page under the ADD-A pattern (`.../modules/nutrition` mobile; `apps/web/app/(app)/modules/nutrition/page.tsx` web), composed from 107/107a primitives
+- **Daily food-log** surface + `apps/web/app/api/v1/nutrition/food-log/route.ts` (and `[id]`) — CRUD over `food_log_entries`; RLS own-row; the day's entries read back by local-day boundary (same derivation pattern as the hydration counter in chat 050)
+- A new migration `packages/db/migrations/<allocated>_food_log_entries.sql` + `.down.sql` creating the **`food_log_entries` scaffold table** (see TECHNICAL_SPEC §3 scaffold-tables; flagged "V1 scaffold — deep columns deferred") and its Drizzle schema sync + `@vesper/shared` Zod shape
+- **Food-search** surface reading the recipe/food corpus (`recipe_templates`) and adding a selection to the food log — no external nutrient DB wiring
+- **AI recipe-modify** surface reusing the chat-045 command pipeline / `@vesper/ai` (a `modify_recipe`-style command applier over the selected recipe) — no new Anthropic model row; voice-gated output
+- Voice-gated user-facing copy (caveman/stop-slop) for the food-log/search/modify surfaces
+- **DEFERRED (named; page structured to accept later):** micronutrient / vitamin breakdown, RDA progress bars, calorie-counter internals, and external food-nutrient DB wiring — the page reserves layout slots but ships none of these at V1
+
+**Implementation notes:** Method B — **functional breadth, not depth.** The three surfaces are real and demoable; the deep nutrition engine is explicitly out of V1 and named above so a later post-launch phase can add it without re-architecting the page. The **AI recipe-modify reuses the existing command infra** (the 🤖 flag marks the AI-layer reuse where prompt versioning matters; no invented skill name per the Part 1 legend); it is not a new synthesis path. The `food_log_entries` table is a **thin scaffold** (id / user_id / logged_at / a free-text or corpus-referencing item field / optional quantity) — no micronutrient columns; deep columns are added later, not now. The 🎩 flag marks the voice-gated copy for the new surfaces. Compose from the committed 107/107a system; the design-track Fable pass polishes this page per the priority order if it is in scope.
+
+**Dependencies:** **ADD-A** (Modules-tab mount contract + nutrition surface location — hard prerequisite). Already-built foundations otherwise: chat 050 (nutrition selection/recipe UI/hydration), chat 045 (NL command pipeline) + 023 (`@vesper/ai` scaffolds) for the AI recipe-modify reuse, chat 047/048 (recipe seed corpus), chat 005 (module RLS pattern). No dependency on any unbuilt master-table chat.
+
+**End-of-session checks:** The nutrition module page opens from its Modules-tab card (ADD-A pattern). A user can log a food to today's log and see it read back (persisted to `food_log_entries`, RLS own-row verified). Food-search returns corpus items and adds a selection to the log. The AI recipe-modify surface returns a modified recipe through the reused command infra with voice-gated output. **No** micronutrient/RDA/calorie/external-DB surface ships; the deferrals are named in-page/in-doc. New migration has a matching `.down.sql`; any new env var is in `.env.example`. `pnpm build` / `pnpm lint` clean.
+
+---
+
+### Chat ADD-C — Fitness Module Scaffold (Method B) (Addendum / Corrective)
+
+*Addendum · no EO (runs immediately, out of sequence) · 🔵 🟢 🤖 · Skills: — · — · Window N · CD-flags: —*
+
+**SUPERSEDES:** nothing structurally in chat **049** (fitness selection/adaptation/detail-UI/swap ships as built) — ADD-C **extends** the fitness surface into the ADD-A Modules-tab full page at **method-B breadth** and explicitly **defers** the deep fitness engine. It supersedes any assumption that the fitness module page ships the strength-rank / world-standard percentile engine at V1.
+
+**SOURCE OF TRUTH:** for the current fitness module surface location + mount pattern, **ADD-A** governs; ADD-C governs the fitness page's **V1 scaffold breadth** and its **named deferrals**.
+
+**Load at session start:** **ADD-A** (Modules-tab mount contract + current fitness surface location); PRD **§6.2** (Fitness — method-B scaffold note); chat **049** (fitness template selection/adaptation + block-detail UI + swap — reuse its selection/adaptation infra verbatim); chat **047/048** (`workout_templates` seed corpus); TECHNICAL_SPEC **§3 → "Method-B Module Scaffold Tables"** (`lift_log_entries`); the 107/107a design system.
+
+**Goal:** Build the fitness module page as a **method-B functional-breadth scaffold** on the ADD-A Modules-tab pattern: (1) a **workout-schedule list** (the week's scheduled/selected workouts), (2) **tailored generation** that **reuses chat 049's selection/adaptation infra** (filter + light AI adaptation) rather than a new engine, and (3) a **lift-logging surface** (log sets / reps / weight per exercise; entries persist to the `lift_log_entries` scaffold table and read back). The page is real, navigable, and demoable **without** the deep engine.
+
+**Output:**
+- The fitness module full page under the ADD-A pattern (`.../modules/fitness` mobile; `apps/web/app/(app)/modules/fitness/page.tsx` web), composed from 107/107a primitives
+- **Workout-schedule list** surface reading the fitness selections produced by chat 049's infra (`workout_templates` + the 049 selection/adaptation hooks) — no new selection algorithm
+- **Lift-logging** surface + `apps/web/app/api/v1/fitness/lift-log/route.ts` (and `[id]`) — CRUD over `lift_log_entries` (sets/reps/weight per exercise); RLS own-row; per-day / per-exercise read-back
+- A new migration `packages/db/migrations/<allocated>_lift_log_entries.sql` + `.down.sql` creating the **`lift_log_entries` scaffold table** (see TECHNICAL_SPEC §3 scaffold-tables; flagged "V1 scaffold — deep columns deferred") + Drizzle schema sync + `@vesper/shared` Zod shape
+- Reuse of the chat-049 **tailored generation** path (selection + adaptation) surfaced on the module page — the 🤖 flag marks the AI-layer reuse where prompt versioning matters (no invented skill name per the Part 1 legend)
+- **DEFERRED (named; page structured to accept later):** the **bronze→platinum strength-rank engine** and the **world-standard percentile mapping** — the page reserves a slot for a future rank/percentile surface but ships none of it at V1
+
+**Implementation notes:** Method B — **functional breadth, not depth.** Schedule list + tailored generation (reusing 049) + lift logging are real and demoable; the strength-rank + percentile engine is explicitly out of V1 and named above so a later post-launch phase can add it without re-architecting the page. The `lift_log_entries` table is a **thin scaffold** (id / user_id / logged_at / exercise reference / sets / reps / weight) — **no** rank, percentile, or world-standard columns; deep columns are added later, not now. Tailored generation is **not** a new engine — it composes chat 049's selection/adaptation infra. No user-facing butler copy is newly authored beyond fixed labels, so no 🎩 (matching 049's meta); if a surface adds a voice line, route it through caveman/stop-slop at that point. Compose from the committed 107/107a system; the design-track Fable pass polishes this page per the priority order if it is in scope.
+
+**Dependencies:** **ADD-A** (Modules-tab mount contract + fitness surface location — hard prerequisite). Already-built foundations otherwise: chat 049 (fitness selection/adaptation/detail/swap), chat 047/048 (`workout_templates` seed corpus), chat 005 (module RLS pattern). No dependency on any unbuilt master-table chat.
+
+**End-of-session checks:** The fitness module page opens from its Modules-tab card (ADD-A pattern). The workout-schedule list renders the 049-selected workouts. Tailored generation produces a workout through the reused 049 infra (no new engine). A user can log sets/reps/weight for an exercise and read it back (persisted to `lift_log_entries`, RLS own-row verified). **No** strength-rank / percentile surface ships; the deferrals are named in-page/in-doc. New migration has a matching `.down.sql`; any new env var is in `.env.example`. `pnpm build` / `pnpm lint` clean.
+
+---
+
+### Chat ADD-D — Fable Polish Pass on Shipped Design Surfaces (Addendum / Corrective)
+
+*Addendum · no EO (runs immediately, out of sequence) · **runs on the FABLE model** (design-track carve-out) · 🔵 🟢 🟡 · Skills: frontend-design · — · Window N · CD-flags: —*
+
+**SUPERSEDES:** nothing structurally — this chat **lifts already-shipped design surfaces to the clean / shippable finished-product bar** authored by Fable directly. It supersedes the assumption that the shipped 107/107a primitives and the shipped plan/day/week/settings surfaces stay at their as-built visual quality; they are re-styled to the finished bar. It does **not** supersede the token **contract** (see the token-freeze rule below).
+
+**SOURCE OF TRUTH:** the **token-freeze contract** in the "Design-Track Overhaul" section below (token names + values frozen; primitive *styling* is Fable-revisable) governs what this chat may and may not change.
+
+**Load at session start:** the shipped **107/107a** system — `packages/ui/src/{tokens.ts, tailwind.ts, index.ts}`, the core primitives (`Card`, `Button`, `BlockRow`, `ButlerLine`) and part-2 primitives (`TextField`, `Toggle`, `Select`, `SegmentedControl`, `TimePicker`, `DatePicker`, `ButlerVoice`, `motion`) in `apps/web/components/ui` + `apps/mobile/components/ui`, and `docs/DESIGN_SYSTEM.md`; the shipped **plan/day** components (`apps/web/components/plan/*`, `apps/mobile/components/plan/*` — `BlockCard`, `BlockTimeline`, `PlanSkeleton`, `PlanEmpty`), the **week** page (`apps/web/app/(app)/week/page.tsx`), and the **settings** surfaces (`apps/web/app/(app)/settings/*`); `docs/DESIGN_STRATEGY.md` (clean-posture banner); the "Design-Track Overhaul" section below (token-freeze contract + priority order).
+
+**Goal:** Run a **Fable-authored visual polish pass over the design surfaces that have ALREADY SHIPPED**, lifting them from as-built quality to the clean, credible, **finished-product (resume / YC-demo) bar** — Fable writes the styled component code directly (Option 1). Scope is **visual treatment only**: the primitive components' look-and-feel and the shipped plan/day/week/settings surfaces' composition and spacing. **Token names and values are frozen** (see the token-freeze contract) so every existing consumer (BlockCard, BlockTimeline, subscription UI, calendar chrome) stays valid; Fable revises how primitives *look*, not the token contract they read.
+
+**Output:**
+- Re-styled core + part-2 primitives in `apps/web/components/ui` and `apps/mobile/components/ui` to the finished bar — same component APIs, same imported token **names**, no new token **values** (add a token only by adding it to `tokens.ts` under the existing rule, never by inlining a hex/px/ms)
+- Re-styled shipped plan/day surfaces: `BlockCard`, `BlockTimeline`, `PlanSkeleton`, `PlanEmpty` (web + mobile), the `week` page, and the settings surfaces — spacing, hierarchy, and treatment lifted to the finished bar, composing the re-styled primitives
+- A resolution on the unused **`cinematic` motion band/easing** token: either keep it (unused, harmless) or remove it from `tokens.ts` / `tailwind.ts` / `DesignTokens.swift` — Fable decides during the pass; if removed, verify zero consumers first (there are none today)
+- `docs/DESIGN_SYSTEM.md` updated to reflect any primitive **styling** changes (not token-value changes) and to record the finished-bar treatment as the new baseline
+- Colocated primitive unit tests kept green (they assert token classes / shapes, not pixels — a styling revision that keeps token names passes them unchanged)
+
+**Implementation notes:** This chat is the mechanism for the premise "**Fable authors the finished designs itself**, no AI-gen imagery / video pipeline." It runs on the **Fable model** against the finite ~$100 budget and is placed in the **priority order** below (it targets the highest-visibility shipped surfaces: the design system every screen inherits, and the plan/day view a demo spends the most time on). The **token-freeze contract** is the safety rail: because BlockCard/BlockTimeline/subscription-UI/calendar-chrome all read `@vesper/ui` token **names**, changing a token **value** would silently re-skin consumers the pass did not review — so values are frozen and only primitive *styling* + surface composition change. Nothing immersive is added (no Three.js, no scroll engine, no AI imagery); this is a restraint-and-finish pass, not a showcase pass. Native Swift surfaces (059b / 077 / 078) stay build-track-owned from the 107 spec (unchanged). If the pass finds a surface that genuinely needs a new token value, it adds the token (new name) rather than mutating an existing value, keeping every current consumer stable.
+
+**Dependencies:** Already-built foundations only — the shipped 107/107a system and the shipped plan/day/week/settings surfaces named above; **ADD-A** where the pass reaches Modules-tab surfaces (so it styles the post-refactor navigation, not the superseded one). No dependency on any unbuilt master-table chat. The unbuilt `-V` halves are **not** in this chat's scope — they are authored fresh on Fable when they run; this chat only polishes what already shipped.
+
+**End-of-session checks:** The shipped primitives and the plan/day/week/settings surfaces render at the finished bar and still compose from `@vesper/ui`. **No token value changed** (verify `tokens.ts` values diff is empty except deliberate additions or the optional `cinematic` removal); every existing consumer still builds. `pnpm build` / `pnpm lint` clean; primitive unit tests green. No immersive/AI-image element was introduced. `DESIGN_SYSTEM.md` reflects the styling changes.
+
+---
+
+## Design-Track Overhaul — Clean Posture + Fable Model (doc-level re-scope; not a chat)
+
+This is a **direction re-scope**, not a chat: it changes the design track's posture and model, edits the strategy/direction docs, and re-scopes the not-yet-run `-V` visual halves. It carries **no ID and no EO**.
+
+### Posture change (drop the immersive vision)
+
+The design track **drops the ambitious immersive vision.** No AI-generated imagery; no cinematic or immersive-scroll motion. The target is a **clean, credible, shippable modern-app look**: restrained tokens, standard motion (Quick/Considered bands, reduced-motion → instant), and conventional layouts. The product must read as a **competent finished product (resume / YC-demo bar)** — not a design showcase. Loss-aversion/persuasion ethics and the scorekeeping-as-absence discipline from `DESIGN_STRATEGY.md` §2–3 are unchanged.
+
+### KEEP vs DEPRECATE split (recon finding)
+
+**KEEP — untouched (clean structural token/primitive work; already consumed by shipped build chats — BlockCard, BlockTimeline, subscription UI):**
+- **Chat 106 output** `docs/DESIGN_STRATEGY.md` — kept; **amended** only with the clean-posture banner + the §4.1 immersive line edited (see below). No persuasion/scorekeeping decision changed.
+- **Chat 107 output** `docs/DESIGN_SYSTEM.md` + the committed `@vesper/ui` token layer (`packages/ui/src/tokens.ts`, `tailwind.ts`) + core primitives (`Card`, `Button`, `BlockRow`, `ButlerLine`) — **untouched.** Token **values** (including the `cinematic` motion band and `cinematic` easing) are **not changed** — changing them would invalidate landed work. Under the clean posture the `cinematic` band simply is **not used for immersive-scroll motion**; it remains a valid token. (No edit to DESIGN_SYSTEM.md — its text is a value catalog, not immersive posture prose.)
+- **Chat 107a output** — part-2 primitives (forms, pickers, `ButlerVoice`, motion primitives) — **untouched**; APIs and values unchanged.
+- The native visual specs (`docs/native/ALARM_SCREEN_059b_VISUAL_SPEC.md`, `LIVE_ACTIVITY_078_VISUAL_SPEC.md`) — kept (structural, not immersive-image direction).
+
+**DEPRECATE — superseded by the clean posture (content preserved, marked, pointed to this section):**
+- `docs/VISUAL_DIRECTION_BANK_v2.md` — the immersive motion/staging bank (Three.js/R3F, GSAP+Lenis cinematic scroll, manor-study 3D scenes, "AI-atmospheric imagery," reel-derived staging). **Deprecated-superseded.**
+- `docs/ASSET_MANIFEST_KICKOFF.md` — the AI-image generation kickoff (operator generation playbook for AI-generated manor stills / atmospheric imagery). **Deprecated-superseded** (the clean posture ships **no** AI-generated imagery, so the asset-manifest pipeline is retired).
+- `docs/REEL_REFERENCE_SHEETS/` (REEL2/6/7/8/9 `.jpg` + `README.txt`) — immersive mood/staging reference feeding the bank above. **Deprecated-superseded** (marked via the folder `README.txt`; images preserved).
+
+**No immersive assumption is baked into shipped code.** Recon (filesystem + deps) found: the immersive assumptions live only in the **direction docs** (bank, asset manifest, reels) and in **not-yet-run `-V` plan Goals** — **no immersive/AI-gen code ever landed** (the `(marketing)/page.tsx` is still the bare `<h1>Vesper</h1>` stub; `HeroThreeScene` is absent; `three`/`gsap`/`lenis`/`vite-plugin-glsl` are not installed; the onboarding, block-detail, subscription, and referral `-V` surfaces are unbuilt). The **only** shipped design code is the **clean 107/107a system** + the build-track plan/day surfaces that already compose from it — none of it immersive. That shipped code is not *wrong*; it is simply at as-built quality, and is **lifted to the finished-product bar by ADD-D (Fable)** under the token-freeze contract below. The unbuilt `-V` halves are authored fresh on Fable when they run. (No standalone "093-V already shipped" exposure exists — it hasn't shipped.)
+
+### Token-freeze contract (the safety rail for touching shipped design code)
+
+Fable **may** revise, on the shipped surfaces (via **ADD-D**): the **visual styling** of the 107/107a primitives, and the composition/spacing/hierarchy of the shipped plan/day/week/settings surfaces — to the finished bar.
+
+Fable **may NOT**: change any **token name or value** in `packages/ui/src/tokens.ts` (or its `tailwind.ts` mapping / `DesignTokens.swift` mirror). A new value enters only as a **new token name** under the existing "add-a-token, never inline" rule — never by mutating an existing value. **Reason:** BlockCard, BlockTimeline, the subscription UI, and the calendar chrome all read `@vesper/ui` token **names**; mutating a value would silently re-skin consumers the pass did not review. So: **token layer = frozen contract; primitive *treatment* + surface composition = Fable-revisable.** The one exception permitted is **removing the unused `cinematic` band/easing** token (zero consumers today) if ADD-D chooses to — an addition-inverse that breaks nothing.
+
+### Model carve-out (Fable) — standing exception
+
+Design-track chats (the `-V` visual halves going forward) **run on the Fable model** against the operator's **~$100 Fable credit budget**. The build track is unchanged (single build model). This is an **explicit exception** to the Part 1 build-plan "single model / don't confirm per-chat model" rule, encoded as a standing note in `CLAUDE.md`. **Execution model = Option 1:** the `-V` design chats **author the actual styled component code directly** — no Figma, no image pipeline.
+
+### Re-scoped `-V` halves (all not-yet-run; each carries an in-place RE-SCOPE pointer above)
+
+Eleven `-V` visual halves are re-scoped to the clean + Fable + new-surface posture (in-place pointers added at each): **032-V, 033-V, 034-V, 035-V, 036-V, 041-V, 044-V, 046-V, 089-V, 093-V, 095-V.** Notable retargets: **035-V** and **041-V** now target the **new Modules-tab + method-B scaffold surfaces** (ADD-A/B/C), not the superseded settings-tab module mounts; **036-V** drops the "cinematic" loading/reveal for a calm standard version; **093-V** drops the Three.js/R3F cinematic-scroll hero for a clean standard-layout hero. (The design-foundation chats 106/107/107a are **not** re-scoped — they are landed and kept.)
+
+### Budget priority order (finite Fable credits)
+
+Because Fable credits are finite (~$100), the Fable design pass is applied in this **priority order** so the **YC-demo-critical, high-visibility** surfaces land clean even if credits run out before every `-V` half (and ADD-D) is done. Both the not-yet-run `-V` halves and **ADD-D** (the Fable polish of already-shipped surfaces) draw from the same budget and share this order:
+
+0. **ADD-D — shipped design system + plan/day surfaces** (107/107a primitives, BlockCard/BlockTimeline/PlanSkeleton/week/settings). Placed first because the primitives are inherited by *every* later surface (`-V` halves compose them), so lifting them to the finished bar raises the floor everywhere at once; the shipped plan/day view is also the surface a demo spends the most time on. (Token values stay frozen — see the token-freeze contract.)
+1. **Onboarding** (032-V welcome/auth/honorific, 035-V preferences/modules/trial, 036-V first-plan loading/reveal/tour) — first impression of the app.
+2. **Plan / day view** (041-V block-detail layouts, 046-V Vesper-hour/week/morning-brief) — the core daily loop, building on the ADD-D-polished plan surfaces.
+3. **The Modules tab + one or two module pages** (ADD-A Modules list; then the highest-visibility of ADD-B nutrition / ADD-C fitness) — the breadth story of the product.
+4. **Waitlist + referral landing** (093-V clean hero, 095-V referral landing) — external-facing, lower demo-loop priority than the in-app core.
+5. **Subscription lifecycle** (089-V) and the remaining `-V` halves (033-V, 034-V, 044-V) — refine as credits allow.
+
+If credits run low, surfaces below the cut line still ship: they compose from the already-clean, committed 107/107a system, so they read as finished even without a dedicated Fable pass — the Fable pass is polish on top of a clean baseline, not the baseline itself.
+
+### Landed-work status (resolved by recon)
+
+**Recon result: no immersive/AI-gen code has shipped, so there is no landed-work exposure to flag.** Filesystem + dependency recon confirms `apps/web/app/(marketing)/page.tsx` is still the bare `<h1>Vesper</h1>` stub, `HeroThreeScene` does not exist, and `three` / `@react-three/fiber` / `gsap` / `lenis` / `vite-plugin-glsl` are **not installed**. The onboarding, block-detail, subscription, and referral `-V` surfaces are unbuilt. **093-V's Three.js hero therefore never landed** — its re-scope is fully covered by editing its Goal in-place (done above); no removal follow-up is needed. The only shipped design code is the clean **107/107a system** + the build-track plan/day surfaces that compose from it; those are lifted to the finished bar by **ADD-D** (Fable) under the token-freeze contract, not removed.
+
+End of Addendum.

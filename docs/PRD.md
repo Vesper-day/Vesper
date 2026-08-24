@@ -224,6 +224,17 @@ The subscription lifecycle follows a deterministic state machine. The states are
 
 **Resubscription.** A user in `read_only` or `archived` state can resubscribe at any time by navigating to account settings and initiating the payment flow. On successful payment, `subscription_status` transitions to `active` and all prior data is restored immediately.
 
+### 3.5 Application Navigation and the Modules Tab
+
+The mobile application uses a four-item tab bar: **Plan, Modules, Tasks, Calendar**, with **Modules second-from-left**. Plan is the primary daily surface; Tasks and Calendar are the secondary work and scheduling surfaces; the **Modules** tab is the home for every lifestyle module and for application settings.
+
+The Modules tab is a **vertically scrollable list of rounded-rectangle cards, one card per module**, and **every card routes to its own full page**. Cards divide into two kinds, both of which route somewhere:
+
+- **Reminder-list modules** (Medications, Bills, Errands) open a **full management page** — a list plus add/edit. Their entries continue to surface through their existing notification/schedule mechanism and as plan blocks; this is unchanged.
+- **Generative modules** (Fitness, Nutrition, Sleep) open a **richer module page**. At V1 these ship as **functional-breadth scaffolds (method B)** — real, navigable, demoable surfaces — with the deep engines explicitly deferred (see §6.2, §6.3).
+
+**Settings are not a separate tab.** Application settings — integrations / Google Calendar, billing / subscription, privacy / biometric lock, referral, and account — live in a **"Settings" rounded-rectangle card pinned at the bottom of the Modules list**, which opens the existing settings surfaces as their own page / sub-stack. No settings surface is removed by this arrangement; the settings *entry point* is a card at the bottom of the Modules list rather than a top-level tab.
+
 ---
 
 ## 4. Core Interactions
@@ -425,6 +436,8 @@ What the user sees is a single workout block in their daily plan with the exerci
 
 The module does not connect to any fitness tracking service at V1. Apple Health, Google Fit, Fitbit, Oura, and Whoop are all deferred to V2. Workout completion is recorded manually by the user marking the block complete. There is no automatic heart rate, calorie burn, or step data ingestion at V1.
 
+**V1 module surface (method B — Modules tab).** The fitness module opens from its Modules-tab card (§3.5) as a full page shipped at **functional-breadth scaffold** depth: a **workout-schedule list**, **tailored generation** (reusing the existing template selection/adaptation described above), and a **lift-logging surface** (sets / reps / weight per exercise, stored in a thin scaffold table). **Explicitly deferred to a post-launch phase (named, page structured to accept it later):** the **bronze→platinum strength-rank engine** and the **world-standard percentile mapping**. V1 builds the real, navigable, demoable fitness surface without those engines.
+
 ### 6.3 Nutrition
 
 The nutrition module selects and schedules meal blocks from a recipe library of approximately 300 recipes. Recipes are sourced from a combination of curated content and recipe API ingestion — TheMealDB provides the free baseline corpus; Edamam or Spoonacular provides nutritional metadata including macronutrient profiles and allergen tags. Each recipe is tagged by dietary restrictions (vegetarian, vegan, gluten-free, dairy-free, nut-free, and similar), cuisine style, total preparation time, and macronutrient profile (high protein, balanced, low carb, and similar). At morning plan generation, the engine selects the day's meals by filtering to recipes that satisfy the user's dietary restrictions, fall within their stated cooking time tolerance, and avoid registered food dislikes, then applies light AI selection to match macronutrient targets if the user has set them.
@@ -435,6 +448,8 @@ Hydration tracking lives inside the nutrition module as a sub-feature. The engin
 
 The module does not count calories automatically. Calorie tracking is not a V1 feature and is not on the planned roadmap. The nutrition module is organized around meal planning and shopping logistics, not dietary restriction enforcement or weight management measurement. Users who want to track calories manually are not prevented from doing so in the free-text notes field on any nutrition block, but the module provides no automated calorie summation or nutritional audit.
 
+**V1 module surface (method B — Modules tab).** The nutrition module opens from its Modules-tab card (§3.5) as a full page shipped at **functional-breadth scaffold** depth: a **daily food-log surface**, a **food-search surface** (over the recipe/food corpus; no external food-nutrient database), and an **AI recipe-modify surface** that reuses the existing AI command infrastructure. **Explicitly deferred to a post-launch phase (named, page structured to accept it later):** micronutrient / vitamin breakdown, RDA progress bars, calorie-counter internals, and external food-nutrient database wiring. This is consistent with the "no automatic calorie counting at V1" boundary above; V1 builds the real, navigable, demoable nutrition surface without those engines.
+
 ### 6.4 Sleep
 
 The sleep module manages the full bedtime arc from wind-down through wake. At setup, the user configures two time values: their target wake time and their target bed time. These values initialize the quiet hours window — no notifications fire during the period between bed time and wake time except medication reminders, which fire at their scheduled time by default — and drive all downstream sleep module behavior. The module schedules a wind-down routine block in the plan each evening at a configurable offset before bed time; the default offset is thirty minutes. The wind-down block contains a brief routine drawn from a library of light evening activities (stretching sequences, breathing exercises, screen-wind-down guidance) selected based on the user's context for the day, otherwise defaulting to a baseline routine.
@@ -444,6 +459,8 @@ The module delivers a push notification when the wind-down block begins. This is
 The optional alarm, when the user has enabled it, fires at the user's registered wake time. On iOS, the alarm presents as a full-screen lockscreen interruption with two edge-to-edge buttons labeled SNOOZE and STOP. The alarm does not require the phone to be unlocked to dismiss. Pressing STOP dismisses the alarm and immediately advances to the energy check-in slider screen as the first interaction of the day. The energy check-in is the first screen after alarm dismissal rather than before it, so that the alarm dismissal is never gated behind a form. Pressing SNOOZE delays the alarm by nine minutes, a fixed interval that is not configurable at V1, and returns the screen to its locked state.
 
 The sleep module does not connect to any sleep tracking hardware or software at V1. Apple Health sleep data, Oura ring integration, and similar sources are deferred to V2. Sleep quality is not measured or stored. The module tracks whether the alarm fired and whether it was dismissed to infer approximate wake time, but it does not record total sleep duration or characterize sleep quality. Users who want to provide sleep context can do so implicitly through the energy check-in slider, which captures perceived rest state through the day's energy score.
+
+**V1 module surface (Modules tab).** The sleep module opens from its Modules-tab card (§3.5) as a generative-module full page, following the same mount pattern as fitness and nutrition; its scope is unchanged from the description above (wind-down, bedtime, quiet hours). It is not re-scoped by method B beyond adopting the Modules-tab mount.
 
 ### 6.5 Medication
 
@@ -462,6 +479,8 @@ The module does not surface any medical advice, drug interaction warnings, or do
 The errands module manages to-dos, recurring chores, and one-off errands as a flat checklist. Recurring chores (trash day, laundry, plant watering) are entered once and appear automatically on the appropriate day each week. One-off errands (pharmacy, dry cleaning, returns) are added on demand and persist until completed or dismissed. Each errand can carry an optional deadline; errands with deadlines surface in the daily plan on or before their deadline date, and errands without deadlines are surfaced opportunistically in lighter sections of the day. Geographic batching, route optimization, and traffic-aware buffers are not V1 features.
 
 The module also manages non-grocery shopping reminders. Shopping items are added with optional purchase deadlines and surface as plan reminders rather than as a transactional checkout surface.
+
+**V1 module surface (Modules tab).** The errands module opens from its Modules-tab card (§3.5) as a reminder-list-module full management page (list + add/edit), following the same mount pattern as medications and bills; its scope is unchanged from the description above. It is not re-scoped by method B beyond adopting the Modules-tab mount.
 
 ### 6.7 Finance
 
