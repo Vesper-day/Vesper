@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { View, Text, Switch, Alert } from 'react-native';
-import { apiClient } from '../../../lib/api/client';
+import { apiClient } from '../../../../lib/api/client';
 import {
   getBiometricAvailability,
   isBiometricLockEnabled,
   setBiometricLockEnabledLocal,
-} from '../../../lib/biometric';
+} from '../../../../lib/biometric';
 
 /**
  * Settings → Privacy (chat-090b). Hosts the optional biometric-lock toggle and a

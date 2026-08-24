@@ -1,9 +1,10 @@
-// Mobile Bills surface (Chat 061 — the Finance module). Finance is a MODULE, OFF by
-// default and gated on modulesEnabled.finance.enabled (the SINGULAR key `finance`,
-// NOT `bills`) — it is NOT a top-level tab. It mounts as a sub-screen of the Settings
-// stack (settings/_layout.tsx) and is reached from the gated link in settings/index.tsx;
-// this screen ALSO self-gates so a deep link while the module is off shows the
-// module-off state.
+// Mobile Bills surface (Chat 061 — the Finance module; re-homed under the Modules tab
+// by ADD-A). Finance is a MODULE, OFF by default and gated on
+// modulesEnabled.finance.enabled (the SINGULAR key `finance`, NOT `bills`) — it is NOT
+// a top-level tab. It mounts as a page in the Modules stack ((tabs)/modules/_layout.tsx)
+// at /modules/bills and is reached from its card on the Modules list
+// ((tabs)/modules/index.tsx); this screen ALSO self-gates so a deep link while the
+// module is off shows the module-off state. CRUD logic is unchanged by the re-home.
 //
 // CRUD runs through the thin lib/bills client (the /api/v1/bills route set via the
 // shared mobile API client + session) — no second transport. Chrome composes the

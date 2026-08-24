@@ -93,3 +93,16 @@
 
 ### Scope
 - One coherent unit of work per session (one API route, one component, one worker) per TECHNICAL_SPEC.md section 13. Do not sprawl across package boundaries.
+
+### Code Hygiene
+- No emojis or decorative unicode in code, comments, identifiers, or commit messages.
+  Emoji belong only where a project doc explicitly calls for them (e.g. butler-voice COPY
+  strings authored under stop-slop) — never in source.
+- Match the conventions of the file you are editing (imports, quotes, error handling,
+  naming) — read a sibling file first; do not impose a different style.
+- Never present a stub, placeholder, or TODO as complete. If a path is unfinished, say so
+  explicitly and mark it [assumed] or leave an explicit TODO — do not claim behavior the
+  code does not yet have. (Extends Claim Discipline from "confirm it exists" to "confirm it
+  actually does what you say.")
+- No dead scaffolding: no unused vars, no commented-out blocks left behind, no console.log
+  debris in committed code.
