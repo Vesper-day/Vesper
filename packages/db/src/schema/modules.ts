@@ -1,6 +1,6 @@
 import * as t from 'drizzle-orm/pg-core';
 import { users } from './users';
-import { recipeTemplates } from './templates';
+import { recipeTemplates, workoutTemplates } from './templates';
 
 // medication_frequency_enum — live on the DB since migration 0006 (verified via
 // direct introspection, chat 060). Modelled here so the ORM `frequency` column is
@@ -141,6 +141,52 @@ export const foodLogEntries = t.pgTable(
   (table) => [
     t
       .index('idx_food_log_entries_user_id_logged_at')
+      .on(table.userId, table.loggedAt),
+  ],
+);
+
+// lift_log_entries — the lift-logging surface of the fitness module (Chat ADD-C).
+// Modelled to the LIVE applied DDL (migration 26). One row per logged set; the day's
+// read-back is derived by query against start_of_local_day(tz) (mirrors the hydration
+// counter, migration 14). workout_template_id is set when logging against a
+// scheduled/selected workout (ON DELETE SET NULL); NULL for ad-hoc. set_number is
+// 1-based (DB CHECK > 0); reps / weight are optional (DB CHECK >= 0 when present);
+// weight_unit is 'kg' | 'lb' or NULL for bodyweight sets. DEEP fitness columns
+// (bronze->platinum strength-rank; world-standard percentile mapping) are DEFERRED
+// (PRD §6.2) and are intentionally NOT modelled here. user_id ALWAYS comes from the
+// authenticated session — NEVER from the request body.
+export const liftLogEntries = t.pgTable(
+  'lift_log_entries',
+  {
+    id: t.uuid('id').defaultRandom().primaryKey(),
+    userId: t
+      .uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    loggedAt: t
+      .timestamp('logged_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    exerciseName: t.text('exercise_name').notNull(),
+    workoutTemplateId: t
+      .uuid('workout_template_id')
+      .references(() => workoutTemplates.id, { onDelete: 'set null' }),
+    setNumber: t.integer('set_number').notNull(),
+    reps: t.integer('reps'),
+    weight: t.numeric('weight', { precision: 7, scale: 2 }),
+    weightUnit: t.text('weight_unit'),
+    createdAt: t
+      .timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: t
+      .timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    t
+      .index('idx_lift_log_entries_user_id_logged_at')
       .on(table.userId, table.loggedAt),
   ],
 );

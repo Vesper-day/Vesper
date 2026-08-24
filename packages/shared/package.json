@@ -32,6 +32,10 @@
     "./nutrition": {
       "types": "./dist/nutrition/index.d.ts",
       "default": "./src/nutrition/index.ts"
+    },
+    "./fitness": {
+      "types": "./dist/fitness/index.d.ts",
+      "default": "./src/fitness/index.ts"
     }
   },
   "scripts": {

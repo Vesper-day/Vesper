@@ -5,8 +5,13 @@ import { MODULE_CARDS, isModuleEnabled, type ModuleGate } from './modules';
 // unit test even though the web vitest env is jsdom.
 
 describe('MODULE_CARDS', () => {
-  it('lists the landed modules in list order (nutrition is the first generative one)', () => {
-    expect(MODULE_CARDS.map((c) => c.key)).toEqual(['medications', 'bills', 'nutrition']);
+  it('lists the landed modules in list order (fitness ADD-C lands after nutrition)', () => {
+    expect(MODULE_CARDS.map((c) => c.key)).toEqual([
+      'medications',
+      'bills',
+      'nutrition',
+      'fitness',
+    ]);
   });
 
   it('routes every card to a /modules/<name> full page (no dead card)', () => {
@@ -20,6 +25,7 @@ describe('MODULE_CARDS', () => {
     expect(byKey.medications).toBe('medication');
     expect(byKey.bills).toBe('finance');
     expect(byKey.nutrition).toBe('nutrition');
+    expect(byKey.fitness).toBe('fitness');
   });
 });
 
@@ -32,6 +38,7 @@ describe('isModuleEnabled', () => {
     expect(isModuleEnabled(gate({ medication: { enabled: true } }), 'medication')).toBe(true);
     expect(isModuleEnabled(gate({ finance: { enabled: false } }), 'finance')).toBe(false);
     expect(isModuleEnabled(gate({ nutrition: { enabled: true } }), 'nutrition')).toBe(true);
+    expect(isModuleEnabled(gate({ fitness: { enabled: true } }), 'fitness')).toBe(true);
   });
 
   it('reads a missing gate / missing key as off', () => {
