@@ -255,7 +255,7 @@ The V1 schema contains 20 tables grouped into nine domains. Listed in foreign-ke
 **Users and Auth (3):** `users`, `user_profiles`, `deleted_user_email_hashes`
 **Daily Planning (4):** `daily_plans`, `blocks`, `tasks`, `weekly_priorities`
 **Templates (2, seeded):** `workout_templates`, `recipe_templates`
-**Modules (3):** `medications`, `recurring_errands`, `bills`
+**Modules (3):** `medications`, `recurring_errands`, `bills` — plus two **method-B scaffold** tables (`food_log_entries`, `lift_log_entries`) defined under "Method-B Module Scaffold Tables" below; each is a thin V1 scaffold with deep columns deferred.
 **Integrations and Devices (2):** `integrations`, `push_tokens`
 **Subscriptions and Billing (2):** `subscriptions`, `subscription_events`
 **Waitlist and Referrals (2):** `waitlist`, `referral_credits`
@@ -1029,6 +1029,55 @@ Updates to seeded templates between releases happen via new seed migrations (for
 ### Reference Data Excluded From Seeding
 
 No other reference data requires seeding at V1. Geographic data, ZIP codes, currency tables, and similar reference sets are either fetched at runtime from third-party APIs as needed in future versions or hardcoded as TypeScript constants in the application code (timezone list, archetype display names, module display order). No third-party geographic or venue API is integrated at V1.
+
+---
+
+## Method-B Module Scaffold Tables (V1 scaffold — deep columns deferred)
+
+These two tables back the **method-B module scaffolds** introduced by the Modules-tab addendum chats (see `docs/PHASE_4_BUILD_PLAN.md` → Addendum → ADD-B Nutrition, ADD-C Fitness). Each is a **thin scaffold**: it stores only what the V1 functional-breadth surface needs and **carries no deep-engine columns**. The deferred engines — nutrition micronutrient/RDA/calorie internals and the fitness strength-rank / world-standard percentile mapping — add their columns (or their own tables) in a post-launch phase; they are **not** part of V1. Both follow the house own-row RLS pattern and are user-cascade hard-deleted like every other user-owned table. They extend the **Modules** schema domain (previously medications / recurring_errands / bills).
+
+### 26. `food_log_entries` (V1 scaffold — deep columns deferred)
+
+The daily food-log surface for the nutrition module's method-B scaffold (ADD-B). One row per logged food item per day. **No micronutrient, vitamin, RDA, or calorie columns at V1** — those are the deferred deep engine and are added later, not here. The per-day view is derived at read time from the local-day boundary, mirroring the hydration-counter derivation used by the nutrition module.
+
+Columns:
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `user_id` uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE
+- `logged_at` timestamptz NOT NULL DEFAULT now()
+- `item_name` text NOT NULL — free-text or corpus-sourced food name
+- `recipe_template_id` uuid NULL REFERENCES recipe_templates(id) ON DELETE SET NULL — set when the entry was chosen from the food-search corpus; NULL for a free-text entry
+- `quantity_note` text NULL — optional free-text portion note (e.g. "1 bowl"); intentionally not a structured quantity at V1
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `updated_at` timestamptz NOT NULL DEFAULT now()
+
+Indexes:
+- `idx_food_log_entries_user_id_logged_at` on (user_id, logged_at) — the per-user, per-local-day read pattern
+
+RLS policies: standard own-row pattern (SELECT, INSERT, UPDATE, DELETE all keyed on `auth.uid() = user_id`).
+
+### 27. `lift_log_entries` (V1 scaffold — deep columns deferred)
+
+The lift-logging surface for the fitness module's method-B scaffold (ADD-C). One row per logged set. **No strength-rank, percentile, or world-standard columns at V1** — those are the deferred deep engine and are added later, not here.
+
+Columns:
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `user_id` uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE
+- `logged_at` timestamptz NOT NULL DEFAULT now()
+- `exercise_name` text NOT NULL — free-text or template-sourced exercise name
+- `workout_template_id` uuid NULL REFERENCES workout_templates(id) ON DELETE SET NULL — set when logging against a scheduled/selected workout; NULL for an ad-hoc lift
+- `set_number` integer NOT NULL CHECK (set_number > 0)
+- `reps` integer NULL CHECK (reps IS NULL OR reps >= 0)
+- `weight` numeric(7,2) NULL CHECK (weight IS NULL OR weight >= 0)
+- `weight_unit` text NULL — 'kg' or 'lb'; NULL for bodyweight sets
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `updated_at` timestamptz NOT NULL DEFAULT now()
+
+Indexes:
+- `idx_lift_log_entries_user_id_logged_at` on (user_id, logged_at) — the per-user, per-day / per-exercise read pattern
+
+RLS policies: standard own-row pattern (SELECT, INSERT, UPDATE, DELETE all keyed on `auth.uid() = user_id`).
+
+**Surfaces needing no new table at V1.** The nutrition **food-search** surface reads the existing `recipe_templates` corpus (and `food_log_entries` above) — **no new table.** The **AI recipe-modify** surface reuses the existing AI command infrastructure and persists nothing of its own at V1 — **no new table.** The fitness **workout-schedule list** and **tailored generation** reuse `workout_templates` plus the existing selection/adaptation path — **no new table.**
 
 ---
 
