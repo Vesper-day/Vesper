@@ -20,13 +20,13 @@ import { useState } from 'react';
 import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { colors } from '@vesper/ui';
-import { Card, Button } from '../../../components/ui';
+import { Card, Button } from '../../../../components/ui';
 import {
   fetchStandardProduct,
   purchaseStandard,
   showManageSubscriptions,
-} from '../../../lib/storeKit';
-import { verifyApplePurchase } from '../../../lib/subscription';
+} from '../../../../lib/storeKit';
+import { verifyApplePurchase } from '../../../../lib/subscription';
 
 type FlowState =
   | { phase: 'idle' }

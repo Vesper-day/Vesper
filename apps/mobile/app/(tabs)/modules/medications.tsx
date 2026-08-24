@@ -1,8 +1,10 @@
-// Mobile Medications surface (Chat 060). Medications is a MODULE, OFF by default and
-// gated on modulesEnabled.medication.enabled — it is NOT a top-level tab. It mounts as
-// a sub-screen of the Settings stack (settings/_layout.tsx) and is reached from the
-// gated link in settings/index.tsx; this screen ALSO self-gates so a deep link while
-// the module is off shows the module-off state.
+// Mobile Medications surface (Chat 060; re-homed under the Modules tab by ADD-A).
+// Medications is a MODULE, OFF by default and gated on modulesEnabled.medication.enabled
+// — it is NOT a top-level tab. It mounts as a page in the Modules stack
+// ((tabs)/modules/_layout.tsx) at /modules/medications and is reached from its card on
+// the Modules list ((tabs)/modules/index.tsx); this screen ALSO self-gates so a deep
+// link while the module is off shows the module-off state. CRUD/scheduler logic is
+// unchanged by the re-home.
 //
 // CRUD runs through the thin lib/medications client (the EXISTING /api/v1/medications
 // route set via the shared mobile API client + session) — no second transport. Chrome
