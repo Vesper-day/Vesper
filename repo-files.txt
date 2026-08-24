@@ -811,6 +811,7 @@ apps/mobile/app/(tabs)/modules/_layout.tsx
 apps/mobile/app/(tabs)/modules/bills.tsx
 apps/mobile/app/(tabs)/modules/index.tsx
 apps/mobile/app/(tabs)/modules/medications.tsx
+apps/mobile/app/(tabs)/modules/nutrition.tsx
 apps/mobile/app/(tabs)/modules/settings/_layout.tsx
 apps/mobile/app/(tabs)/modules/settings/index.tsx
 apps/mobile/app/(tabs)/modules/settings/integrations.tsx
@@ -909,6 +910,8 @@ apps/mobile/lib/medications.test.ts
 apps/mobile/lib/medications.ts
 apps/mobile/lib/modules.test.ts
 apps/mobile/lib/modules.ts
+apps/mobile/lib/nutrition.test.ts
+apps/mobile/lib/nutrition.ts
 apps/mobile/lib/pushTokens.test.ts
 apps/mobile/lib/pushTokens.ts
 apps/mobile/lib/sentry.ts
@@ -945,6 +948,7 @@ apps/web/app/(app)/calendar/page.tsx
 apps/web/app/(app)/layout.tsx
 apps/web/app/(app)/modules/bills/page.tsx
 apps/web/app/(app)/modules/medications/page.tsx
+apps/web/app/(app)/modules/nutrition/page.tsx
 apps/web/app/(app)/modules/page.tsx
 apps/web/app/(app)/plan/page.tsx
 apps/web/app/(app)/settings/integrations/callback/page.tsx
@@ -1004,6 +1008,12 @@ apps/web/app/api/v1/notebook/getDueInference.ts
 apps/web/app/api/v1/notebook/mapInference.ts
 apps/web/app/api/v1/notebook/route.ts
 apps/web/app/api/v1/notebook/schemas.ts
+apps/web/app/api/v1/nutrition/food-log.integration.test.ts
+apps/web/app/api/v1/nutrition/food-log/[id]/route.ts
+apps/web/app/api/v1/nutrition/food-log/route.ts
+apps/web/app/api/v1/nutrition/food-search/route.ts
+apps/web/app/api/v1/nutrition/operations.ts
+apps/web/app/api/v1/nutrition/recipe-modify/route.ts
 apps/web/app/api/v1/plans/date/[date]/reorder/operations.ts
 apps/web/app/api/v1/plans/date/[date]/reorder/reorder.integration.test.ts
 apps/web/app/api/v1/plans/date/[date]/reorder/route.ts
@@ -1137,6 +1147,8 @@ apps/web/lib/googleCalendar/registerWatch.ts
 apps/web/lib/idempotency.ts
 apps/web/lib/modules.test.ts
 apps/web/lib/modules.ts
+apps/web/lib/nutrition.test.ts
+apps/web/lib/nutrition.ts
 apps/web/lib/regenerationLimits.ts
 apps/web/lib/sentry/scrub.ts
 apps/web/lib/subscription/stateMachine.ts
@@ -1259,6 +1271,7 @@ packages/ai/src/__tests__/classifyCalendarEvent.test.ts
 packages/ai/src/__tests__/fallback.test.ts
 packages/ai/src/__tests__/generateCheckInQuestion.test.ts
 packages/ai/src/__tests__/generateRegenerationPrompt.test.ts
+packages/ai/src/__tests__/modifyRecipe.test.ts
 packages/ai/src/__tests__/parsePlanEditCommand.test.ts
 packages/ai/src/__tests__/selectTemplate.test.ts
 packages/ai/src/__tests__/suggestWeeklyPriorities.test.ts
@@ -1294,6 +1307,7 @@ packages/ai/src/integrations/googleCalendar.test.ts
 packages/ai/src/integrations/googleCalendar.ts
 packages/ai/src/integrations/persistChannelState.ts
 packages/ai/src/integrations/registerWatch.ts
+packages/ai/src/modifyRecipe.ts
 packages/ai/src/parsePlanEditCommand.ts
 packages/ai/src/prompts/calendar-classify.ts
 packages/ai/src/prompts/checkin-question.ts
@@ -1301,6 +1315,7 @@ packages/ai/src/prompts/dailyPlanSynthesis.reference.ts
 packages/ai/src/prompts/dailyPlanSynthesis.ts
 packages/ai/src/prompts/empathy-regeneration.ts
 packages/ai/src/prompts/nl-command.ts
+packages/ai/src/prompts/recipe-modify.ts
 packages/ai/src/prompts/template-selection.ts
 packages/ai/src/prompts/types.ts
 packages/ai/src/prompts/voiceGateReview.ts
@@ -1388,6 +1403,8 @@ packages/db/migrations/20260601100001_seed_workout_templates.down.sql
 packages/db/migrations/20260601100001_seed_workout_templates.sql
 packages/db/migrations/20260601100002_seed_recipe_templates.down.sql
 packages/db/migrations/20260601100002_seed_recipe_templates.sql
+packages/db/migrations/20260824000025_food_log_entries.down.sql
+packages/db/migrations/20260824000025_food_log_entries.sql
 packages/db/package.json
 packages/db/scripts/check-client.ts
 packages/db/scripts/inspect-integrations.ts
@@ -1403,6 +1420,7 @@ packages/db/seed/workout_templates.json
 packages/db/src/client.ts
 packages/db/src/encryption.test.ts
 packages/db/src/encryption.ts
+packages/db/src/foodLogEntries.migrations.test.ts
 packages/db/src/index.ts
 packages/db/src/queries/index.ts
 packages/db/src/schema/analytics.ts
@@ -1456,6 +1474,7 @@ packages/shared/src/errors.ts
 packages/shared/src/index.ts
 packages/shared/src/liveActivity/schema.json
 packages/shared/src/liveActivity/types.ts
+packages/shared/src/nutrition/index.ts
 packages/shared/src/onboarding/index.ts
 packages/shared/src/onboarding/state.test.ts
 packages/shared/src/onboarding/state.ts
@@ -1517,6 +1536,7 @@ supabase/migrations/20260601000024_gcal_channel_state.sql
 supabase/migrations/20260601000031_subscription_webhook_columns.sql
 supabase/migrations/20260601100001_seed_workout_templates.sql
 supabase/migrations/20260601100002_seed_recipe_templates.sql
+supabase/migrations/20260824000025_food_log_entries.sql
 tsconfig.json
 turbo.json
 vitest.config.ts

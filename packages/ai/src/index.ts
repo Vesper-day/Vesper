@@ -41,6 +41,11 @@ export { selectWorkoutTemplate } from './selectWorkoutTemplate';
 export type { WorkoutSelectionInput } from './selectWorkoutTemplate';
 export { selectRecipeTemplate } from './selectRecipeTemplate';
 export type { RecipeSelectionInput } from './selectRecipeTemplate';
+// Chat ADD-B: nutrition module AI recipe-modify applier (reuses generateText — voice
+// gate + cost + breaker seam; no new Anthropic model row).
+export { modifyRecipe, MODIFY_RECIPE_PROMPT_VERSION } from './modifyRecipe';
+export type { ModifyRecipeInput } from './modifyRecipe';
+export { RECIPE_MODIFY_PROMPT, RECIPE_MODIFY_VERSION } from './prompts/recipe-modify';
 export { classifyCalendarEvent, CalendarClassificationSchema } from './classifyCalendarEvent';
 export { classifyCalendarEventsBatch } from './classifyCalendarEventsBatch';
 export { generateCheckInQuestion } from './generateCheckInQuestion';

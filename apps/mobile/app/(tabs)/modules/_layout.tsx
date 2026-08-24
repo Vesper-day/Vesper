@@ -6,9 +6,9 @@ import { colors } from '@vesper/ui';
  * `index` is the scrollable rounded-card list; each module page and the Settings
  * sub-stack are pushed on top.
  *
- * Reminder-list module pages (medications, bills) live directly under this stack;
- * the Settings sub-stack ((tabs)/modules/settings) is a nested navigator reached
- * from the Settings card pinned at the bottom of the list.
+ * Module pages (medications, bills, nutrition) live directly under this stack; the
+ * Settings sub-stack ((tabs)/modules/settings) is a nested navigator reached from the
+ * Settings card pinned at the bottom of the list.
  *
  * Headers are hidden to match the tab shell (the tab navigator owns chrome);
  * screens render their own in-content titles.
@@ -22,10 +22,11 @@ export default function ModulesStackLayout() {
       }}
     >
       <Stack.Screen name="index" />
-      {/* Reminder-list modules (chat 060 / 061), re-homed here by ADD-A. Each
-          self-gates on its singular module key. */}
+      {/* Reminder-list modules (chat 060 / 061), re-homed here by ADD-A, and the
+          nutrition generative module (ADD-B). Each self-gates on its singular key. */}
       <Stack.Screen name="medications" />
       <Stack.Screen name="bills" />
+      <Stack.Screen name="nutrition" />
       {/* Application settings, re-parented under the Modules tab (nested stack). */}
       <Stack.Screen name="settings" />
     </Stack>
