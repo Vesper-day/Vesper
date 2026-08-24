@@ -1,10 +1,10 @@
 'use client';
 
-// Web Medications surface (Chat 060). The Medications MODULE is OFF by default and
-// gated on profile.modulesEnabled.medication.enabled — it is NOT a core tab, and the
-// web app shell (app/(app)/layout.tsx) has no persistent nav, so there is no always-on
-// entry to add: this page simply renders the module-off state until the module is
-// enabled.
+// Web Medications surface (Chat 060; re-homed to /modules/medications by ADD-A). The
+// Medications MODULE is OFF by default and gated on
+// profile.modulesEnabled.medication.enabled. It is reached from its card on the
+// /modules list (app/(app)/modules/page.tsx) and self-gates: it renders the module-off
+// state until the module is enabled. CRUD logic is unchanged by the re-home.
 //
 // CRUD runs against the EXISTING /api/v1/medications route set through the shared web
 // fetch helper (@/lib/api) + the react-query provider already mounted in
