@@ -809,6 +809,7 @@ apps/mobile/app/(tabs)/_layout.tsx
 apps/mobile/app/(tabs)/calendar.tsx
 apps/mobile/app/(tabs)/modules/_layout.tsx
 apps/mobile/app/(tabs)/modules/bills.tsx
+apps/mobile/app/(tabs)/modules/fitness.tsx
 apps/mobile/app/(tabs)/modules/index.tsx
 apps/mobile/app/(tabs)/modules/medications.tsx
 apps/mobile/app/(tabs)/modules/nutrition.tsx
@@ -903,6 +904,8 @@ apps/mobile/lib/buildPrioritiesSubmission.test.ts
 apps/mobile/lib/buildPrioritiesSubmission.ts
 apps/mobile/lib/calendarEvents.test.ts
 apps/mobile/lib/calendarEvents.ts
+apps/mobile/lib/fitness.test.ts
+apps/mobile/lib/fitness.ts
 apps/mobile/lib/medicationReminders.ts
 apps/mobile/lib/medicationSchedule.test.ts
 apps/mobile/lib/medicationSchedule.ts
@@ -947,6 +950,7 @@ apps/web/app/(app)/calendar/_components/rbc-theme.css
 apps/web/app/(app)/calendar/page.tsx
 apps/web/app/(app)/layout.tsx
 apps/web/app/(app)/modules/bills/page.tsx
+apps/web/app/(app)/modules/fitness/page.tsx
 apps/web/app/(app)/modules/medications/page.tsx
 apps/web/app/(app)/modules/nutrition/page.tsx
 apps/web/app/(app)/modules/page.tsx
@@ -989,6 +993,13 @@ apps/web/app/api/v1/calendar-events/route.ts
 apps/web/app/api/v1/energy/energy.integration.test.ts
 apps/web/app/api/v1/energy/logEnergy.ts
 apps/web/app/api/v1/energy/route.ts
+apps/web/app/api/v1/fitness/fitness.integration.test.ts
+apps/web/app/api/v1/fitness/lift-log/[id]/route.ts
+apps/web/app/api/v1/fitness/lift-log/route.ts
+apps/web/app/api/v1/fitness/operations.ts
+apps/web/app/api/v1/fitness/tailored.test.ts
+apps/web/app/api/v1/fitness/tailored/route.ts
+apps/web/app/api/v1/fitness/workouts/route.ts
 apps/web/app/api/v1/health/circuit-breaker/route.ts
 apps/web/app/api/v1/integrations/[provider]/route.ts
 apps/web/app/api/v1/integrations/google-calendar/connect/route.ts
@@ -1142,6 +1153,8 @@ apps/web/lib/blocks/effectiveStatus.ts
 apps/web/lib/csp/nonce.ts
 apps/web/lib/dates/localDate.test.ts
 apps/web/lib/dates/localDate.ts
+apps/web/lib/fitness.test.ts
+apps/web/lib/fitness.ts
 apps/web/lib/googleCalendar/registerWatch.test.ts
 apps/web/lib/googleCalendar/registerWatch.ts
 apps/web/lib/idempotency.ts
@@ -1405,6 +1418,8 @@ packages/db/migrations/20260601100002_seed_recipe_templates.down.sql
 packages/db/migrations/20260601100002_seed_recipe_templates.sql
 packages/db/migrations/20260824000025_food_log_entries.down.sql
 packages/db/migrations/20260824000025_food_log_entries.sql
+packages/db/migrations/20260824000026_lift_log_entries.down.sql
+packages/db/migrations/20260824000026_lift_log_entries.sql
 packages/db/package.json
 packages/db/scripts/check-client.ts
 packages/db/scripts/inspect-integrations.ts
@@ -1422,6 +1437,7 @@ packages/db/src/encryption.test.ts
 packages/db/src/encryption.ts
 packages/db/src/foodLogEntries.migrations.test.ts
 packages/db/src/index.ts
+packages/db/src/liftLogEntries.migrations.test.ts
 packages/db/src/queries/index.ts
 packages/db/src/schema/analytics.ts
 packages/db/src/schema/daily-planning.ts
@@ -1471,6 +1487,7 @@ packages/shared/src/constants/index.ts
 packages/shared/src/copy/copy.test.ts
 packages/shared/src/copy/index.ts
 packages/shared/src/errors.ts
+packages/shared/src/fitness/index.ts
 packages/shared/src/index.ts
 packages/shared/src/liveActivity/schema.json
 packages/shared/src/liveActivity/types.ts
@@ -1537,6 +1554,7 @@ supabase/migrations/20260601000031_subscription_webhook_columns.sql
 supabase/migrations/20260601100001_seed_workout_templates.sql
 supabase/migrations/20260601100002_seed_recipe_templates.sql
 supabase/migrations/20260824000025_food_log_entries.sql
+supabase/migrations/20260824000026_lift_log_entries.sql
 tsconfig.json
 turbo.json
 vitest.config.ts

@@ -23,10 +23,12 @@ export default function ModulesStackLayout() {
     >
       <Stack.Screen name="index" />
       {/* Reminder-list modules (chat 060 / 061), re-homed here by ADD-A, and the
-          nutrition generative module (ADD-B). Each self-gates on its singular key. */}
+          generative modules (nutrition ADD-B, fitness ADD-C). Each self-gates on its
+          singular key. */}
       <Stack.Screen name="medications" />
       <Stack.Screen name="bills" />
       <Stack.Screen name="nutrition" />
+      <Stack.Screen name="fitness" />
       {/* Application settings, re-parented under the Modules tab (nested stack). */}
       <Stack.Screen name="settings" />
     </Stack>
