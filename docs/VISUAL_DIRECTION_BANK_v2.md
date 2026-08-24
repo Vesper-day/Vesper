@@ -1,5 +1,7 @@
 # VISUAL_DIRECTION_BANK.md
 
+> **⛔ DEPRECATED — SUPERSEDED by the clean-posture design-track overhaul.** This bank captures the **immersive** motion/staging direction (Three.js / React Three Fiber, GSAP ScrollTrigger + Lenis cinematic scroll, manor-study 3D scenes, AI-atmospheric imagery, reel-derived staging). The design track has **dropped the immersive vision** in favor of a **clean, credible, shippable** look (restrained tokens, standard motion, conventional layouts). **Do not consume this bank as active direction.** Content is preserved for reference only. Current authority: `docs/DESIGN_STRATEGY.md` (clean-posture banner) and `docs/PHASE_4_BUILD_PLAN.md` → Addendum → "Design-Track Overhaul." The committed 107/107a token/primitive values are unchanged; only this immersive direction is retired.
+
 **Purpose.** A distilled, durable record of the design-reference recon for the Vesper landing page. Any "-V" design chat consumes *this* file instead of re-watching the 9 reels or re-browsing the four reference sites. It captures **motion + staging direction only** — palette, type, copy, and brand are locked Layer-4 decisions and are not re-opened here.
 
 **Status.** Direction-only. Not a build spec, not a component API. A design/build chat reads this alongside `LAYER_4_EXPERIENCE_IDENTITY.md` and the design system; where this bank and an authority doc disagree, the authority doc wins.

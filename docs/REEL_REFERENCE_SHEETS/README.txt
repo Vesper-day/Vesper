@@ -1,3 +1,10 @@
+*** DEPRECATED — SUPERSEDED by the clean-posture design-track overhaul. ***
+These reel reference sheets (REEL2/6/7/8/9 .jpg) feed the immersive VISUAL_DIRECTION_BANK_v2.md,
+which is itself deprecated. The design track dropped the immersive/AI-atmospheric direction for a
+clean, shippable look. Do not use these as active direction. Images preserved for reference only.
+Current authority: docs/DESIGN_STRATEGY.md (clean-posture banner) and
+docs/PHASE_4_BUILD_PLAN.md -> Addendum -> "Design-Track Overhaul".
+
 VESPER — REEL REFERENCE SHEETS (1fps contact sheets, timestamped)
 Companion to VISUAL_DIRECTION_BANK.md Part A2. Mood/staging reference only.
 
