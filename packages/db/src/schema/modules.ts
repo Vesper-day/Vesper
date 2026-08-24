@@ -1,5 +1,6 @@
 import * as t from 'drizzle-orm/pg-core';
 import { users } from './users';
+import { recipeTemplates } from './templates';
 
 // medication_frequency_enum — live on the DB since migration 0006 (verified via
 // direct introspection, chat 060). Modelled here so the ORM `frequency` column is
@@ -100,4 +101,46 @@ export const bills = t.pgTable(
       .defaultNow(),
   },
   (table) => [t.index('idx_bills_user_id').on(table.userId)],
+);
+
+// food_log_entries — the daily food-log surface of the nutrition module (Chat
+// ADD-B). Modelled to the LIVE applied DDL (migration 25). One row per logged food
+// item; the day's read-back is derived by query against start_of_local_day(tz)
+// (mirrors the hydration counter, migration 14). recipe_template_id is set when the
+// item was chosen from the food-search corpus (ON DELETE SET NULL); NULL for
+// free-text. quantity_note is an optional, UNstructured portion note. DEEP nutrition
+// columns (micronutrient / vitamin / RDA / calorie) are DEFERRED (PRD §6.3) and are
+// intentionally NOT modelled here. user_id ALWAYS comes from the authenticated
+// session — NEVER from the request body.
+export const foodLogEntries = t.pgTable(
+  'food_log_entries',
+  {
+    id: t.uuid('id').defaultRandom().primaryKey(),
+    userId: t
+      .uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    loggedAt: t
+      .timestamp('logged_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    itemName: t.text('item_name').notNull(),
+    recipeTemplateId: t
+      .uuid('recipe_template_id')
+      .references(() => recipeTemplates.id, { onDelete: 'set null' }),
+    quantityNote: t.text('quantity_note'),
+    createdAt: t
+      .timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: t
+      .timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    t
+      .index('idx_food_log_entries_user_id_logged_at')
+      .on(table.userId, table.loggedAt),
+  ],
 );

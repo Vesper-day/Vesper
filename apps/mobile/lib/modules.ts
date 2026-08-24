@@ -8,11 +8,11 @@
 // bills (the Finance module) gate on modulesEnabled.finance (key `finance`, NOT
 // `bills`). See docs/MODULE_MOUNT_CONTRACT.md.
 
-export type ModuleGateKey = 'medication' | 'finance';
+export type ModuleGateKey = 'medication' | 'finance' | 'nutrition';
 
 export interface ModuleCard {
   /** Stable id / route slug. */
-  key: 'medications' | 'bills';
+  key: 'medications' | 'bills' | 'nutrition';
   title: string;
   subtitle: string;
   /** Absolute expo-router path to the module's full page. */
@@ -21,10 +21,11 @@ export interface ModuleCard {
   gateKey: ModuleGateKey;
 }
 
-// The reminder-list modules that have a landed full page (ADD-A), in list order.
-// Generative modules (fitness/nutrition/sleep) and errands (062) join this list
-// when their pages land — they are intentionally absent now so no card routes to
-// a page that does not exist.
+// The modules that have a landed full page, in list order. Nutrition (ADD-B) is the
+// first GENERATIVE module to land — a method-B functional-breadth scaffold page (PRD
+// §6.3). The remaining generative modules (fitness/sleep) and errands (062) join this
+// list when their pages land — intentionally absent now so no card routes to a page
+// that does not exist.
 export const MODULE_CARDS: readonly ModuleCard[] = [
   {
     key: 'medications',
@@ -39,6 +40,13 @@ export const MODULE_CARDS: readonly ModuleCard[] = [
     subtitle: 'Due days and reminders',
     route: '/modules/bills',
     gateKey: 'finance',
+  },
+  {
+    key: 'nutrition',
+    title: 'Nutrition',
+    subtitle: 'Food log and recipes',
+    route: '/modules/nutrition',
+    gateKey: 'nutrition',
   },
 ];
 
