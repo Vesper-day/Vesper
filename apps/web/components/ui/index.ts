@@ -21,9 +21,15 @@ export { ButlerVoice, type ButlerVoiceProps } from './ButlerVoice';
 export {
   Entrance,
   type EntranceProps,
+  Reveal,
+  type RevealProps,
   Interaction,
   type InteractionProps,
   useReducedMotion,
   motionDurationClass,
   type MotionBand,
 } from './motion';
+
+// Rich-posture smooth-scroll provider (ADD-D) — composes the Lenis library for
+// immersive scroll surfaces; reduced-motion falls back to native scroll.
+export { SmoothScroll, type SmoothScrollProps } from './SmoothScroll';

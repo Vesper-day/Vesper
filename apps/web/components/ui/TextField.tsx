@@ -18,8 +18,9 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
       className={cn(
         'w-full rounded-md border border-line-subtle bg-surface px-3 py-2',
         'font-body text-sm text-cream placeholder:text-cream-faint',
-        'transition-[border-color] duration-quick ease-standard-out',
-        'focus:border-line-strong focus:outline-none',
+        'transition-[border-color,box-shadow] duration-quick ease-standard-out',
+        // Rich posture (ADD-D): focus lifts the bronze glow halo alongside the border.
+        'focus:border-line-strong focus:shadow-glow focus:outline-none',
         'disabled:pointer-events-none disabled:opacity-50',
         className,
       )}

@@ -23,7 +23,7 @@ export function PlanSkeleton({ rows = 4 }: PlanSkeletonProps): React.JSX.Element
       {Array.from({ length: rows }).map((_, i) => (
         <View
           key={i}
-          className="flex-row items-center gap-3 rounded-lg border border-line-subtle bg-surface px-4 py-4"
+          className="flex-row items-center gap-3 rounded-lg border border-line-subtle bg-surface px-4 py-4 shadow-raised"
         >
           <View className="h-6 w-6 rounded bg-elevated" />
           <View className="min-w-0 flex-1 gap-2">
