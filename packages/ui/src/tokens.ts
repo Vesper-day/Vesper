@@ -56,6 +56,33 @@ export const borderRadius = {
 } as const;
 
 /**
+ * ELEVATION — warm box-shadow set for the rich posture (Design-Track Re-Overhaul).
+ * NEW token names added by ADD-D; they extend (never replace) Tailwind's default
+ * shadow scale, so existing `shadow-sm` / `shadow-inner` consumers keep resolving.
+ * Shadows are tinted with the near-black espresso base (rgba of #14100D) rather
+ * than neutral gray, so depth reads warm against the espresso ground. `glow` is
+ * the bronze focus halo (accent-bronze at low alpha). Emits the utilities
+ * shadow-raised / shadow-floating / shadow-press / shadow-glow. Values live here
+ * (the single source) — components compose the NAMES, never these literals.
+ */
+export const boxShadow = {
+  raised: '0 1px 2px 0 rgba(20,16,13,0.30), 0 2px 8px -2px rgba(20,16,13,0.35)', // rest elevation — cards, buttons
+  floating: '0 6px 16px -4px rgba(20,16,13,0.45), 0 16px 40px -12px rgba(20,16,13,0.55)', // hover/lifted — raised cards, menus
+  press: 'inset 0 1px 3px 0 rgba(20,16,13,0.55)', // pressed-in leather (:active)
+  glow: '0 0 0 1px rgba(184,136,74,0.45), 0 0 18px -2px rgba(184,136,74,0.35)', // bronze focus halo (accent-bronze #B8884A)
+} as const;
+
+/**
+ * BACKDROP BLUR — glass veil for immersive overlays (Design-Track Re-Overhaul).
+ * NEW token name added by ADD-D. Web-only (NativeWind lacks a reliable
+ * backdrop-blur); mobile surfaces fall back to an opaque token surface. Emits
+ * backdrop-blur-veil.
+ */
+export const backdropBlur = {
+  veil: '12px', // frosted overlay behind sheets / immersive chrome
+} as const;
+
+/**
  * SPACING SCALE — 4px base unit (Layer 4 space-0 … space-32). Recorded here as
  * the single source for React Native / Swift consumers and for documentation.
  *
@@ -177,7 +204,11 @@ export const motion = {
   easing: {
     standardOut: 'cubic-bezier(0.2, 0.8, 0.2, 1.0)', // entry animations
     standardIn: 'cubic-bezier(0.4, 0.0, 1.0, 1.0)', // exit animations
-    cinematic: 'cubic-bezier(0.4, 0.0, 0.1, 1.0)', // storytelling moments
+    cinematic: 'cubic-bezier(0.4, 0.0, 0.1, 1.0)', // storytelling moments (KEPT — do not remove)
+    // NEW rich-posture curves (Design-Track Re-Overhaul / ADD-D). Additive names;
+    // existing curve names stay stable so shipped consumers do not shift.
+    emphasized: 'cubic-bezier(0.2, 0.0, 0.0, 1.0)', // decelerate-heavy reveal (rich entrances)
+    overshoot: 'cubic-bezier(0.34, 1.56, 0.64, 1.0)', // gentle spring overshoot (press / pop)
   },
   // React Native Reanimated spring — interactive feedback.
   spring: { damping: 18, stiffness: 150 },

@@ -26,7 +26,10 @@ export const BlockRow = React.forwardRef<HTMLDivElement, BlockRowProps>(
       ref={ref}
       className={cn(
         'flex items-start gap-3 rounded-lg border border-line-subtle bg-surface px-4 py-3',
-        active && 'border-l-2 border-l-bronze',
+        // Rich posture (ADD-D): rest elevation + hover lift over the quick band.
+        'shadow-raised transition-shadow duration-quick ease-standard-out hover:shadow-floating',
+        // Active/now block gets the bronze rail AND the bronze glow halo.
+        active && 'border-l-2 border-l-bronze shadow-glow',
         className,
       )}
       {...props}

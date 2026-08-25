@@ -25,8 +25,10 @@ export function Toggle({ checked, onChange, disabled, className, ...rest }: Togg
       onClick={() => onChange?.(!checked)}
       className={cn(
         'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-line-subtle',
-        'transition-colors duration-quick ease-standard-out',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bronze focus-visible:ring-offset-2 focus-visible:ring-offset-espresso',
+        'transition-[background-color,box-shadow] duration-quick ease-standard-out',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bronze focus-visible:ring-offset-2 focus-visible:ring-offset-espresso focus-visible:shadow-glow',
+        // Rich posture (ADD-D): the on-state track carries the bronze glow it earns.
+        checked && 'shadow-glow',
         'disabled:pointer-events-none disabled:opacity-50',
         checked ? 'bg-bronze' : 'bg-surface',
         className,

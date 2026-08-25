@@ -67,7 +67,7 @@ export function PlanEmpty({
         accessibilityRole="button"
         disabled={isGenerating}
         onPress={onGenerate}
-        className="rounded-md bg-bronze px-4 py-2.5"
+        className="rounded-md bg-bronze px-4 py-2.5 shadow-raised active:shadow-press"
       >
         <Text className="text-sm font-medium text-espresso">
           {isGenerating ? 'Drafting…' : 'Generate plan'}
