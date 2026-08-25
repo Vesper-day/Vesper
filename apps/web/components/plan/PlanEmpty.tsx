@@ -26,7 +26,7 @@ export function PlanEmpty({
 }): React.JSX.Element {
   if (variant === 'error') {
     return (
-      <div className="rounded-lg border border-line-subtle bg-surface p-10 text-center">
+      <div className="rounded-lg border border-line-subtle bg-surface p-10 text-center shadow-raised">
         <p className="text-base font-medium text-cream">Could not load your plan.</p>
         <p className="mt-1 text-sm text-cream-muted">
           Something went wrong reaching your day. Please try again.
@@ -38,7 +38,7 @@ export function PlanEmpty({
   const isFallback = variant === 'fallback-apology';
 
   return (
-    <div className="rounded-lg border border-line-subtle bg-surface p-10 text-center">
+    <div className="rounded-lg border border-line-subtle bg-surface p-10 text-center shadow-raised">
       <p className="text-lg font-medium text-cream">
         {isFallback ? 'No plan just now' : 'No plan yet'}
       </p>
@@ -52,7 +52,7 @@ export function PlanEmpty({
         type="button"
         onClick={onGenerate}
         disabled={isGenerating}
-        className="mt-6 rounded-md bg-bronze px-4 py-2 text-sm font-medium text-espresso hover:opacity-90 disabled:opacity-60"
+        className="mt-6 rounded-md bg-bronze px-4 py-2 text-sm font-medium text-espresso shadow-raised transition-[opacity,box-shadow,transform] duration-quick ease-standard-out hover:opacity-90 hover:shadow-floating focus-visible:shadow-glow active:scale-95 active:shadow-press disabled:opacity-60"
       >
         {isGenerating ? 'Generating…' : isFallback ? 'Try again' : 'Generate plan'}
       </button>

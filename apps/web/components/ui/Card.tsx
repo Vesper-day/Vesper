@@ -6,6 +6,12 @@
 // absolutely-positioned overlay child so it tints the card without affecting
 // layout. Discipline: no hex, radius, or size literal lives here — all are
 // @vesper/ui tokens via Tailwind utilities.
+//
+// Rich posture (Design-Track Re-Overhaul / ADD-D): the card rests at the warm
+// `shadow-raised` elevation and lifts to `shadow-floating` on hover over the
+// considered band with the standard-out curve. Motion is a shadow transition
+// only (no transform), and globals.css collapses all transitions to instant under
+// prefers-reduced-motion, so the reduced-motion fallback needs no extra branch.
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +26,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       ref={ref}
       className={cn(
         'relative overflow-hidden rounded-lg border border-line-subtle bg-surface text-cream',
+        'shadow-raised transition-shadow duration-considered ease-standard-out hover:shadow-floating',
         className,
       )}
       {...props}

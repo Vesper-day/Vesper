@@ -94,13 +94,28 @@ Allowed form submission targets:
 injected script could call `eval()` with full execution scope, which negates the
 CSP's primary value as a second-line defense against script injection.
 
-**Precompiled-shader strategy.** The one library that typically forces
-`'unsafe-eval'` is Three.js, which compiles GLSL shaders via runtime `eval` by
-default. The architectural workaround (scheduled for a later chat — Chat 093 in
-`PHASE_4_BUILD_PLAN.md`): shaders are extracted to `.glsl` files and compiled at
-**build time** via `vite-plugin-glsl`, loaded as static assets. With shaders
-precompiled, no runtime `eval` is needed, so `'unsafe-eval'` can stay out of the
-policy permanently. No Three.js / shader code ships at V1.
+**Rich-UI library audit (Design-Track Re-Overhaul / ADD-D).** The rich posture
+adds the code libraries `lenis`, `gsap`, `vanta`, and `three` to `@vesper/web`. All
+four were audited for the JS constructs `'unsafe-eval'` gates — `eval(` and
+`new Function(` — in their shipped builds: **zero** matches in three's core
+(`build/three.module.js`), vanta's `dist`, gsap, and lenis. This corrects an earlier
+belief recorded here that "Three.js compiles GLSL shaders via runtime `eval`":
+modern three (r150+, and the r185 installed) passes GLSL **strings** to the WebGL
+API, and **shader compilation is GPU-side** (`gl.compileShader` / `gl.linkProgram`),
+which is **not** JavaScript-`eval` and **not** gated by `script-src`.
+
+**Consequence: no `script-src` relaxation was made.** The production `script-src`
+still carries **no `'unsafe-eval'`** — Decision 13's exclusion stays fully intact,
+and `next.config.ts` was **not** modified for the rich-UI libraries. The
+`vite-plugin-glsl` precompiled-shader workaround is therefore **not needed** and was
+not added.
+
+**If a future WebGL surface needs it.** three's worker-based asset loaders
+(DRACOLoader / KTX2Loader / basis) spin Web Workers from `blob:` URLs; if such a
+loader is ever adopted, the minimal directive is **`worker-src blob:`** (and/or
+`child-src blob:`) — still far narrower than a blanket `'unsafe-eval'`. Vanta's
+standard animated backgrounds and GSAP/Lenis need none of this. No such loader ships
+today.
 
 ---
 

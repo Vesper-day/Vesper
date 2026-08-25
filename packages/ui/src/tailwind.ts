@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss';
-import { colors, borderRadius, typography, motion } from './tokens';
+import { colors, borderRadius, typography, motion, boxShadow, backdropBlur } from './tokens';
 
 /**
  * Shared Vesper Tailwind preset. Every value is built from ./tokens.ts (the
@@ -15,7 +15,9 @@ import { colors, borderRadius, typography, motion } from './tokens';
  *   tracking-          tightest tighter tight normal wide wider widest
  *   leading-           display body butler
  *   duration-          instant quick considered slow cinematic
- *   ease-              standard-out standard-in cinematic
+ *   ease-              standard-out standard-in cinematic emphasized overshoot
+ *   shadow-            raised floating press glow   (rich-posture elevation; extends TW defaults)
+ *   backdrop-blur-     veil                          (glass overlay; web-only)
  *
  * Spacing is intentionally NOT extended — Layer 4's scale equals Tailwind's
  * default 4px-base scale (see tokens.ts spacing note).
@@ -41,7 +43,13 @@ export const vesperPreset: Config = {
         'standard-out': motion.easing.standardOut,
         'standard-in': motion.easing.standardIn,
         cinematic: motion.easing.cinematic,
+        emphasized: motion.easing.emphasized,
+        overshoot: motion.easing.overshoot,
       },
+      // Rich-posture elevation (ADD-D). `extend` MERGES with Tailwind's default
+      // shadow scale, so shadow-sm / shadow-inner stay available to shipped code.
+      boxShadow: { ...boxShadow },
+      backdropBlur: { ...backdropBlur },
     },
   },
   plugins: [],
