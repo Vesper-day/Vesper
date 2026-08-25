@@ -1236,12 +1236,6 @@ docs/PHASE_4_BUILD_PLAN.md
 docs/PRD.md
 docs/PROJECT_OVERVIEW.md
 docs/Persistent.md
-docs/REEL_REFERENCE_SHEETS/README.txt
-docs/REEL_REFERENCE_SHEETS/REEL2_editorial-ecomm_crossfade.jpg
-docs/REEL_REFERENCE_SHEETS/REEL6_cafe-LOUNGE_warmdark-staging.jpg
-docs/REEL_REFERENCE_SHEETS/REEL7_skincare-galaxy_static-staging.jpg
-docs/REEL_REFERENCE_SHEETS/REEL8_VELOUR-candle_warmdark-REGISTER-MATCH.jpg
-docs/REEL_REFERENCE_SHEETS/REEL9_color_60-30-10-rule.jpg
 docs/RETENTION_POLICY.md
 docs/RUNBOOKS/APNS_KEY_ROTATION.md
 docs/RUNBOOKS/APPLE_PKI_MONITOR.md
