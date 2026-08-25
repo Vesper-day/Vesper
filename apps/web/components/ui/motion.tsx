@@ -3,10 +3,15 @@
 // Motion primitives (web) — Layer 4 / Chat 107a. A small reusable set of entrance +
 // interaction wrappers plus a reduced-motion hook, so later screens never inline a
 // one-off animation. Mechanism: CSS transitions driven by the @vesper/ui token
-// classes the Tailwind preset emits — `duration-quick` / `duration-considered`
-// (band midpoints), `duration-instant` (reduced-motion fallback), and the
-// `ease-standard-out` curve. No motion library is a web dep, so this composes the
-// preset rather than adding one. Never inlines an ms value or a bezier.
+// classes the Tailwind preset emits — `duration-quick` / `duration-considered` /
+// `duration-cinematic` (band midpoints), `duration-instant` (reduced-motion
+// fallback), and the `ease-standard-out` / `ease-emphasized` curves. These
+// lightweight wrappers stay pure CSS-token compositions so they SSR-render and
+// unit-test without a client runtime. The rich-posture code libraries added by
+// ADD-D (GSAP timelines / ScrollTrigger, Lenis smooth-scroll, Vanta+Three WebGL)
+// are reserved for the heavier immersive surfaces (landing hero / scroll
+// storytelling) — they layer on top of, not inside, these primitives. Never
+// inlines an ms value or a bezier.
 //
 // Reduced motion: globals.css already collapses every transition under
 // `prefers-reduced-motion` to instant. These primitives ALSO read the preference
@@ -15,13 +20,15 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-export type MotionBand = 'quick' | 'considered';
+export type MotionBand = 'quick' | 'considered' | 'cinematic';
 
 // Quick = taps / toggles / focus (150-250ms band); Considered = reveals / sheets /
-// expansions (300-500ms band). Map to the preset's token duration utility.
+// expansions (300-500ms band); Cinematic = hero / first-plan reveals (1000-2000ms
+// band). Map to the preset's token duration utility.
 const BAND_DURATION: Record<MotionBand, string> = {
   quick: 'duration-quick',
   considered: 'duration-considered',
+  cinematic: 'duration-cinematic',
 };
 
 /**
@@ -76,6 +83,44 @@ export function Entrance({
         'transition-[opacity,transform] ease-standard-out',
         motionDurationClass(band, reduceMotion),
         visible ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0',
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+export interface RevealProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Cinematic by default (hero / first-plan reveal); pass a lighter band if wanted. */
+  band?: MotionBand;
+  reduceMotion?: boolean;
+}
+
+/**
+ * Reveal — the rich-posture entrance for hero / first-plan moments: a larger rise
+ * and blur-clear over the cinematic band with the emphasized (decelerate-heavy)
+ * curve. reduceMotion shows the content immediately at the instant token with no
+ * transform or blur. This is the token-driven baseline; a surface wanting a
+ * scrubbed timeline composes GSAP/ScrollTrigger on top of it.
+ */
+export function Reveal({
+  band = 'cinematic',
+  reduceMotion = false,
+  className,
+  children,
+  ...props
+}: RevealProps) {
+  const [shown, setShown] = React.useState(false);
+  React.useEffect(() => setShown(true), []);
+  const visible = shown || reduceMotion;
+  return (
+    <div
+      className={cn(
+        'transition-[opacity,transform,filter] ease-emphasized',
+        motionDurationClass(band, reduceMotion),
+        visible ? 'translate-y-0 opacity-100 blur-0' : 'translate-y-3 opacity-0 blur-sm',
         className,
       )}
       {...props}

@@ -20,6 +20,10 @@ export const ButlerLine = React.forwardRef<HTMLParagraphElement, ButlerLineProps
         ref={ref}
         className={cn(
           'font-display text-base italic leading-butler text-cream-faint',
+          // Rich posture (ADD-D): the ambient voice cross-fades on the slow band so
+          // line swaps read as a quiet settle, not a cut. Collapses to instant under
+          // prefers-reduced-motion via globals.css.
+          'transition-opacity duration-slow ease-standard-out',
           className,
         )}
         {...props}

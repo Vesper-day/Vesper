@@ -39,7 +39,9 @@ export function PlanSkeleton({
             key={i}
             className={cn(
               'flex items-start gap-3 rounded-lg border border-line-subtle bg-surface p-4',
-              !settled && 'animate-pulse',
+              // Rich posture (ADD-D): a settled row lifts to the warm rest elevation
+              // as it lands; unsettled rows keep the pulse and stay flat.
+              settled ? 'shadow-raised transition-shadow duration-considered ease-standard-out' : 'animate-pulse',
             )}
           >
             <div className="h-9 w-9 shrink-0 rounded-md bg-elevated" />

@@ -104,8 +104,9 @@ export function BlockCard({ block }: BlockCardProps): React.JSX.Element {
     >
       <View
         className={cn(
-          'flex-row items-start gap-3 border border-line-subtle bg-surface px-4 py-3',
-          active && 'border-l-2 border-l-bronze',
+          // Rich posture (ADD-D): warm rest elevation; the live block adds the bronze glow.
+          'flex-row items-start gap-3 border border-line-subtle bg-surface px-4 py-3 shadow-raised',
+          active && 'border-l-2 border-l-bronze shadow-glow',
         )}
         style={{ borderRadius: 12 }}
         accessibilityRole="summary"

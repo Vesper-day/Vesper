@@ -120,6 +120,26 @@ public enum VesperRadius {
     public static let full: CGFloat = 9999 // avatars, pill buttons, FAB
 }
 
+// MARK: - Elevation (rich-posture warm shadows)
+
+/// Warm box-shadow set mirroring tokens.ts `boxShadow` (Design-Track Re-Overhaul /
+/// ADD-D). SwiftUI applies these as `.shadow(color:radius:x:y:)`; the tuple carries
+/// (color, opacity, radius, y-offset). Tinted with the near-black espresso base
+/// (#14100D) so depth reads warm. `glow` is the bronze focus halo.
+public enum VesperElevation {
+    public struct Shadow {
+        public let color: Color
+        public let radius: CGFloat
+        public let y: CGFloat
+    }
+    private static func espressoShadow(_ opacity: Double) -> Color {
+        Color(red: 20.0 / 255.0, green: 16.0 / 255.0, blue: 13.0 / 255.0).opacity(opacity)
+    }
+    public static let raised = Shadow(color: espressoShadow(0.35), radius: 4, y: 2) // rest — cards, buttons
+    public static let floating = Shadow(color: espressoShadow(0.55), radius: 20, y: 8) // lifted — menus, sheets
+    public static let glow = Shadow(color: VesperColor.bronze.opacity(0.35), radius: 9, y: 0) // bronze focus halo
+}
+
 // MARK: - Motion (durations, easing, spring)
 
 /// Duration bands as [min, max] seconds, plus a representative midpoint per band.
@@ -141,7 +161,10 @@ public enum VesperMotion {
     // Easing curves (cubic-bezier control points) — match tokens.ts.
     public static let standardOut: (Double, Double, Double, Double) = (0.2, 0.8, 0.2, 1.0) // entry
     public static let standardIn: (Double, Double, Double, Double) = (0.4, 0.0, 1.0, 1.0) // exit
-    public static let cinematicCurve: (Double, Double, Double, Double) = (0.4, 0.0, 0.1, 1.0) // storytelling
+    public static let cinematicCurve: (Double, Double, Double, Double) = (0.4, 0.0, 0.1, 1.0) // storytelling (KEPT)
+    // NEW rich-posture curves (Design-Track Re-Overhaul / ADD-D) — mirror tokens.ts motion.easing.
+    public static let emphasizedCurve: (Double, Double, Double, Double) = (0.2, 0.0, 0.0, 1.0) // decelerate-heavy reveal
+    public static let overshootCurve: (Double, Double, Double, Double) = (0.34, 1.56, 0.64, 1.0) // gentle spring overshoot
 
     // Interactive spring (mirror of the RN Reanimated spring).
     public static let springDamping: Double = 18

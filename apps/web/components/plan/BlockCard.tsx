@@ -56,6 +56,11 @@ export function BlockCard({ block }: { block: PlanBlock }): React.JSX.Element {
     <article
       className={cn(
         'flex items-start gap-3 rounded-lg border border-line-subtle bg-surface p-4',
+        // Rich posture (ADD-D): rest elevation + hover lift on the quick band; the
+        // live block carries the bronze glow halo. Collapses to instant under
+        // prefers-reduced-motion via globals.css.
+        'shadow-raised transition-shadow duration-quick ease-standard-out hover:shadow-floating',
+        block.status === 'in_progress' && 'shadow-glow',
         block.status === 'skipped' && 'opacity-60',
       )}
     >

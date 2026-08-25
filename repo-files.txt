@@ -1126,6 +1126,7 @@ apps/web/components/ui/SegmentedControl.test.tsx
 apps/web/components/ui/SegmentedControl.tsx
 apps/web/components/ui/Select.test.tsx
 apps/web/components/ui/Select.tsx
+apps/web/components/ui/SmoothScroll.tsx
 apps/web/components/ui/TextField.test.tsx
 apps/web/components/ui/TextField.tsx
 apps/web/components/ui/TimePicker.test.tsx

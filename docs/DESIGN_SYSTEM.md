@@ -19,7 +19,9 @@ There is **one** token source, read by both web and mobile:
 - **`packages/ui/src/tailwind.ts`** — the `vesperPreset` Tailwind preset, built
   entirely from `tokens.ts`. Maps every semantic token to `theme.extend`: colors,
   borderRadius, fontFamily, fontSize, letterSpacing, lineHeight, transitionDuration,
-  transitionTimingFunction.
+  transitionTimingFunction, and (added by the rich re-overhaul / ADD-D) `boxShadow`
+  and `backdropBlur`. The `boxShadow` extend **merges** with Tailwind's default
+  shadow scale, so pre-existing `shadow-sm` / `shadow-inner` consumers keep resolving.
 - **`packages/ui/src/index.ts`** — exports the token object **and** `vesperPreset`.
 
 **Web** consumes the preset via `apps/web/tailwind.config.ts`
@@ -64,8 +66,10 @@ writes the SwiftUI. (DESIGN_STRATEGY.md §5.)
 | Spacing | `0,1,2,3,4,5,6,8,10,12,16,20,24,32` (4px base) | Spacing scale |
 | Type families | `display` (Fraunces), `sans`/`body` (Inter), `mono` (JetBrains Mono) | Typography |
 | Type roles | `display1-3`, `butlerLine`, `bodyLarge`, `body`, `bodySmall`, `uiLabel`, `uiLabelSmall`, `mono`, `monoSmall` | Typography roles |
-| Motion durations | `quick` (150-250), `considered` (300-500), `slow` (600-900), `cinematic` (1000-2000), `instant` (reduced-motion) | Motion bands |
-| Motion easing | `standardOut`, `standardIn`, `cinematic`, `spring` (damping 18 / stiffness 150) | Motion easing |
+| Motion durations | `quick` (150-250), `considered` (300-500), `slow` (600-900), `cinematic` (1000-2000, **KEPT**), `instant` (reduced-motion) | Motion bands |
+| Motion easing | `standardOut`, `standardIn`, `cinematic` (**KEPT**), `emphasized`, `overshoot` (added by ADD-D), `spring` (damping 18 / stiffness 150) | Motion easing |
+| Elevation (ADD-D) | `shadow-raised` (rest), `shadow-floating` (hover/lift), `shadow-press` (:active inset), `shadow-glow` (bronze focus halo) | Rich-posture `boxShadow` (warm, espresso-tinted) |
+| Backdrop blur (ADD-D) | `backdrop-blur-veil` (12px, web-only glass overlay) | Rich-posture `backdropBlur` |
 
 ### Fonts
 
@@ -168,6 +172,83 @@ Each part-2 component has a colocated unit test in the shallow 107 shape (web:
 `react-dom/server` markup; mobile: call-as-function + read `element.props.className`,
 mocking `react-native` and `react-native-reanimated`). These assert token classes /
 shapes — not resolved on-device styles.
+
+---
+
+## 3b. Rich posture baseline (Design-Track Re-Overhaul / ADD-D)
+
+The design track returned to a **rich / animated / immersive** posture built from
+**code libraries** (the earlier clean-posture re-scope is reversed; the AI-image
+GENERATION pipeline stays retired — richness comes from libraries, not generated
+stills). Execution runs on the **single build model** (the Fable carve-out is
+retired). This section records the baseline the shipped surfaces were lifted to.
+Full authority: `docs/PHASE_4_BUILD_PLAN.md` → Addendum ("Design-Track
+Re-Overhaul" + chat ADD-D) and the rich-posture banner in `docs/DESIGN_STRATEGY.md`.
+
+### Rich-UI tooling (installed into `@vesper/web`)
+
+| Library | Role | Notes |
+|---|---|---|
+| `lenis` | Smooth-scroll inertia | Wrapped by the `SmoothScroll` provider; reduced-motion → native scroll. |
+| `gsap` | Timeline / ScrollTrigger motion | Reserved for the heavier immersive `-V` surfaces (landing / scroll storytelling). |
+| `vanta` + `three` | WebGL animated backgrounds | `three` is vanta's runtime peer. Reserved for the immersive hero (`093-V`). |
+| Playwright | Visual / interaction checks | Dev dep + config already present (`apps/web/playwright.config.ts`, root `pnpm playwright`); browsers are a user-run `npx playwright install`. |
+
+`react-bits` (reactbits.dev animated components) is **copy-in via the jsrepo CLI**,
+**not** a runtime npm dependency — the npm package named `react-bits` is an unrelated
+"common React interfaces" library and is deliberately **not** installed. Components
+are copied in per-need when a surface uses one.
+
+**CSP / Decision 13.** The installed libraries were audited for JS `eval` /
+`new Function` (three core, vanta, gsap, lenis) — **all zero**. WebGL shader
+compilation is GPU-side (`gl.compileShader`), not JS-eval-gated. So **no `script-src`
+relaxation was made**; Decision 13's exclusion of `'unsafe-eval'` stays fully intact.
+See `docs/CSP_NOTES.md` for the audit. If a future surface adopts three's
+worker-based loaders (Draco/KTX2), the minimal addition is `worker-src blob:` —
+still far narrower than `'unsafe-eval'`.
+
+### New motion / immersive tokens (names only — values in `tokens.ts`)
+
+- **Elevation** (`boxShadow`): `raised` / `floating` / `press` / `glow` — a warm,
+  espresso-tinted shadow set (`glow` is the bronze focus halo). Emits
+  `shadow-raised` / `shadow-floating` / `shadow-press` / `shadow-glow`.
+- **Easing**: `emphasized` (decelerate-heavy reveal) + `overshoot` (gentle spring
+  pop) added alongside the **KEPT** `cinematic` curve. Emits `ease-emphasized` /
+  `ease-overshoot`.
+- **Backdrop blur**: `veil` (12px) — web-only glass. Emits `backdrop-blur-veil`.
+
+All are mirrored in `DesignTokens.swift` (`VesperElevation`, `VesperMotion`'s
+`emphasizedCurve` / `overshootCurve`). The **loosened token-freeze** holds: a new
+value enters only as a new token **name**; existing names stay stable; `cinematic`
+is kept; reduced-motion → instant remains mandatory on every motion surface.
+
+### New primitives
+
+- **`Reveal`** (web `motion.tsx`) — cinematic-band entrance (rise + blur-clear on
+  the emphasized curve) for hero / first-plan moments; reduced-motion shows content
+  instantly with no transform/blur.
+- **`SmoothScroll`** (web `SmoothScroll.tsx`) — Lenis provider for immersive scroll
+  surfaces; constructs Lenis only when `prefers-reduced-motion` is off.
+
+### Shipped surfaces lifted to the rich bar
+
+- **Core primitives** (web): `Card` (rest → hover elevation), `Button` (leather
+  raise / press / bronze focus glow + scale press), `BlockRow` (elevation + active
+  glow), `ButlerLine` (slow-band cross-fade).
+- **Part-2 primitives** (web): `TextField` / `Select` (focus glow), `Toggle`
+  (on-state + focus glow), `SegmentedControl` (active + focus glow).
+- **Plan surfaces**: `BlockCard`, `BlockTimeline` (via BlockCard), `PlanSkeleton`,
+  `PlanEmpty` (web + mobile) — warm elevation, live-block glow, richer CTA press.
+- **Mobile**: `Card` carries `shadow-raised` (RN 0.81 boxShadow); the Reanimated
+  spring/FadeIn motion set is the mobile rich layer. `weekly-planning` composes the
+  enriched `Card`/`Button` primitives and inherits the lift.
+- **Settings / integrations** (web): elevated cards, richer connect/disconnect
+  buttons. (The `/week` and `/settings` index pages are still route stubs — nothing
+  shipped there yet to polish.)
+
+Reduced-motion fallback is preserved everywhere: `globals.css` collapses all
+web transitions to instant under `prefers-reduced-motion`, and the mobile set swaps
+to instant via `AccessibilityInfo.isReduceMotionEnabled`.
 
 ---
 

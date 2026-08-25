@@ -88,21 +88,21 @@ function IntegrationsInner(): React.JSX.Element {
         // Reconnect banner — the error-state pattern. Chats 064/099 wire the
         // status-driven trigger from the integrations row; here it reflects the
         // last connect/disconnect attempt.
-        <div className="mb-6 rounded-lg border border-bronze bg-surface p-4">
+        <div className="mb-6 rounded-lg border border-bronze bg-surface p-4 shadow-raised">
           <p className="text-cream">
             We couldn&apos;t reach your Google Calendar. Please reconnect.
           </p>
           <button
             type="button"
             onClick={startGoogleConnect}
-            className="mt-3 rounded-md bg-bronze px-4 py-2 text-espresso"
+            className="mt-3 rounded-md bg-bronze px-4 py-2 text-espresso shadow-raised transition-[background-color,box-shadow,transform] duration-quick ease-standard-out hover:shadow-floating focus-visible:shadow-glow active:scale-95 active:shadow-press"
           >
             Reconnect Google Calendar
           </button>
         </div>
       )}
 
-      <ul className="divide-y divide-line-subtle rounded-lg border border-line-subtle">
+      <ul className="divide-y divide-line-subtle overflow-hidden rounded-lg border border-line-subtle shadow-raised">
         {/* Google Calendar */}
         <li className="flex items-center justify-between p-4">
           <div>
@@ -116,7 +116,7 @@ function IntegrationsInner(): React.JSX.Element {
               type="button"
               onClick={disconnect}
               disabled={busy}
-              className="rounded-md border border-line-subtle px-4 py-2 text-cream disabled:opacity-50"
+              className="rounded-md border border-line-subtle px-4 py-2 text-cream shadow-raised transition-[background-color,box-shadow,transform] duration-quick ease-standard-out hover:bg-elevated hover:shadow-floating active:scale-95 active:shadow-press disabled:opacity-50"
             >
               Disconnect
             </button>
@@ -125,7 +125,7 @@ function IntegrationsInner(): React.JSX.Element {
               type="button"
               onClick={startGoogleConnect}
               disabled={busy}
-              className="rounded-md bg-bronze px-4 py-2 text-espresso disabled:opacity-50"
+              className="rounded-md bg-bronze px-4 py-2 text-espresso shadow-raised transition-[background-color,box-shadow,transform] duration-quick ease-standard-out hover:shadow-floating focus-visible:shadow-glow active:scale-95 active:shadow-press disabled:opacity-50"
             >
               Connect
             </button>
