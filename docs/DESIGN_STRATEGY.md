@@ -17,7 +17,7 @@ If a surface cannot clear that bar, its design changes, not the bar.
 
 ## 1. Surface-by-Surface Map
 
-Design effort lands on three property groups: the **application** (`apps/web`, `apps/mobile`), the **marketing / waitlist site** (the custom Next.js landing on the Vesper TLD), and a small set of **native Swift surfaces** that the build track owns from a design-track visual spec (see Section 5).
+Design effort lands on three property groups: the **application** (`apps/web`, `apps/mobile`), the **marketing site** (the custom Next.js landing on the Vesper TLD, which under the direct-release pivot *is* the launched product's front page), and a small set of **native Swift surfaces** that the build track owns from a design-track visual spec (see Section 5).
 
 The "Shell today" column records what exists in the repo right now (recon of `apps/web/app/` and `apps/mobile/app/`). Surfaces with backend routes but no front-end shell are flagged **not-yet-scaffolded**; the map still covers them because the design-build chats need the strategy before the shell exists.
 
@@ -25,8 +25,8 @@ The "Shell today" column records what exists in the repo right now (recon of `ap
 
 | Surface | Shell today | Design weight | Notes |
 |---|---|---|---|
-| Marketing landing `(marketing)/page.tsx` | Bare stub (`<h1>Vesper</h1>`) | High | Becomes the waitlist landing (Section 4.1). Backend `api/v1/waitlist` exists; UI **not-yet-scaffolded**. |
-| Sign-in `(auth)/sign-in` | Built | Low | No-card onboarding entry. Butler-voice copy only. |
+| Marketing landing `(marketing)/page.tsx` | Bare stub (`<h1>Vesper</h1>`) | High | Becomes the **product landing** (Section 4.1) — the launched product's front page. Its primary CTA is a route link into the auth entry; **no backend call** (`api/v1/waitlist` is retired dead surface). UI **not-yet-scaffolded**. |
+| Sign-in `(auth)/sign-in` | Built | Low | **The landing CTA's destination** — the direct-release signup entry. Butler-voice copy only. Repositioned into the onboarding flow by 032-V. |
 | Day / Week plan `(app)/week` | Built | High | Core daily loop surface; Vesper-hour and morning-brief voice land here in later chats. |
 | Calendar `(app)/calendar` | Built (`CalendarView`, `EventFormDialog`) | Medium | Block-detail and conflict surfaces. |
 | Settings `(app)/settings` (+ `integrations`) | Built | Medium | Hosts the **referral settings panel** (Section 4.3) and the "manage subscription" link to the Stripe portal. Referral panel UI **not-yet-scaffolded**. |
@@ -46,11 +46,11 @@ The "Shell today" column records what exists in the repo right now (recon of `ap
 
 Mobile talks only through `/api/v1/` routes (per `CLAUDE.md` architecture rules); the design map does not add any mobile-only data path.
 
-### 1.3 Marketing / waitlist site
+### 1.3 Marketing site (the launched product's front page)
 
 | Surface | Shell today | Design weight | Notes |
 |---|---|---|---|
-| Waitlist landing (5 locked sections) | Stub only | High | Custom-built; section set locked in Layer 4 / Layer 6 (Section 4.1). |
+| Product landing (5 locked sections) | Stub only | High | Custom-built; section set locked in Layer 4 / Layer 6 (Section 4.1). **Direct-release: this is the launched product's front page, not a waitlist page** — section 5's primary CTA routes into real signup. |
 | Referral landing `/r/[code]` | None | High | Dedicated path-based referee-facing brand surface (link format `vesper.studio/r/[code]`). Built by chat **095-V**, a design-track window chat (Window Y, Fwin F15). Carries a personalized greeting plus an invalid-code soft-redirect page (HTTP 200, ~2s auto-redirect so a mistyped code does not dead-end). UI **not-yet-scaffolded** (Section 4.3). |
 
 ### 1.4 Native Swift surfaces (build-track-owned, design-track-specified)
@@ -69,15 +69,15 @@ See Section 5 for the ownership rule and its source.
 
 Each of the four conversion / retention surfaces is mapped to **one primary Layer 4 persuasion principle**, cited by its exact Layer 4 name, plus an explicit statement of how the application clears the 24-hour-satisfaction bar. The locked behavior each thesis propagates is named so the strategy can be checked against its source, not re-derived.
 
-### 2.1 Waitlist landing
+### 2.1 Product landing
 
-- **Locked behavior (Layer 6 Waitlist Strategy):** Custom-built Next.js landing on the Vesper TLD. Exactly five sections — Hero (the interactive sixty-second sample-day demo), What Vesper does, Modules, How it works, Pricing and signup. The fifth section holds **the only form on the page**: one email input, one iOS/Android segmented control, one "Begin" button. No additional capture fields. No third-party waitlist widget. No "limited spots," no countdown.
+- **Locked behavior (Layer 6 Landing Page Strategy):** Custom-built Next.js landing on the Vesper TLD, and — under the **direct-release pivot** — **the launched product's front page**; there is no waitlist. Exactly five sections, unchanged and in order: Hero (the interactive sixty-second sample-day demo), What Vesper does, Modules, How it works, Pricing and signup. The fifth section holds **no form at all**: it carries the pricing literal ("One week free. After that, $19.99 per month."), the card-at-signup disclosure, and **one primary signup CTA routing to the auth entry**. No email capture, no iOS/Android segmented control, no third-party widget. No "limited spots," no countdown.
 - **Applied Layer 4 principle: Tactical empathy** — "acknowledge the user's situation before any request." The page leads with the sample-day demo: the visitor watches a real plan compose for their own wake time and archetype *before* a single field is asked of them. The product acknowledges the visitor's day before requesting their email.
-- **Clears the 24-hour bar:** A visitor who signs up has already seen the product behave honestly and asked for nothing they cannot verify. There is no manufactured scarcity to regret and no hidden cost (the trial is genuinely no-card, seven days). A fully informed signer-up is satisfied a day later because nothing was concealed or inflated. Influence, not manipulation.
+- **Clears the 24-hour bar:** A visitor who signs up has already seen the product behave honestly and asked for nothing they cannot verify. There is no manufactured scarcity to regret and **no hidden cost — which, under card-at-signup, is a disclosure duty, not an absence.** The trial is seven days and free, and the card placed at signup is not charged until the trial ends ($19.99, cancellable before then); the landing and the signup step **both say so plainly, in the same visual weight as the price**. A fully informed signer-up is satisfied a day later precisely because the future charge was stated up front rather than discovered. Influence, not manipulation. **A card taken quietly would fail this bar**; stating it is what keeps the pivot inside the honest-conversion thesis.
 
 ### 2.2 Trial-end screen (the trial-end ledger)
 
-- **Locked behavior (Layer 5 Trial-to-Paid; Layer 4 Copy Library):** On the trial end date the user sees two options — **Continue** (routes to Stripe Checkout on web / StoreKit on iOS) or **End** (transitions to seven-day read-only). The screen is in butler voice with **no retention copy, no discount offer, no countdown timer**. It is preceded by the ledger lead-in: "This week I arranged [N] blocks, resolved [N] conflicts, planned [N] meals, and reshuffled your day [N] times." Then: "Your week is up." Two unstyled buttons. **No derived figures, no time-saved estimates.**
+- **Locked behavior (Layer 5 Trial-to-Paid; Layer 4 Copy Library):** On the trial end date the user sees two options — **Continue** (under card-at-signup the method is already on file, so this confirms the charge rather than routing to a payment sheet) or **End** (transitions to seven-day read-only). The screen is in butler voice with **no retention copy, no discount offer, no countdown timer**. It is preceded by the ledger lead-in: "This week I arranged [N] blocks, resolved [N] conflicts, planned [N] meals, and reshuffled your day [N] times." Then: "Your week is up." Two unstyled buttons. **No derived figures, no time-saved estimates.**
 - **Applied Layer 4 principle: Commitment and consistency** — "surfaces what the user has already built rather than asking for new commitment." The ledger restates the literal work the butler did during the trial; the decision flows from what already exists, not from a new pitch.
 - **A note on loss aversion:** Trial end is one of the three moments where Layer 4 *permits* **Loss aversion** ("reserved for genuine decision moments (trial end, cancellation, account deletion)"). The strategy deliberately keeps it implicit — the ledger names what would lapse without ever adding urgency, a countdown, or a discount. Loss aversion is available here but is not the lever; commitment and consistency is.
 - **Clears the 24-hour bar:** The figures are literal counts of events that actually happened, never inflated productivity math. A user who continues does so on a true account of value received; a user who ends meets no friction wall. Either decision still feels right 24 hours later because neither was engineered by pressure.
@@ -125,11 +125,13 @@ Practical consequence for the design system (handed to chat 107 and onward): **n
 
 Brief, per-surface design intent for the four conversion / retention surfaces, so the later chats inherit the posture rather than re-deriving it. Each note restates only locked behavior.
 
-### 4.1 Waitlist landing
-Five sections, Hero-demo first, single capture form last (email + iOS/Android control + "Begin"). Espresso / cream / bronze system, Fraunces + Inter, per Layer 4. **Per the rich re-overhaul, the immersive hero direction is restored:** a rich, animated, immersive hero built from the code-library tooling (Lenis smooth-scroll, GSAP, Vanta + Three.js WebGL, react-bits) composing the 107 tokens — immersive staging and layered depth around the interactive sample-day demo. **Reduced-motion → instant is mandatory:** the cream→espresso gradient + wordmark remains the reduced-motion fallback (not the baseline). The AI-generated-imagery / video GENERATION pipeline stays retired — the richness comes from code libraries, not generated stills; no third-party waitlist widget, no scarcity chrome. (See build-plan chat 093-V's in-place re-scope pointer.)
+### 4.1 Product landing
+**Direct-release: this is the launched product's front page — there is no waitlist.** Five sections, Hero-demo first, and **no capture form anywhere on the page**. Section 5 carries the pricing literal, the card-at-signup disclosure (card placed at signup, first charge $19.99 at trial end unless cancelled), and a single primary **signup CTA routing to the auth entry**, which begins the real flow: signup → pricing + card-capture checkout → a dismissable "get the iOS app" overlay → the signed-in web app home (`/plan`). Espresso / cream / bronze system, Fraunces + Inter, per Layer 4. **Per the rich re-overhaul, the immersive hero direction is restored:** a rich, animated, immersive hero built from the code-library tooling (Lenis smooth-scroll, GSAP, Vanta + Three.js WebGL, react-bits) composing the 107 tokens — immersive staging and layered depth around the interactive sample-day demo. **Reduced-motion → instant is mandatory:** the cream→espresso gradient + wordmark remains the reduced-motion fallback (not the baseline). The AI-generated-imagery / video GENERATION pipeline stays retired — the richness comes from code libraries, not generated stills; no third-party widget, no scarcity chrome. (See build-plan chat 093-V.)
 
 ### 4.2 Trial-end screen
 Ledger lead-in, then "Your week is up.", then two unstyled buttons (Continue / End). Bronze marks at most the single primary action and nothing competes with it. No countdown element exists in the layout to populate.
+
+**Card-at-signup reconciliation.** The card is already on file by the time this screen appears, so **Continue collects nothing** — there is no "add a card" step, no payment sheet, no re-entry of details; Continue simply confirms and the existing method is charged $19.99. The screen therefore gets *simpler* under the pivot, not busier: the two buttons stay two buttons and no field is added between them. **End** likewise collects nothing and takes no charge — it transitions to the seven-day read-only state and the card on file is never billed. The honest consequence of card-at-signup is that doing nothing now has a cost, so the screen must state which way inaction falls (the trial ends and the card is charged unless the user ends it) in the same plain register as the rest — one sentence, no countdown, no urgency chrome.
 
 ### 4.3 Referral surfaces
 
@@ -166,7 +168,7 @@ Recon of `apps/web/app/` and `apps/mobile/app/` shows the four conversion / rete
 
 | Surface | Backend present | Front-end shell | Status |
 |---|---|---|---|
-| Waitlist landing | `api/v1/waitlist` | `(marketing)/page.tsx` is a bare `<h1>Vesper</h1>` stub | Not-yet-scaffolded |
+| Product landing | — (**`api/v1/waitlist` is retired dead surface**; the landing CTA is a route link to the auth entry, not an API call) | `(marketing)/page.tsx` is a bare `<h1>Vesper</h1>` stub | Not-yet-scaffolded |
 | Trial-end screen | `api/v1/subscription` | None (web or mobile) | Not-yet-scaffolded |
 | Referral (landing + panel) | `api/v1/referral/{code,track}` | None — both the `/r/[code]` landing UI (095-V) and the settings-panel UI (095-W) absent | Not-yet-scaffolded |
 | Cancellation acknowledgment | `api/v1/subscription` (portal) | None | Not-yet-scaffolded |

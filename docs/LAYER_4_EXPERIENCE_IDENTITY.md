@@ -531,13 +531,15 @@ Headline: "What are your two or three priorities right now?"
 
 Three open text fields. Skip available.
 
-### Screen 12: Trial confirmation
+### Screen 12: Trial confirmation and card capture
 
-Headline: "One week free. No card required."
+> **CARD-AT-SIGNUP (direct-release pivot) — the headline literal below is RETIRED.** The seven-day trial now requires a **card at signup**: captured at this step, **not charged**, first charge $19.99 at trial end unless cancelled. ~~"One week free. No card required."~~ **must not ship.** Its replacement is authored in build chat 035-V through the caveman/stop-slop voice gate, so no new literal is committed here; it must state plainly, in the same visual weight as the price, that a card is placed now and first charged at trial end. Authority: `docs/LAYER_5_BUSINESS_MONETIZATION.md` (card-at-signup banner) and `docs/Persistent.md` → "DIRECT-RELEASE PIVOT".
 
-Body: "After seven days, $19.99 per month. Cancel anytime."
+Headline: ~~"One week free. No card required."~~ — **RETIRED, replacement authored in 035-V under the voice gate**
 
-Button: "Begin"
+Body: "After seven days, $19.99 per month. Cancel anytime." *(unchanged and still correct)*
+
+Button: "Begin" — followed by the hand-off to the hosted checkout (Stripe Checkout on web, StoreKit on iOS); Vesper renders no card field of its own
 
 ### Screen 13: Brief tour (4 screens, skippable)
 

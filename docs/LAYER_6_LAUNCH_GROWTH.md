@@ -4,7 +4,7 @@
 
 Layer 6 translates the locked product, technical, experience, and business decisions from prior layers into a concrete, sequenced plan for getting Vesper from "built" to "in users' hands and generating revenue." Where Layer 1 set the strategic posture, Layer 2 defined what ships, Layer 3 defined how it is built, Layer 4 defined how it looks and sounds, and Layer 5 defined how it makes money, Layer 6 defines exactly what the founder does each week from now through three months post-launch to acquire users, convert them to paying subscribers, and measure whether the business is working.
 
-This layer produces six sets of decisions: the master launch calendar with explicit week-by-week founder action items so nothing falls through the cracks during a long build; the waitlist strategy covering landing page mechanics, capture fields, tooling, and pre-launch nurture cadence; the launch channel mix prioritized for top-of-funnel signups across Product Hunt, Hacker News, Indie Hackers, Designer News, Reddit, BetaList, startup directories, newsletter pitches, and AMAs; the content strategy with five pillars, batched volume targets, and a Claude-driven generation workflow that drops the prior 3-to-5-hour weekly founder time cap; precise definitions of activation, day-one retention, day-seven retention, and day-thirty retention so that PostHog funnels can be wired against Layer 3's tracked events; and the policies on referrals and Android-waitlist communication.
+This layer produces six sets of decisions: the master launch calendar with explicit week-by-week founder action items so nothing falls through the cracks during a long build; the landing page strategy covering page mechanics and the signup CTA (**the pre-launch waitlist, capture fields, tooling, and nurture cadence are superseded — see the direct-release banner in Working Direction**); the launch channel mix prioritized for top-of-funnel signups across Product Hunt, Hacker News, Indie Hackers, Designer News, Reddit, BetaList, startup directories, newsletter pitches, and AMAs; the content strategy with five pillars, batched volume targets, and a Claude-driven generation workflow that drops the prior 3-to-5-hour weekly founder time cap; precise definitions of activation, day-one retention, day-seven retention, and day-thirty retention so that PostHog funnels can be wired against Layer 3's tracked events; and the policies on referrals and Android communication.
 
 Decisions in this layer interact with Layer 3's analytics infrastructure (PostHog event names already defined), Layer 4's marketing visual language (landing page sections and social aesthetics already locked), and Layer 5's win-back posture (single 48-hour survey email already locked). Where Layer 6 expands on or modifies prior-layer decisions, the change is documented explicitly in the cross-layer updates section at the end of this document.
 
@@ -12,9 +12,12 @@ Because Layer 6 is tactical and reversible throughout, it is appropriate for Son
 
 ## Working Direction From Prior Layers
 
-The product is Vesper, a Life OS for young professionals ages 22 to 32, launching in the United States only at V1. The positioning is evening-anchored: the user wakes up with the day already planned, having reviewed and approved tomorrow's plan the evening before in a roughly five-minute Vesper hour, so the morning is pure delivery. The brand voice is butler-modeled, warm but calm and quietly competent, never referring to itself as AI and never using emojis or exclamation points. The aesthetic is warm darkness rather than cold darkness. The business model is a one-week (seven-day) free trial at $19.99 per month, with no permanent free tier, no card required to start the trial, and a deliberately frictionless cancellation flow with a single 48-hour win-back survey email after exit. Both web and iOS mobile ship at V1, with Android arriving shortly after launch through friend-assisted development rather than waiting for V1.5. The founder maintains media anonymity, meaning no face on camera and no voice in recordings, but is comfortable with text-based outreach, newsletter pitches, and brand-account engagement on social platforms. 
+The product is Vesper, a Life OS for young professionals ages 22 to 32, launching in the United States only at V1. The positioning is evening-anchored: the user wakes up with the day already planned, having reviewed and approved tomorrow's plan the evening before in a roughly five-minute Vesper hour, so the morning is pure delivery. The brand voice is butler-modeled, warm but calm and quietly competent, never referring to itself as AI and never using emojis or exclamation points. The aesthetic is warm darkness rather than cold darkness. The business model is a one-week (seven-day) free trial at $19.99 per month, with no permanent free tier, **a card placed at signup that is not charged until the trial ends** (first charge $19.99 at trial end unless cancelled), and a deliberately frictionless cancellation flow with a single 48-hour win-back survey email after exit. Both web and iOS mobile ship at V1, with Android arriving shortly after launch through friend-assisted development rather than waiting for V1.5. The founder maintains media anonymity, meaning no face on camera and no voice in recordings, but is comfortable with text-based outreach, newsletter pitches, and brand-account engagement on social platforms. 
 
 Layer 6 builds entirely within those constraints.
+
+
+> **SUPERSEDED BY THE DIRECT-RELEASE PIVOT — WAITLIST RETIRED, CARD-AT-SIGNUP TRIAL.** Vesper ships **direct-to-release**. There is **no waitlist**: the landing at `apps/web/app/(marketing)/page.tsx` is the **launched product's front page**, and its primary CTA routes into real signup → pricing + card-capture checkout → a dismissable "get the iOS app" overlay → the signed-in web app home (`/plan`). The **trial requires a card at signup**: the card is captured during signup and **not billed until the trial ends**; the first charge is **$19.99 at trial end unless cancelled**. This overrides every "no card required" statement in this document. What **survives unchanged**: the five locked landing sections and their order, the pricing literal ("One week free. After that, $19.99 per month."), the **launch-day channel mix** (Product Hunt / Hacker News / Indie Hackers / Designer News / Reddit / directories / newsletter pitches / AMA), the content strategy, the referral program, the activation and retention definitions, and the Android communication posture. Waitlist passages below are **kept for lineage and marked superseded** — they are not the plan.
 
 ## Master Launch Calendar
 
@@ -46,13 +49,13 @@ By end of Build Month 3, the X account should have approximately 30 to 40 posts 
 
 **Build Month 4 (Project Weeks 18 through 21).** Content cadence continues. Add TikTok production at a rate of 2 to 3 ambient screen-recording videos per week, batched and scheduled. Add Instagram reposts of X card content at 3 to 4 posts per week. Begin organic Reddit participation under the brand account in Tier 1 subreddits (r/productivity, r/getdisciplined, r/zenhabits, r/decidingtobebetter, r/selfimprovement). Reddit participation means commenting on existing threads with genuine perspectives, never linking to the brand, building visible comment karma against future launch-day posts. Plan for approximately 1 to 2 substantive Reddit comments per week during Build Month 4.
 
-**Build Month 5 (Project Weeks 22 through 25). Waitlist live, BetaList submission, directory carpet-bomb.** This is the densest launch-prep month. The following actions occur in order:
+**Build Month 5 (Project Weeks 22 through 25). Landing live, BetaList submission, directory carpet-bomb.** This is the densest launch-prep month. **Direct-release pivot:** the page that goes live here is the **product landing** with its signup CTA, not a waitlist page, and the pre-launch nurture email is retired. The following actions occur in order:
 
-1. **Project Week 22.** The waitlist landing page goes live. The cinematic Three.js scroll experience locked in Layer 4 is the live page on the chosen TLD. Email capture plus iOS/Android dropdown is the only form on the page. The page goes live exactly two months before public launch per founder direction. Announce waitlist availability across all established brand accounts (X, Instagram, TikTok).
+1. **Project Week 22.** The **product landing page** goes live on the chosen TLD, with the immersive Three.js hero locked in Layer 4. **There is no form on the page** — section 5 carries the pricing literal, the card-at-signup disclosure, and a single signup CTA. Because signup is real from the day the page is up, the page going live *is* the release for web; there is no two-months-early holding period and nothing to "announce availability" of separately. Announce across all established brand accounts (X, Instagram, TikTok). *(Superseded: the prior plan put a waitlist page live exactly two months before a separate public launch.)*
 
-2. **Project Week 23.** Submit to BetaList free tier with the waitlist URL. Approval typically takes 1 to 4 weeks, which times the BetaList feature to align with launch week. Begin the directory carpet-bomb: submit to Launching Next, StartupBase, OpenHunts, BetaPage, Uneed, SaaS Hub, AlternativeTo (as a planned alternative to Motion and Reclaim), Foundigy, Startupranking, Indie Hackers Products, ProductHunt's Coming Soon page, Tiny Launch, MicroLaunch, BetaPage, and approximately 10 other consumer-app-friendly directories. Claude can fill the bulk of these forms in approximately 3 to 4 hours of one-time work. The founder reviews and submits.
+2. **Project Week 23.** Submit to BetaList free tier with the landing URL (**superseded framing:** BetaList was previously pitched as a waitlist listing; it is now a plain product listing — see the BetaList section below). Approval typically takes 1 to 4 weeks, which times the BetaList feature to align with launch week. Begin the directory carpet-bomb: submit to Launching Next, StartupBase, OpenHunts, BetaPage, Uneed, SaaS Hub, AlternativeTo (as a planned alternative to Motion and Reclaim), Foundigy, Startupranking, Indie Hackers Products, ProductHunt's Coming Soon page, Tiny Launch, MicroLaunch, BetaPage, and approximately 10 other consumer-app-friendly directories. Claude can fill the bulk of these forms in approximately 3 to 4 hours of one-time work. The founder reviews and submits.
 
-3. **Project Week 24.** Send the first nurture email to the waitlist: a midpoint butler-voice update with one or two screen-recording GIFs or short clips showing recent build progress. Subject line in butler tone. Body short, less than 200 words. Resend handles delivery. Continue all content cadences.
+3. **Project Week 24.** ~~Send the first nurture email to the waitlist.~~ **RETIRED (direct-release pivot):** there is no waitlist to nurture — visitors sign up on the day they arrive. Continue all content cadences; the build-progress GIFs that would have carried this email go to the existing content channels instead.
 
 4. **Project Week 25.** Begin newsletter pitch outreach. Email-only pitches to Indie Hackers newsletter, The Pragmatic Engineer, Refind, Lenny's Newsletter, Morning Brew Sidekick, Every.to Superorganizers, and Stratechery (long-shot but free to pitch). Each pitch is approximately 150 words, brand-only, leading with the philosophy rather than feature inventory. Use the Vesper domain email account.
 
@@ -62,11 +65,11 @@ By end of Build Month 3, the X account should have approximately 30 to 40 posts 
 
 ### Phase 6: Closed Beta (Project Weeks 28 through 29)
 
-**Project Week 28. Closed beta begins.** Recruit 20 to 50 beta testers. Sources: friends and family connections to industry, network introductions, and AI-driven website-testing tools running overnight per founder note. The closed beta is invitation-only via direct outreach, not via the public waitlist (the waitlist preserves the launch-day moment).
+**Project Week 28. Closed beta begins.** Recruit 20 to 50 beta testers. Sources: friends and family connections to industry, network introductions, and AI-driven website-testing tools running overnight per founder note. The closed beta is invitation-only via direct outreach. *(Superseded rationale: this previously read "not via the public waitlist," which no longer exists; direct outreach remains the recruiting method.)*
 
 **Project Week 28 through 29.** Collect structured feedback via in-app surveys (Layer 3 already specifies the survey infrastructure) and direct conversations with willing beta users. Pricing willingness is confirmed in these conversations: the explicit question "would you pay $19.99 per month for this?" surfaces direct signal, and any common pushback (price too high, missing feature, friction in a specific flow) is logged.
 
-**Project Week 29.** Final pre-launch actions: finalize the Product Hunt launch page (tagline, gallery images, 60-to-90-second product video with no talking head, maker comment drafted 48 hours in advance), finalize the Hacker News Show HN post draft, finalize the Indie Hackers launch announcement, finalize the Designer News submission, finalize launch-day email blast to the waitlist, and pre-write the post-launch content for the following two weeks so that the founder is not generating content during the launch week itself.
+**Project Week 29.** Final pre-launch actions: finalize the Product Hunt launch page (tagline, gallery images, 60-to-90-second product video with no talking head, maker comment drafted 48 hours in advance), finalize the Hacker News Show HN post draft, finalize the Indie Hackers launch announcement, finalize the Designer News submission, ~~finalize launch-day email blast to the waitlist~~ (**retired — no waitlist to blast**), and pre-write the post-launch content for the following two weeks so that the founder is not generating content during the launch week itself.
 
 ### Phase 7: Public Launch (Project Week 30)
 
@@ -74,7 +77,7 @@ By end of Build Month 3, the X account should have approximately 30 to 40 posts 
 
 1. **12:01 AM PT.** Product Hunt launch page goes live. Self-hunted under the brand account.
 2. **12:05 AM PT.** Maker comment posted on Product Hunt page. The comment tells the philosophy story, not the feature list.
-3. **12:10 AM PT.** Waitlist email blast sent via Resend. Subject line in butler tone, body links directly to the trial signup flow.
+3. **12:10 AM PT.** ~~Waitlist email blast sent via Resend.~~ **RETIRED (direct-release pivot)** — there is no waitlist and no blast. The slot is left empty rather than refilled: the launch-day channel mix below is unchanged and carries the moment on its own. *(Consequence: launch day no longer opens with a warm audience; all launch-day traffic is cold-channel traffic, which is the honest trade of shipping direct-to-release.)*
 4. **12:15 AM PT.** X thread published. Twelve to fifteen posts. Philosophy first, screen recordings interspersed.
 5. **12:20 AM PT.** Hacker News Show HN post published. Title format: "Show HN: Vesper — a calm scheduler that plans your day around your life." Body: 300 to 400 words, philosophy-first, link to landing page, link to a "how it works" page. The "calm scheduler" framing in this title is a deliberate concession to the Hacker News audience, not the brand pitch; the evening-anchored "wake up with your day already planned" positioning remains the canonical brand line everywhere else.
 6. **12:30 AM PT.** Indie Hackers launch post published. Open metrics dashboard linked (a public Stripe and PostHog dashboard showing real-time signup and revenue, which is brand-authentic to the indie-hackers audience).
@@ -85,7 +88,7 @@ By end of Build Month 3, the X account should have approximately 30 to 40 posts 
 
 Launch-day total founder time commitment: approximately 14 to 16 hours of continuous engagement, ideally with a buffer day cleared on either side.
 
-**Launch Day Plus 1 through 7 (Project Week 30 days 2 through 7).** The launch news cycle continues. Most signup volume arrives in the 48-hour window after launch. Continue responding to Product Hunt and Hacker News comments. Schedule a Reddit AMA on r/SideProject or r/SaaS for day 3 or 4 post-launch. Send a follow-up nurture email to non-converting waitlist signups on day 5 reminding them the trial is still available.
+**Launch Day Plus 1 through 7 (Project Week 30 days 2 through 7).** The launch news cycle continues. Most signup volume arrives in the 48-hour window after launch. Continue responding to Product Hunt and Hacker News comments. Schedule a Reddit AMA on r/SideProject or r/SaaS for day 3 or 4 post-launch. ~~Send a follow-up nurture email to non-converting waitlist signups on day 5.~~ **RETIRED — no waitlist.** The equivalent day-5 touch for people who signed up and did not convert is the existing in-product trial-reminder sequence (Layer 5), not a marketing email.
 
 ### Phase 8: Growth and Iteration (Project Week 31 onward)
 
@@ -99,39 +102,37 @@ Launch-day total founder time commitment: approximately 14 to 16 hours of contin
 
 This calendar is the operational backbone of Layer 6. The remainder of this document specifies the underlying logic, decisions, and policies that justify the actions in the calendar.
 
-## Waitlist Strategy
+## Landing Page Strategy
+
+*(This section was "Waitlist Strategy." The waitlist is retired by the direct-release pivot; the landing survives as the launched product's front page. Superseded sub-sections are kept below for lineage and labelled.)*
 
 ### Landing Page
 
-The waitlist landing page leads with the interactive sixty-second sample-day demo specified in Layer 4 (visitor enters wake time and archetype, watches a plan compose, no signup). The cinematic Three.js scroll, if retained, supports the demo atmospherically rather than serving as the primary surface. The page is built in Next.js, hosted on the chosen Vesper TLD, deployed via Vercel, and uses the existing design system from Layer 4 (espresso background, cream text, bronze accent, Fraunces and Inter typography). No third-party waitlist widget is embedded; the page is custom-built to preserve the experience without third-party visual artifacts.
+The landing page **is the launched product's front page**. It leads with the interactive sixty-second sample-day demo specified in Layer 4 (visitor enters wake time and archetype, watches a plan compose, no signup). The immersive Three.js scroll supports the demo atmospherically rather than serving as the primary surface. The page is built in Next.js, hosted on the chosen Vesper TLD, deployed via Vercel, and uses the existing design system from Layer 4 (espresso background, cream text, bronze accent, Fraunces and Inter typography). No third-party widget is embedded; the page is custom-built to preserve the experience without third-party visual artifacts.
 
-The five sections of the landing page are exactly as locked in Layer 4: Hero (the interactive sample day demo), What Vesper does, Modules, How it works, and Pricing and signup. The fifth section contains the only form on the page: a single email input field and a single iOS/Android segmented control, with a single "Begin" button. No additional capture fields are requested. The "Pricing and signup" copy already reads "One week free. After that, $19.99 per month." with an additional line below indicating "iOS launching shortly. Web works everywhere in the meantime."
+The five sections of the landing page are exactly as locked in Layer 4 and are **unchanged by the pivot**: Hero (the interactive sample day demo), What Vesper does, Modules, How it works, and Pricing and signup. **The fifth section contains no form.** It carries the pricing literal — "One week free. After that, $19.99 per month." — the additional line "iOS launching shortly. Web works everywhere in the meantime.", the **card-at-signup disclosure** (the card is placed at signup and first charged $19.99 at trial end unless cancelled), and **one primary signup CTA routing to the auth entry**. No email input, no iOS/Android segmented control, no "Begin" submit. Final CTA and disclosure wording is authored in build chat 093-V through the caveman/stop-slop voice gate.
 
-### Capture Fields
+**The conversion path from the landing** is: landing CTA → signup (Google / Apple / email magic link) → pricing + card-capture checkout → a dismissable "get the iOS app" overlay → the signed-in web app home (`/plan`). This is the web conversion entry; there is no intermediate list, queue, or holding state.
 
-Two fields only: email address and primary platform preference (iOS or Android). The platform preference drives segmentation for launch-day email blast (iOS users receive a link to the App Store on launch day, Android users receive a link to the web app with a soft note that the mobile app is coming). No other fields are captured at the waitlist stage. Additional friction reduces signup rate, and the data captured at signup is not needed to operate the waitlist.
+### Capture Fields — **SUPERSEDED (direct-release pivot)**
 
-### Tooling
+*Superseded in full. The landing captures nothing.* The prior plan captured two fields — email address and primary platform preference (iOS or Android) — to segment a launch-day email blast. With no waitlist and no blast there is nothing to segment, so the page asks for nothing and the segmented control is removed. The information that segmentation existed to deliver (iOS users get the App Store, Android users get the web app with an honest note) is delivered **in-product instead**: the "iOS launching shortly" line on the landing itself, and the dismissable App Store overlay at the end of onboarding (build chats 036-V / 036-W).
 
-Waitlist storage is in Supabase, in a dedicated table separate from the main user table. The table schema includes: `id` (uuid), `email` (text, unique), `platform_preference` (enum: 'ios' or 'android'), `created_at` (timestamp), `referral_source` (text, captured via UTM parameters if present in the URL), and `converted_to_user_id` (uuid, foreign key, null until launch-day conversion). Email delivery for both the nurture cadence and the launch-day blast uses Resend on the existing transactional email infrastructure from Layer 3.
+### Tooling — **SUPERSEDED (direct-release pivot)**
 
-No third-party waitlist tooling (LaunchList, Getwaitlist.com, ConvertKit) is used. The custom build keeps the landing page experience cohesive with the cinematic direction and avoids fragmenting the brand surface across vendors.
+*Superseded in full.* The prior plan stored waitlist signups in a dedicated Supabase `waitlist` table (`id`, `email`, `platform_preference`, `created_at`, `referral_source`, `converted_to_user_id`) and delivered nurture and launch-day mail through Resend. That table and its `POST /api/v1/waitlist` endpoint **shipped** (build chat 031) and are now **dead surface with no consumer** — nothing writes to them and no chat reads them. The rejection of third-party waitlist tooling (LaunchList, Getwaitlist.com, ConvertKit) is moot for the same reason. Resend remains in use for transactional mail (Layer 5) and for the post-cancel survey.
 
-### Nurture Cadence
+### Nurture Cadence — **SUPERSEDED (direct-release pivot)**
 
-Two emails between waitlist signup and launch day, regardless of when the user joined the waitlist:
+*Superseded in full — both emails are retired and neither is authored (build chat 092).* The prior plan sent two: a **midpoint email** (Project Week 24, subject "Building.", ~150 words in butler voice with a build-progress clip, closing "Begin will be ready shortly.") and a **launch-day email** (Project Week 30, subject "It is ready.", ~80 words, linking to trial signup, with iOS and Android variants). Under direct release there is no gap between interest and signup for a nurture cadence to fill: a visitor who wants Vesper signs up on the page they are already looking at.
 
-1. **Midpoint email (Project Week 24, approximately 6 weeks pre-launch for users who joined at Week 22).** Subject: "Building." Body: approximately 150 words in butler voice, with one short screen-recording GIF or clip showing a recently shipped feature. Closes with a soft "Begin will be ready shortly."
+### Conversion From the Landing
 
-2. **Launch-day email (Project Week 30, launch day).** Subject: "It is ready." Body: approximately 80 words. Direct link to the trial signup flow. For iOS waitlist signups, an additional line directs to the App Store listing. For Android waitlist signups, an additional line notes the web app is ready now and the Android app follows soon.
+*(Was "Launch-Day Conversion." The waitlist head-start, the batched-drip rejection, the `converted_to_user_id` match and the waitlist-vs-cold funnel split are all **superseded** — with no list there is no head start to grant and no second funnel to measure against.)*
 
-No other emails are sent to the waitlist during the build period. Restraint is consistent with the brand voice and avoids list fatigue.
+Every visitor converts the same way, on the day they arrive: the landing CTA routes into signup, then the pricing + card-capture checkout, then the dismissable App Store overlay, then `/plan`. No batched drip, no priority queue, no artificial scarcity — that posture is unchanged, it simply has nothing left to apply to.
 
-### Launch-Day Conversion
-
-All waitlist users receive immediate access to the trial on launch day. No batched drip, no priority queue, no artificial scarcity. The launch-day email arrives at 12:10 AM Pacific on launch day, simultaneous with the Product Hunt page going live. Waitlist users have a slight head start over Product Hunt traffic in that the email arrives before most launch-day discovery channels have peaked.
-
-The trial signup flow is the same flow described in Layer 5 (no card required, 7-day trial, full feature access). The waitlist signup is matched to the trial signup by email address, and the `converted_to_user_id` field on the waitlist row is populated on conversion. This enables accurate measurement of waitlist conversion rate as a distinct funnel from launch-day cold traffic.
+The trial signup flow is the one described in Layer 5: **7-day trial, full feature access, card placed at signup and not charged until the trial ends** (first charge $19.99 at trial end unless cancelled). The card-at-signup step is part of the signup flow itself, not a later prompt. Funnel measurement is a single path — landing view → CTA click → signup → card captured → trial start → paid conversion — measured in PostHog per the Analytics Infrastructure section; there is no separate waitlist cohort to compare against.
 
 ## Launch Channel Mix
 
@@ -173,6 +174,8 @@ Tier 2 subreddits (r/zenhabits, r/decidingtobebetter, r/selfimprovement) are not
 Tier 4 subreddits (r/biohackers, r/QuantifiedSelf, r/digitalminimalism) are not posted to. r/digitalminimalism is openly hostile to new apps, and r/biohackers/r/QuantifiedSelf are too niche to justify the time cost during the launch window.
 
 ### BetaList
+
+**Direct-release note:** BetaList is submitted as a **product listing pointing at the live landing**, not as a waitlist listing. Any wording below that frames the submission around collecting waitlist signups is superseded; the channel itself and its timing are unchanged.
 
 Submission occurs in Project Week 23 (approximately 7 weeks before launch). BetaList free tier with no expedited fee. Approval typically takes 1 to 4 weeks; for consumer apps with a clear value proposition and warm-dark aesthetic, approval rates are reasonable. If approval times out the launch-week alignment, BetaList feature publishing can happen post-launch and still contributes incremental signup volume.
 
@@ -331,7 +334,7 @@ The analytics stack is locked in Layer 3 (PostHog free tier, Vercel Analytics in
 
 Three primary funnels are built in PostHog on or before launch day:
 
-**Funnel 1: Signup to activation.** Steps: `signed_up` → `onboarding_step_completed` (each step counted individually) → `first_plan_generated` → `onboarding_completed` → `block_completed`. Time window: 24 hours from `signed_up`. Because onboarding is plan-first, `first_plan_generated` fires partway through the step sequence, before `onboarding_completed`. The drop-off at each step identifies which part of the onboarding flow is friction-causing.
+**Funnel 1: Landing to activation.** Steps: `landing_cta_clicked` → `signed_up` → `onboarding_step_completed` (each step counted individually) → `first_plan_generated` → `card_captured` → `onboarding_completed` → `block_completed`. **Direct-release pivot:** the funnel now starts at the landing CTA rather than at signup (the landing is the product's front page, so its click-through is the top of the real funnel), and `card_captured` is a step because the card is placed during onboarding at the trial-confirmation screen — its drop-off is the single most important number the pivot introduces. Time window: 24 hours from `signed_up`. Because onboarding is plan-first, `first_plan_generated` fires partway through the step sequence, before `onboarding_completed`. The drop-off at each step identifies which part of the onboarding flow is friction-causing.
 
 **Funnel 2: Activation to trial-to-paid conversion.** Steps: `signed_up` → `block_completed` (activation) → `trial_reminder_shown` (any of the three checkpoints) → `subscription_started`. Time window: 7 days from `signed_up`. This funnel measures the trial-to-paid conversion rate by stage of the trial.
 
@@ -396,9 +399,9 @@ Per founder direction, Android development is reframed from a deferred V1.5 item
 
 ### Communication Posture
 
-The communication posture to Android waitlist users is soft, honest, and free of manufactured urgency.
+The communication posture to Android users is soft, honest, and free of manufactured urgency.
 
-The launch-day email to Android waitlist users includes a single additional line beyond the standard launch-day copy:
+*(Superseded delivery vehicle — the message survives, the email does not.)* The prior plan carried this line in a launch-day email to Android **waitlist** users; with the waitlist retired it is carried on the landing itself and in the in-product App Store overlay instead. The line is:
 
 > The web app is ready now and works on any device. The Android app is in development; we'll let you know when it's ready.
 
@@ -406,9 +409,9 @@ No specific timeline is promised. No "coming in X weeks" claim is made. The line
 
 ### Web-First Mobile Posture for Android Users
 
-Until the Android app ships, Android waitlist users are routed to the web application, which has feature parity with the iOS app at V1 per Layer 2. The web application is responsive and usable on Android phones; the Layer 4 design system already specifies mobile-responsive breakpoints for web. The user experience on a mobile browser is functional and brand-consistent, even if not as polished as the native iOS application.
+Until the Android app ships, Android users are routed to the web application, which has feature parity with the iOS app at V1 per Layer 2. The web application is responsive and usable on Android phones; the Layer 4 design system already specifies mobile-responsive breakpoints for web. The user experience on a mobile browser is functional and brand-consistent, even if not as polished as the native iOS application.
 
-When the Android app ships, a separate launch announcement is made to the Android-segmented waitlist subset and to the active Android-using web subscribers. This is a smaller, audience-targeted launch moment rather than a full-scale public launch.
+When the Android app ships, a separate launch announcement is made to the active Android-using web subscribers (**superseded:** there is no Android-segmented waitlist subset to announce to). This is a smaller, audience-targeted launch moment rather than a full-scale public launch.
 
 ## Cross-Layer Updates Required
 
@@ -424,7 +427,7 @@ This section documents specific text changes that must be applied to other layer
 
 ### LAYER_2_PRODUCT_SCOPE.md
 
-**Update 1:** In the "Open Items From Layer 2" section, the third paragraph ("The specific marketing approach to communicating the iOS-only V1 launch to Android users on the waitlist is deferred to Layer 6 (Launch and Growth).") can be marked resolved with the note: "Resolved in Layer 6. Android waitlist users receive the launch-day email with web-app-first messaging and a soft 'Android app in development' note without specific timeline commitment. Friend-assisted Android development begins post-launch."
+**Update 1:** In the "Open Items From Layer 2" section, the third paragraph ("The specific marketing approach to communicating the iOS-only V1 launch to Android users on the waitlist is deferred to Layer 6 (Launch and Growth).") can be marked resolved with the note: "Resolved in Layer 6. Android users receive web-app-first messaging with a soft 'Android app in development' note without specific timeline commitment, carried on the landing page and the in-product App Store overlay rather than a launch-day email (the waitlist is retired by the direct-release pivot). Friend-assisted Android development begins post-launch."
 
 **Update 2:** The V1.5 roadmap reference to "Android Dynamic Island equivalent" should be re-pinned to a fast-follow post-V1 ship rather than V1.5, contingent on friend-assisted development capacity.
 
@@ -440,15 +443,15 @@ This section documents specific text changes that must be applied to other layer
 
 **Update 1:** In the "Marketing Visual Language" section, the landing page section 5 ("Pricing and signup") copy can be expanded to include the Android-soft-message line:
 
-> Copy resolves to: "One week free. After that, $19.99 per month. iOS launching shortly. Web works everywhere in the meantime." Single email input field, single iOS/Android segmented control, single "Begin" button.
+> Copy resolves to: "One week free. After that, $19.99 per month. iOS launching shortly. Web works everywhere in the meantime." **No form:** one primary signup CTA routing to the auth entry, plus the card-at-signup disclosure. *(Superseded: "single email input field, single iOS/Android segmented control, single 'Begin' button.")*
 
-**Update 2:** In the "Copy Library" section, add the following waitlist email copy entries:
+**Update 2:** In the "Copy Library" section, add the following copy entries. **The three waitlist email rows are RETIRED by the direct-release pivot and are not authored** (build chat 092); they are kept struck through for lineage.
 
 | Scenario | Subject | Body |
 |---|---|---|
-| Waitlist midpoint nurture | "Building." | Approximately 150 words in butler voice with one screen-recording GIF showing recent build progress. Closes with "Begin will be ready shortly." |
-| Waitlist launch day (iOS user) | "It is ready." | Approximately 80 words. Direct link to trial signup. App Store link below. |
-| Waitlist launch day (Android user) | "It is ready." | Approximately 80 words. Direct link to web trial signup. Soft note: "The web app is ready now and works on any device. The Android app is in development; we'll let you know when it's ready." |
+| ~~Waitlist midpoint nurture~~ **RETIRED** | ~~"Building."~~ | ~~Approximately 150 words in butler voice with one screen-recording GIF showing recent build progress. Closes with "Begin will be ready shortly."~~ |
+| ~~Waitlist launch day (iOS user)~~ **RETIRED** | ~~"It is ready."~~ | ~~Approximately 80 words. Direct link to trial signup. App Store link below.~~ |
+| ~~Waitlist launch day (Android user)~~ **RETIRED** | ~~"It is ready."~~ | ~~Approximately 80 words. Direct link to web trial signup.~~ The Android soft note survives, relocated to the landing page and the in-product App Store overlay: "The web app is ready now and works on any device. The Android app is in development; we'll let you know when it's ready." |
 | Referral settings panel | (no email) | "Pass this along, if you like. Anyone who joins through your link starts with the free trial, and their first month is half off when they begin paying. When they begin paying, your next month is half off too." |
 
 ### LAYER_5_BUSINESS_MONETIZATION.md
@@ -487,11 +490,11 @@ The following items are deferred or flagged for resolution outside Layer 6.
 
 The following alternatives were considered during Layer 6 and rejected, recorded so they are not revisited.
 
-**Six-week or sixteen-week waitlist runway.** Rejected in favor of the 2-month (8-week) runway specified by the founder. Shorter runways risk insufficient compounding; longer runways risk waitlist staleness and email-list fatigue. Eight weeks is the calibrated middle ground.
+**Six-week or sixteen-week waitlist runway.** ~~Rejected in favor of the 2-month (8-week) runway specified by the founder.~~ **MOOT (direct-release pivot):** there is no waitlist runway of any length. The landing goes live and signup is real from that moment.
 
-**Capturing additional waitlist fields beyond email and platform preference.** Rejected. Pain-point dropdown, timezone, age range, and other potentially useful fields add friction at signup with marginal information gain. The two-field waitlist preserves conversion rate at the top of funnel.
+**Capturing additional waitlist fields beyond email and platform preference.** ~~Rejected.~~ **MOOT (direct-release pivot):** the landing captures no fields at all. The friction argument that drove this rejection now argues for the CTA-only section 5.
 
-**Batched launch-day waitlist invite drip.** Rejected. The artificial scarcity of a drip contradicts the no-manufactured-urgency posture locked in Layer 4. All waitlist users receive immediate access on launch day.
+**Batched launch-day waitlist invite drip.** ~~Rejected.~~ **MOOT (direct-release pivot):** there is no list to drip. The no-manufactured-urgency posture the rejection rested on is unchanged and still binds every surface.
 
 **Card-required-upfront trial as a Layer 6 experiment.** Rejected. Per Layer 5, the no-card-required posture is locked at V1. Per Layer 6, all experimentation is deferred to V3.
 
@@ -507,7 +510,7 @@ The following alternatives were considered during Layer 6 and rejected, recorded
 
 **Heavy ASO investment at launch.** Rejected in favor of light ASO at launch and review at Month 2 once App Store Connect data is available. Premature ASO investment without data is guesswork.
 
-**LaunchList, Getwaitlist.com, or other third-party waitlist tools.** Rejected. The custom-built waitlist landing page preserves the cinematic Three.js experience locked in Layer 4 without third-party visual artifacts. Backend storage in Supabase and email delivery via Resend leverage existing infrastructure.
+**LaunchList, Getwaitlist.com, or other third-party waitlist tools.** ~~Rejected.~~ **MOOT (direct-release pivot):** there is no waitlist to tool. The custom-built landing still preserves the immersive Three.js experience locked in Layer 4 without third-party visual artifacts.
 
 **Public referral leaderboard, referral badge system, or in-app referral promotion.** Rejected as gamification mechanics inconsistent with Layer 2's anti-gamification posture. The quiet referral program embedded in the settings panel is the alternative.
 
