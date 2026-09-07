@@ -26,7 +26,6 @@ flowchart LR
 
     Anthropic[Anthropic API\nHaiku · Sonnet]
     Stripe[Stripe\nCheckout · Portal]
-    Resend[Resend\nTransactional Email]
     Sentry[Sentry\nError Monitoring]
     PostHog[PostHog\nProduct Analytics]
 
@@ -35,7 +34,6 @@ flowchart LR
     API -->|"② verify JWT"| Auth
     Auth --- DB
     API -->|"③ fetch profile + templates"| DB
-    Workers -->|"05:20 UTC cache-prewarm"| Anthropic
     API -->|"④ plan synthesis claude-sonnet-4-6"| Anthropic
     API -->|"⑤ persist plan rows"| DB
     API -->|"⑥ SSE stream blocks"| Expo
@@ -43,7 +41,6 @@ flowchart LR
     RT --> Expo
     Stripe -->|webhooks| WH
     WH -->|update subscription state| DB
-    Workers -->|dunning · trial reminders| Resend
     API --> Sentry
     API --> PostHog
 ```
@@ -54,15 +51,14 @@ The numbered arrows above trace one complete request: a user opens the app in th
 
 | Step | What happens |
 |---|---|
-| Pre-condition | `cache-prewarm` Cloudflare Worker ran at 05:20 UTC, priming the Anthropic prompt cache for users whose local time is 05:20–05:30 |
 | ① | Expo app sends `POST /api/v1/plans/generate` with the Supabase JWT in the `Authorization` header |
 | ② | Next.js API route validates the JWT against Supabase Auth; rejects if expired or missing |
 | ③ | API reads user profile, enabled modules, Google Calendar events for the day, and applicable plan templates from Postgres |
 | ④ | API calls `claude-sonnet-4-6` via the Anthropic SDK with the assembled context; response streams via SSE |
-| ⑤ | Completed plan blocks are persisted to Postgres (`daily_plans` + `plan_blocks` tables) |
+| ⑤ | Completed plan blocks are persisted to Postgres (`daily_plans` + `blocks` tables) |
 | ⑥ | Streamed blocks are forwarded to the Expo client as SSE; the app renders blocks as they arrive |
 
-Stripe, Resend, and Realtime are not in the plan-generation hot path. They activate on subscription events, email dispatch windows, and real-time plan edits respectively.
+Stripe and Realtime are not in the plan-generation hot path. They activate on subscription events and real-time plan edits respectively.
 
 ## Package Boundaries
 

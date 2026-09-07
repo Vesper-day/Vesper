@@ -2241,7 +2241,7 @@ All Workers are deployed via Wrangler CLI. The `wrangler.toml` at the root of th
 
 **Workers and their cron schedules:**
 
-> **Build status.** Four workers exist in `workers/` today — `apple-assn`, `apple-pki-monitor`, `daily-cron` (which carries the hourly-dispatch rows below as modules rather than as separate workers) and `stripe-webhook`; `live-activity-pusher` is specified here but not yet built, and is provisioned at Cutover.
+> **Build status.** Four workers are built and unit-tested in `workers/` today but none is deployed — `apple-assn`, `apple-pki-monitor`, `daily-cron` (which carries the hourly-dispatch rows below as modules rather than as separate workers) and `stripe-webhook`, each Cutover-gated on its account binding, route and secrets; `live-activity-pusher` is specified here but not built.
 
 | Worker name | Cron | Purpose |
 |---|---|---|
