@@ -2241,6 +2241,8 @@ All Workers are deployed via Wrangler CLI. The `wrangler.toml` at the root of th
 
 **Workers and their cron schedules:**
 
+> **Build status.** Four workers exist in `workers/` today — `apple-assn`, `apple-pki-monitor`, `daily-cron` (which carries the hourly-dispatch rows below as modules rather than as separate workers) and `stripe-webhook`; `live-activity-pusher` is specified here but not yet built, and is provisioned at Cutover.
+
 | Worker name | Cron | Purpose |
 |---|---|---|
 | `cache-prewarm` | `*/5 * * * *` | Pre-warm Anthropic prompt cache for users whose local time is 05:20–05:30 |
