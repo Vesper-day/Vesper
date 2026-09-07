@@ -93,6 +93,10 @@ serviceAccount*.json
 .DS_Store
 Thumbs.db
 *.log
+coverage/
+.next/
+.expo/
+out/
 
 # --- Withheld from publication: local-only working documents and machine-local config ---
 # These files remain on disk and keep working locally; they are deliberately not versioned.
@@ -103,6 +107,8 @@ CLAUDE.md
 .claude/skills/
 .mcp.json
 docs/Persistent.md
+repo-files.txt
+docs/PUBLICATION_AUDIT.md
 docs/ENVIRONMENT_SETUP.md
 docs/PHASE_4_BUILD_PLAN.md
 docs/CC_PROMPT_FORMAT_EXAMPLE.md.md
