@@ -1,36 +1,36 @@
 # Vesper
 
-Vesper is a Life OS for young professionals. It ingests work, fitness, nutrition, sleep, calendar and location context and generates a complete, personalised daily plan — not a to-do list, but an ordered set of time blocks covering every domain of a day. Everything it says is written in a calm, formal butler voice, and every plan it produces is editable, explainable and reversible.
+Vesper is a Life OS for young professionals. It ingests work, fitness, nutrition, sleep, calendar and location context, then generates a complete, personalised daily plan: an ordered set of time blocks covering every domain of a day, in place of a to-do list. Everything it says is written in a calm, formal butler voice. Plans are editable and reversible, and the engine can explain any of them.
 
-The product targets people who want adaptive planning across all of life rather than work scheduling alone. It ships on web and iOS, with a seven-day trial and a single paid tier.
+The audience is people who want adaptive planning across all of life, not work scheduling alone. It ships on web and iOS, with a seven-day trial and a single paid tier.
 
 ## What it does
 
-**AI daily plan engine.** The engine maintains a slow-moving base profile per user — work pattern, sleep targets, fitness goals, dietary constraints, recurring commitments — and generates each day as a diff against that base rather than from scratch. Tasks are movable units with durations, deadlines and priorities; the engine places them around calendar fixity and reflows them when a meeting lands on top of one. Conflicts it can resolve silently, it resolves silently; conflicts it cannot, it surfaces as a single question rather than dropping a commitment.
+**AI daily plan engine.** The engine keeps a slow-moving base profile per user (work pattern, sleep targets, fitness goals, dietary constraints, recurring commitments) and generates each day as a diff against that base instead of from scratch. Tasks are movable units carrying a duration, a deadline and a priority. The engine places them around calendar fixity and reflows them when a meeting lands on top of one. Conflicts it can resolve silently, it resolves silently. The rest surface as one question, and no commitment is dropped.
 
-**A butler's notebook that shows its work.** Personalisation is surfaced, not silent. The engine periodically writes what it has inferred — "you move workouts to evenings; I'll plan them there" — with one-tap confirm or correct, so the user can see and steer the model being built of them.
+**A butler's notebook that shows its work.** Personalisation stays visible. Every so often the engine writes down what it has inferred ("you move workouts to evenings; I'll plan them there"), with one-tap confirm or correct, so the user can see and steer the model being built of them.
 
-**Five module surfaces.** Work and tasks, fitness, nutrition, medication and finance, each with its own page on web and iOS. Modules are independently toggleable and activate progressively rather than all at once. Fitness and nutrition draw on template libraries the engine selects from by goal, equipment, time available and energy; medication is the one module permitted to interrupt with a device notification, because the health stakes justify it.
+**Five module surfaces.** Work and tasks, fitness, nutrition, medication and finance, each with its own page on web and iOS. Each module toggles independently, and they switch on in stages. Fitness and nutrition draw on template libraries the engine selects from by goal, equipment, time available and energy; medication is the one module permitted to interrupt with a device notification, because the health stakes justify it.
 
-**Calendar, two surfaces.** Google Calendar sync for people who already keep a schedule, and a built-in calendar for people who do not. Both feed the same data model and the same plan engine. Sync reads the user's primary calendar and is push-driven: a watch channel is registered per user, a webhook receives change notifications, and a scheduled worker renews channels before they expire.
+**Calendar, two surfaces.** Google Calendar sync for people who already keep a schedule, and a built-in calendar for people who do not. Both feed the same data model and the same plan engine. Sync reads the user's primary calendar and is push-driven: a watch channel per user, a webhook that receives change notifications, and a scheduled worker that renews those channels before they expire.
 
-**Web and iOS parity.** Both surfaces ship together. Mobile is an execution surface with full editing — drag-to-reorder, block detail, complete, skip, reschedule — and web is the configuration surface where profile setup, weekly planning and billing live. Both read the same Postgres through the same API.
+**Web and iOS parity.** Both surfaces ship together. Mobile is the execution surface, with full editing: drag-to-reorder, block detail, complete, skip, reschedule. Web is the configuration surface, where profile setup, weekly planning and billing live. Both read the same Postgres through the same API.
 
 **iOS Live Activities and Dynamic Island.** One Live Activity per block lifecycle, so the next block stays glanceable without opening the app. The Swift widget and alarm-extension sources and the shared payload contract are in this repository; the Xcode target wiring is a macOS step and is tracked as open work.
 
-**Weekly planning.** A five-step Sunday session across both platforms — prior-week review, priority entry, an upcoming-events pass, module adjustments, and a review grid with a batched accept.
+**Weekly planning.** A five-step Sunday session runs on both platforms: prior-week review, priority entry, an upcoming-events pass, module adjustments, then a review grid with a batched accept.
 
 **Subscription billing on two rails.** Stripe Checkout and Customer Portal on web, StoreKit 2 in-app purchase on iOS, reconciled into one canonical subscription state machine so a user's entitlement does not depend on where they paid.
 
 ## In development
 
-Vesper is an active solo project. The following are specified and partially built; in each case the parts named as present are in this repository and the parts named as absent are not.
+Vesper is an active solo project. What follows is specified and partly built. In each entry the parts named as present are in this repository, and the parts named as absent are not.
 
-- **Cron-driven prompt-cache prewarm.** The layered prompt and its `cache_control` markers exist in `@vesper/ai`; the worker module that warms the cache ahead of a user's morning does not.
-- **Transactional email dispatch.** Five templates are authored under `packages/shared/emails/` and the `email_queue` table ships in the migrations; there is no producer and no consumer.
+- **Cron-driven prompt-cache prewarm.** `@vesper/ai` holds the layered prompt and its `cache_control` markers. The worker module that warms the cache ahead of a user's morning is not written.
+- **Transactional email dispatch.** Five templates are authored under `packages/shared/emails/` and the `email_queue` table ships in the migrations. Nothing writes to that queue and nothing reads it.
 - **Onboarding UI surfaces.** The resume-state machine at `packages/shared/src/onboarding/state.ts` derives the correct step from which fields a user has populated; the screens it drives are not built.
 - **A client surface for the natural-language command endpoint.** `POST /api/v1/ai/command` ships with its parser and its integration tests; no web or mobile surface calls it yet.
-- **Server-side APNs push for Live Activities.** The Swift sources and the shared payload contract are present; the sender that starts and ends an activity is not built.
+- **Server-side APNs push for Live Activities.** The Swift sources and the shared payload contract are present. Nothing yet sends the push that starts and ends an activity.
 - **Sleep and errands module surfaces.** Both are in the module schema and `recurring_errands` has a table; neither has an API route or a screen.
 - **Deployment of the four Cloudflare workers.** All four are written and unit-tested; every `wrangler.toml` marks the account binding, the route and the secrets as Cutover steps.
 
@@ -95,22 +95,20 @@ flowchart LR
     API --> PostHog
 ```
 
-The numbered path is one morning plan generation. The client posts to `/api/v1/plans/generate` with its Supabase JWT; the API route validates that token against Supabase Auth before anything else runs, reads the user's profile, enabled modules, calendar events and applicable templates from Postgres, calls `claude-sonnet-4-6` with the assembled context, persists the resulting blocks, and streams them back over SSE so the client renders blocks as they arrive rather than after the whole plan completes. Stripe and Realtime are deliberately outside this hot path.
+The numbered path is one morning plan generation. The client posts to `/api/v1/plans/generate` with its Supabase JWT. Before anything else runs, the API route validates that token against Supabase Auth. It then reads the user's profile, enabled modules, calendar events and applicable templates from Postgres, calls `claude-sonnet-4-6` with the assembled context, persists the resulting blocks, and streams them back over SSE, so the client renders blocks as they arrive instead of waiting for the whole plan. Stripe and Realtime sit outside this hot path by design.
 
-Package boundaries are enforced rather than conventional: `@vesper/db` and `@vesper/ai` are importable only from web API routes, and the mobile app can reach the backend only through `/api/v1/`. It never imports the database or AI packages at all.
+Package boundaries are enforced: `@vesper/db` and `@vesper/ai` are importable only from web API routes, and the mobile app can reach the backend only through `/api/v1/`. It never imports the database or AI packages at all.
 
 ## Engineering practices
 
-These are the parts that separate this from a tutorial build.
-
 - **Forward-only, immutable migrations.** Twenty-eight hand-written SQL migrations, each paired with a `.down.sql`. Applied migrations are never edited; corrections ship as new numbered migrations. A numbered allocation register prevents two parallel work streams claiming the same migration number. See [docs/MIGRATION_DISCIPLINE.md](docs/MIGRATION_DISCIPLINE.md).
-- **Row-level security on every table.** Not a middleware check that can be forgotten — RLS is enabled at the database on all 28 tables, and every table holding user rows carries own-row policies keyed to `auth.uid()`, so a missing application-layer guard cannot leak another user's rows. The two shared template tables are read-all by design, the public waitlist accepts anonymous inserts, and the four internal tables carry no policy at all, which denies every client and leaves them reachable only by the service role. That key is server-only and never reaches a client bundle.
-- **Fail-closed, signature-verified webhooks.** The Stripe worker verifies the signature against the raw request body before parsing anything and returns 400 on mismatch. The Apple worker verifies the StoreKit 2 JWS by walking its `x5c` certificate chain to a **pinned** Apple root — the root travelling in the payload is never trusted — and rejects on any chain, validity-window or signature failure.
+- **Row-level security on every table.** Enforcement sits in the database, a layer below any application check. RLS is enabled on all 28 tables, and every table holding user rows carries own-row policies keyed to `auth.uid()`, so a missing application-layer guard cannot leak another user's rows. The two shared template tables are read-all by design. The public waitlist accepts anonymous inserts. The four internal tables carry no policy at all, which denies every client and leaves them reachable only by the service role, and that key is server-only: it never reaches a client bundle.
+- **Fail-closed, signature-verified webhooks.** The Stripe worker verifies the signature against the raw request body before parsing anything and returns 400 on mismatch. The Apple worker verifies the StoreKit 2 JWS by walking its `x5c` certificate chain to a **pinned** Apple root (the root travelling in the payload is never trusted) and rejects on any chain, validity-window or signature failure.
 - **Encrypted OAuth token storage.** Google Calendar access and refresh tokens are encrypted application-side with libsodium XChaCha20-Poly1305 AEAD before they touch the database, so a database read alone does not yield usable tokens. Key rotation is a documented procedure.
-- **A CI gate that actually gates.** Every pull request to `main` must build cleanly, lint clean and pass the full Vitest suite before it can merge, enforced as a required status check. No credentials are exposed to that workflow at all. A Playwright job is wired into the same workflow ahead of the end-to-end specs being written, and currently runs no tests.
+- **A CI gate that actually gates.** Every pull request to `main` has to build cleanly, lint clean and pass the full Vitest suite before it can merge, and a required status check enforces that. No credentials are exposed to the workflow at all. A Playwright job is wired into the same workflow ahead of the end-to-end specs being written, and currently runs no tests.
 - **An eval harness for prompt work.** Ten fixture scenarios spanning archetypes, calendar densities and energy states, scored against a written rubric with an explicit pass bar, so changes to plan-synthesis prompts are measured instead of eyeballed. See [packages/ai/eval/SCORING_RUBRIC.md](packages/ai/eval/SCORING_RUBRIC.md).
 - **A real Content Security Policy.** The production `script-src` carries no `unsafe-eval` and no `unsafe-inline`.
-- **Documented, locked architecture decisions.** Twenty-two decisions recorded with their reasoning and their rejected alternatives, so later work extends the decisions rather than relitigating them.
+- **Documented, locked architecture decisions.** Twenty-two decisions recorded with their reasoning and their rejected alternatives, so later work extends them instead of relitigating them.
 
 Further reading: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [docs/ARCHITECTURE_DECISIONS.md](docs/ARCHITECTURE_DECISIONS.md) · [docs/TECHNICAL_SPEC.md](docs/TECHNICAL_SPEC.md) · [docs/ENV_VAR_DISCIPLINE.md](docs/ENV_VAR_DISCIPLINE.md) · [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md)
 
