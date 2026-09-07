@@ -20,7 +20,7 @@ flowchart LR
     end
 
     subgraph Cloudflare
-        Workers[Workers + Cron\ndaily-cron · live-activity-pusher]
+        Workers[Workers + Cron\ndaily-cron · apple-pki-monitor]
         WH[Webhook Handlers\nStripe · Apple]
     end
 
