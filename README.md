@@ -40,7 +40,7 @@ The product targets people who want adaptive planning across all of life rather 
 | Payments | Stripe, Apple StoreKit 2 | Checkout and Portal on web; StoreKit 2 with server-side JWS receipt verification against a pinned Apple root chain on iOS. |
 | Observability | Sentry, PostHog | Error monitoring with source maps uploaded on every push to `main`; product analytics. |
 | Monorepo | Turborepo, pnpm workspaces | Two apps, five packages (`shared`, `db`, `ai`, `apple`, `ui`), four workers. |
-| Testing | Vitest, Playwright | 130 test files. Database integration tests are gated behind an explicit env flag and a local Supabase stack. |
+| Testing | Vitest | 130 test files. Database integration tests are gated behind an explicit env flag and a local Supabase stack. Playwright is configured for end-to-end tests but no specs are written yet. |
 
 ## Architecture
 
@@ -62,7 +62,7 @@ flowchart LR
     end
 
     subgraph Cloudflare
-        Workers[Workers + Cron\ndaily-cron · live-activity-pusher]
+        Workers[Workers + Cron\ndaily-cron · apple-pki-monitor]
         WH[Webhook Handlers\nStripe · Apple]
     end
 
@@ -102,7 +102,7 @@ These are the parts that separate this from a tutorial build.
 - **Row-level security on every table.** Not a middleware check that can be forgotten — RLS is enabled at the database and policies are own-row, keyed to `auth.uid()`, so a missing application-layer guard cannot leak another user's rows. The service-role key that bypasses RLS is server-only and never reaches a client bundle.
 - **Fail-closed, signature-verified webhooks.** The Stripe worker verifies the signature against the raw request body before parsing anything and returns 400 on mismatch. The Apple worker verifies the StoreKit 2 JWS by walking its `x5c` certificate chain to a **pinned** Apple root — the root travelling in the payload is never trusted — and rejects on any chain, validity-window or signature failure.
 - **Encrypted OAuth token storage.** Google Calendar access and refresh tokens are encrypted application-side with libsodium XChaCha20-Poly1305 AEAD before they touch the database, so a database read alone does not yield usable tokens. Key rotation is a documented procedure.
-- **A CI gate that actually gates.** Every pull request to `main` must build, lint, type-check, unit-test and pass Playwright end-to-end tests before it can merge. No credentials are exposed to that workflow at all.
+- **A CI gate that actually gates.** Every pull request to `main` must build cleanly, lint clean and pass the full Vitest suite before it can merge, enforced as a required status check. No credentials are exposed to that workflow at all. A Playwright job is wired into the same workflow ahead of the end-to-end specs being written, and currently runs no tests.
 - **An eval harness for prompt work.** Ten fixture scenarios spanning archetypes, calendar densities and energy states, scored against a written rubric with an explicit pass bar, so changes to plan-synthesis prompts are measured instead of eyeballed. See [packages/ai/eval/SCORING_RUBRIC.md](packages/ai/eval/SCORING_RUBRIC.md).
 - **A real Content Security Policy.** The production `script-src` carries no `unsafe-eval` and no `unsafe-inline`.
 - **Documented, locked architecture decisions.** Twenty-two decisions recorded with their reasoning and their rejected alternatives, so later work extends the decisions rather than relitigating them.
