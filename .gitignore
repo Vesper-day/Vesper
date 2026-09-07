@@ -59,3 +59,78 @@ remotion/
 
 # Stray nested Claude config (real config lives at repo root)
 docs/.claude/.claude/settings.local.json 
+
+# Landing manor 3D build (093-V Path B) — raw render frames are huge, keep local only.
+# The .blend source and BUILD_STATE.md ARE tracked; only the frame dumps are ignored.
+art/landing-manor/frames/
+art/landing-manor/**/*.blend1
+
+# --- Publication hardening: never commit credential-bearing or machine-local files ---
+.env
+.env.*
+env.local
+!.env.example
+*.bak
+*.old
+*.save
+*~
+*.swp
+*.p8
+*.p12
+*.pem
+*.key
+*.keystore
+*.jks
+*.mobileprovision
+id_rsa*
+.npmrc
+.netrc
+eas.json
+GoogleService-Info.plist
+google-services.json
+ExportOptions.plist
+serviceAccount*.json
+.DS_Store
+Thumbs.db
+*.log
+
+# --- Withheld from publication: local-only working documents and machine-local config ---
+# These files remain on disk and keep working locally; they are deliberately not versioned.
+# Listing them here prevents a future `git add -A` from re-adding them.
+CLAUDE.md
+.claude/memory.md
+.claude/settings.local.json
+.claude/skills/
+.mcp.json
+docs/Persistent.md
+docs/ENVIRONMENT_SETUP.md
+docs/PHASE_4_BUILD_PLAN.md
+docs/CC_PROMPT_FORMAT_EXAMPLE.md.md
+docs/BRAINSTORM_MASTER.md
+docs/PROJECT_OVERVIEW.md
+docs/PRD.md
+docs/LAYER_1_FOUNDATION.md
+docs/LAYER_5_BUSINESS_MONETIZATION.md
+docs/LAYER_6_LAUNCH_GROWTH.md
+docs/OPEN_SOURCE_INVENTORY.md
+docs/CI_SECRETS.md
+docs/VISUAL_DIRECTION_BANK_v2.md
+docs/ASSET_MANIFEST_KICKOFF.md
+docs/RUNBOOKS/
+docs/REEL_REFERENCE_SHEETS/
+docs/CHAT_021_RESOLUTION_RECORD.md
+docs/CHAT_022_RESOLUTION_RECORD.md
+docs/CHAT_025_RESOLUTION_RECORD.md
+docs/CHAT_025_HOTFIX_approved_at_dedup.md
+docs/CHAT_026_RESOLUTION_RECORD.md
+docs/CHAT_027_RESOLUTION_RECORD.md
+docs/CHAT_028_RESOLUTION_RECORD.md
+docs/CHAT_029_RESOLUTION_RECORD.md
+docs/CHAT_030_RESOLUTION_RECORD.md
+docs/CHAT_031_RESOLUTION_RECORD.md
+docs/CHAT_048_RESOLUTION_RECORD.md
+docs/CHAT_059B_RESOLUTION_RECORD.md
+docs/CHAT_077_RESOLUTION_RECORD.md
+docs/CHAT_108_RESOLUTION_RECORD.md
+docs/CHAT_111_RESOLUTION_RECORD.md
+docs/CHAT_112_RESOLUTION_RECORD.md

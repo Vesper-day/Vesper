@@ -3,11 +3,18 @@
 // Pure Apple JWS-verification tests. A dev-signed sample transaction is the fixture —
 // NO Apple Developer account / key / production transaction is needed.
 //
-// The fixture chain (root → intermediate → leaf, all EC P-256) was generated once
-// with openssl; `LEAF_PK8_PEM` is the leaf private key used to SIGN the sample JWS.
-// It is a self-signed TEST CA, entirely unrelated to Apple's real roots.
-import { describe, it, expect, beforeEach } from 'vitest';
-import { X509Certificate, createHash } from 'node:crypto';
+// The fixture chain (root -> intermediate -> leaf, all EC P-256) is GENERATED AT TEST
+// TIME in the beforeAll below: three fresh keypairs from node:crypto, and three X.509
+// certificates DER-encoded here from those keys. Nothing key-shaped is committed. It is
+// a self-signed TEST CA, entirely unrelated to Apple's real roots.
+import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
+import {
+  X509Certificate,
+  createHash,
+  createSign,
+  generateKeyPairSync,
+  type KeyObject,
+} from 'node:crypto';
 import { CompactSign, importPKCS8 } from 'jose';
 import {
   verifyAppleJws,
@@ -19,19 +26,203 @@ import {
   __resetPinnedAppleRootsCache,
 } from './keyCache';
 
-// --- fixture chain (dev, self-signed — NOT Apple) ----------------------------
+// --- minimal DER writer ------------------------------------------------------
+// Enough of X.690 to emit an X.509 v3 certificate. Node can parse X.509 but cannot
+// issue one, and pulling in a certificate library for a test fixture is not worth a
+// new dependency — so the handful of encodings the fixture needs live here.
 
-const LEAF_DER_B64 =
-  'MIIBgjCCASigAwIBAgIUWEbfzZziOY4ibf+Rwedd/l3e2BEwCgYIKoZIzj0EAwIwIzEhMB8GA1UEAwwYVmVzcGVyIFRlc3QgSW50ZXJtZWRpYXRlMB4XDTI2MDcxMzExNDkwMloXDTM2MDcxMDExNDkwMlowGzEZMBcGA1UEAwwQVmVzcGVyIFRlc3QgTGVhZjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJT7VySKkMN3xt0Yj2vsOWTg/B2r4f33cIY0oyplqSzJjokqzGHOf0wJe2aVqZ/XqnWLtbn5wwso1+O0ov1hVMijQjBAMB0GA1UdDgQWBBSGPIdOjz7yeh5ULAXHev7UhAfaojAfBgNVHSMEGDAWgBTmvjASo930uyiXWucwWqcASPvLQDAKBggqhkjOPQQDAgNIADBFAiEA610rcaPOYBT5VvqNXLrT1T+ZeCbEbIfNo/XZT4cA1Z8CIBe8B9SpScrA0dPnvhgKm/uoHDNYfUEaqB/DOQlvCzQK';
-const INT_DER_B64 =
-  'MIIBhTCCASugAwIBAgIUbs6BukLPeIMSSTKtkGVLjgi9uQkwCgYIKoZIzj0EAwIwHjEcMBoGA1UEAwwTVmVzcGVyIFRlc3QgUm9vdCBDQTAeFw0yNjA3MTMxMTQ5MDJaFw0zNjA3MTAxMTQ5MDJaMCMxITAfBgNVBAMMGFZlc3BlciBUZXN0IEludGVybWVkaWF0ZTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABCIz4DNsIGzbQYRYgV46AFF6h4XZmg4L5bvsg1QJwb3deqVxgp+TMFO7TDWW/8Do5AfCdEyOIU6x9nq7LQqyV8CjQjBAMB0GA1UdDgQWBBTmvjASo930uyiXWucwWqcASPvLQDAfBgNVHSMEGDAWgBSE6wWrTRXx+Dc3LSQoYoSknn80gDAKBggqhkjOPQQDAgNIADBFAiEAnzaAwT8CKdIekBKbQyk/1G8TXQtZfs9ixxKO95VIgisCICIEiHW3Wmaew2DB0k3TN9jif4Es3EJM+lMMZRngTCl2';
-const ROOT_DER_B64 =
-  'MIIBkTCCATegAwIBAgIUKGtECfyDJW1ObvzJHXtKX6LT8CswCgYIKoZIzj0EAwIwHjEcMBoGA1UEAwwTVmVzcGVyIFRlc3QgUm9vdCBDQTAeFw0yNjA3MTMxMTQ5MDJaFw00NjA3MDgxMTQ5MDJaMB4xHDAaBgNVBAMME1Zlc3BlciBUZXN0IFJvb3QgQ0EwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASmrQBHguuzXLHasGElX5AYbgyb0jW+A+Wt3Ph9JeISmwSoUphOhotFpWAPlSZHtqi5VYBAlrEYBTNJvaUcr1bjo1MwUTAdBgNVHQ4EFgQUhOsFq00V8fg3Ny0kKGKEpJ5/NIAwHwYDVR0jBBgwFoAUhOsFq00V8fg3Ny0kKGKEpJ5/NIAwDwYDVR0TAQH/BAUwAwEB/zAKBggqhkjOPQQDAgNIADBFAiAo6DbS7B/pPpuHpoWJAM29AB9mVpcRCoVG5Y0LWkDF+wIhAKpiWOn+55AiflzoQCWNWgny4h0+uIsrwSCendx2hgMA';
-const LEAF_PK8_PEM = `-----BEGIN PRIVATE KEY-----
-MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg73VUcD2alH5Cjtzz
-GN3N7IyrtRRDOroAgOigRlCb1qahRANCAASU+1ckipDDd8bdGI9r7Dlk4Pwdq+H9
-93CGNKMqZaksyY6JKsxhzn9MCXtmlamf16p1i7W5+cMLKNfjtKL9YVTI
------END PRIVATE KEY-----`;
+function derLength(n: number): Buffer {
+  if (n < 0x80) return Buffer.from([n]);
+  const bytes: number[] = [];
+  let v = n;
+  while (v > 0) {
+    bytes.unshift(v & 0xff);
+    v = Math.floor(v / 256);
+  }
+  return Buffer.from([0x80 | bytes.length, ...bytes]);
+}
+
+function tlv(tag: number, content: Buffer): Buffer {
+  return Buffer.concat([Buffer.from([tag]), derLength(content.length), content]);
+}
+
+const derSeq = (...parts: Buffer[]): Buffer => tlv(0x30, Buffer.concat(parts));
+const derSet = (...parts: Buffer[]): Buffer => tlv(0x31, Buffer.concat(parts));
+const derOctet = (content: Buffer): Buffer => tlv(0x04, content);
+const derUtf8 = (s: string): Buffer => tlv(0x0c, Buffer.from(s, 'utf8'));
+const derBool = (v: boolean): Buffer => tlv(0x01, Buffer.from([v ? 0xff : 0x00]));
+const derBitString = (content: Buffer): Buffer =>
+  tlv(0x03, Buffer.concat([Buffer.from([0x00]), content]));
+const derExplicit = (tagNumber: number, content: Buffer): Buffer =>
+  tlv(0xa0 | tagNumber, content);
+const derContext = (tagNumber: number, content: Buffer): Buffer =>
+  tlv(0x80 | tagNumber, content);
+
+function derInteger(value: Buffer): Buffer {
+  let v = value;
+  while (v.length > 1 && v[0] === 0x00 && (v[1]! & 0x80) === 0) v = v.subarray(1);
+  if ((v[0]! & 0x80) !== 0) v = Buffer.concat([Buffer.from([0x00]), v]);
+  return tlv(0x02, v);
+}
+
+function derOid(dotted: string): Buffer {
+  const parts = dotted.split('.').map(Number);
+  const bytes: number[] = [parts[0]! * 40 + parts[1]!];
+  for (const part of parts.slice(2)) {
+    const chunk: number[] = [part & 0x7f];
+    let v = Math.floor(part / 128);
+    while (v > 0) {
+      chunk.unshift((v & 0x7f) | 0x80);
+      v = Math.floor(v / 128);
+    }
+    bytes.push(...chunk);
+  }
+  return tlv(0x06, Buffer.from(bytes));
+}
+
+/** UTCTime (YYMMDDHHMMSSZ). Valid for years 1950-2049, which covers every fixture date. */
+function derUtcTime(date: Date): Buffer {
+  const p = (n: number): string => String(n).padStart(2, '0');
+  const s =
+    p(date.getUTCFullYear() % 100) +
+    p(date.getUTCMonth() + 1) +
+    p(date.getUTCDate()) +
+    p(date.getUTCHours()) +
+    p(date.getUTCMinutes()) +
+    p(date.getUTCSeconds()) +
+    'Z';
+  return tlv(0x17, Buffer.from(s, 'ascii'));
+}
+
+const OID_ECDSA_SHA256 = '1.2.840.10045.4.3.2';
+const OID_COMMON_NAME = '2.5.4.3';
+const OID_SUBJECT_KEY_ID = '2.5.29.14';
+const OID_AUTHORITY_KEY_ID = '2.5.29.35';
+const OID_BASIC_CONSTRAINTS = '2.5.29.19';
+
+/** AlgorithmIdentifier for ecdsa-with-SHA256 (absent parameters, per RFC 5758). */
+const sigAlgId = (): Buffer => derSeq(derOid(OID_ECDSA_SHA256));
+
+/** Name ::= RDNSequence, carrying a single CN attribute. */
+const commonName = (cn: string): Buffer =>
+  derSeq(derSet(derSeq(derOid(OID_COMMON_NAME), derUtf8(cn))));
+
+const keyIdOf = (spki: Buffer): Buffer =>
+  createHash('sha1').update(spki).digest().subarray(0, 20);
+
+function extension(oid: string, critical: boolean, value: Buffer): Buffer {
+  return critical
+    ? derSeq(derOid(oid), derBool(true), derOctet(value))
+    : derSeq(derOid(oid), derOctet(value));
+}
+
+interface CertSpec {
+  subject: string;
+  issuer: string;
+  subjectSpki: Buffer;
+  issuerSpki: Buffer;
+  notBefore: Date;
+  notAfter: Date;
+  isCa: boolean;
+  signingKey: KeyObject;
+}
+
+/** Build and sign one X.509 v3 certificate; returns its DER bytes. */
+function issueCertificate(spec: CertSpec): Buffer {
+  const serial = createHash('sha256')
+    .update(spec.subject)
+    .digest()
+    .subarray(0, 8);
+  const extensions: Buffer[] = [
+    extension(OID_SUBJECT_KEY_ID, false, derOctet(keyIdOf(spec.subjectSpki))),
+    extension(
+      OID_AUTHORITY_KEY_ID,
+      false,
+      derSeq(derContext(0, keyIdOf(spec.issuerSpki))),
+    ),
+  ];
+  if (spec.isCa) {
+    extensions.push(extension(OID_BASIC_CONSTRAINTS, true, derSeq(derBool(true))));
+  }
+
+  const tbs = derSeq(
+    derExplicit(0, derInteger(Buffer.from([0x02]))), // v3
+    derInteger(serial),
+    sigAlgId(),
+    commonName(spec.issuer),
+    derSeq(derUtcTime(spec.notBefore), derUtcTime(spec.notAfter)),
+    commonName(spec.subject),
+    spec.subjectSpki,
+    derExplicit(3, derSeq(...extensions)),
+  );
+
+  const signature = createSign('sha256').update(tbs).sign(spec.signingKey);
+  return derSeq(tbs, sigAlgId(), derBitString(signature));
+}
+
+// --- fixture chain (dev, self-signed — NOT Apple) ----------------------------
+// Generated in beforeAll. The validity windows bracket NOW so the clock override below
+// stays deterministic.
+
+const NOT_BEFORE = new Date('2026-07-13T11:49:02Z');
+const NOT_AFTER_LEAF = new Date('2036-07-10T11:49:02Z');
+const NOT_AFTER_ROOT = new Date('2046-07-08T11:49:02Z');
+
+let LEAF_DER_B64: string;
+let INT_DER_B64: string;
+let ROOT_DER_B64: string;
+let LEAF_PK8_PEM: string;
+let TEST_ROOT: X509Certificate;
+
+beforeAll(() => {
+  const newKey = (): { publicKey: KeyObject; privateKey: KeyObject } =>
+    generateKeyPairSync('ec', { namedCurve: 'P-256' });
+  const root = newKey();
+  const intermediate = newKey();
+  const leaf = newKey();
+
+  const spki = (k: KeyObject): Buffer =>
+    k.export({ format: 'der', type: 'spki' }) as Buffer;
+
+  const rootDer = issueCertificate({
+    subject: 'Vesper Test Root CA',
+    issuer: 'Vesper Test Root CA',
+    subjectSpki: spki(root.publicKey),
+    issuerSpki: spki(root.publicKey),
+    notBefore: NOT_BEFORE,
+    notAfter: NOT_AFTER_ROOT,
+    isCa: true,
+    signingKey: root.privateKey,
+  });
+  const intDer = issueCertificate({
+    subject: 'Vesper Test Intermediate',
+    issuer: 'Vesper Test Root CA',
+    subjectSpki: spki(intermediate.publicKey),
+    issuerSpki: spki(root.publicKey),
+    notBefore: NOT_BEFORE,
+    notAfter: NOT_AFTER_LEAF,
+    isCa: true,
+    signingKey: root.privateKey,
+  });
+  const leafDer = issueCertificate({
+    subject: 'Vesper Test Leaf',
+    issuer: 'Vesper Test Intermediate',
+    subjectSpki: spki(leaf.publicKey),
+    issuerSpki: spki(intermediate.publicKey),
+    notBefore: NOT_BEFORE,
+    notAfter: NOT_AFTER_LEAF,
+    isCa: false,
+    signingKey: intermediate.privateKey,
+  });
+
+  ROOT_DER_B64 = rootDer.toString('base64');
+  INT_DER_B64 = intDer.toString('base64');
+  LEAF_DER_B64 = leafDer.toString('base64');
+  LEAF_PK8_PEM = leaf.privateKey
+    .export({ format: 'pem', type: 'pkcs8' })
+    .toString();
+  TEST_ROOT = new X509Certificate(rootDer);
+});
 
 const SAMPLE_TXN = {
   transactionId: '2000000000000001',
@@ -43,15 +234,15 @@ const SAMPLE_TXN = {
 
 // A clock inside every fixture cert's validity window (deterministic — no wall-clock flake).
 const NOW = new Date('2027-01-01T00:00:00Z');
-const TEST_ROOT = new X509Certificate(Buffer.from(ROOT_DER_B64, 'base64'));
 
 async function signSampleJws(
   payload: unknown = SAMPLE_TXN,
-  x5c: string[] = [LEAF_DER_B64, INT_DER_B64, ROOT_DER_B64],
+  x5c?: string[],
 ): Promise<string> {
+  const chain = x5c ?? [LEAF_DER_B64, INT_DER_B64, ROOT_DER_B64];
   const key = await importPKCS8(LEAF_PK8_PEM, 'ES256');
   return new CompactSign(new TextEncoder().encode(JSON.stringify(payload)))
-    .setProtectedHeader({ alg: 'ES256', x5c })
+    .setProtectedHeader({ alg: 'ES256', x5c: chain })
     .sign(key);
 }
 
